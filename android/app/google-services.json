@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "29559896656",
+    "project_id": "gympad-e44fc",
+    "storage_bucket": "gympad-e44fc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29559896656:android:6af18b9aa96e729d6baf55",
+        "android_client_info": {
+          "package_name": "com.gympad.gympad"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdFgEPuDFzUDmkwfKqvfNMRx1Rs-dMiCo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

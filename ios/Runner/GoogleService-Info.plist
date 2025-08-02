@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>29559896656-khbnite9chiu6cq5bbd69j34a5hm09ei.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.29559896656-khbnite9chiu6cq5bbd69j34a5hm09ei</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>29559896656-53rd7l0smrnlm73q3ej9obeadbgfr3sl.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyD9Wu-nrC2nJAXjL510ZoIzgiSppnduolI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>29559896656</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.gympad.gympad</string>
+	<key>PROJECT_ID</key>
+	<string>gympad-e44fc</string>
+	<key>STORAGE_BUCKET</key>
+	<string>gympad-e44fc.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:29559896656:ios:b5324f8c146d92b36baf55</string>
+</dict>
+</plist>

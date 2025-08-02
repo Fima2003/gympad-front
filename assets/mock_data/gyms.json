@@ -1,0 +1,12 @@
+{
+    "gyms": {
+        "GYM_ABC": {
+            "name": "Elite Fitness Center",
+            "image": "https://example.com/images/elite_fitness.png"
+        },
+        "GYM_XYZ": {
+            "name": "Urban Strength Hub",
+            "image": "https://example.com/images/urban_strength.png"
+        }
+    }
+}
