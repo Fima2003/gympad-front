@@ -52,11 +52,11 @@
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>
-				<key>CFBundleURLName</key>
-				<string>googleauth</string>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
-					<string>app-1-29559896656-ios-b5324f8c146d92b36baf55</string>
+					<string>com.googleusercontent.apps.29559896656-khbnite9chiu6cq5bbd69j34a5hm09ei</string>
 				</array>
 			</dict>
 		</array>

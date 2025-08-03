@@ -12,7 +12,20 @@
           "package_name": "com.gympad.gympad"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "29559896656-53rd7l0smrnlm73q3ej9obeadbgfr3sl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gympad.gympad",
+            "certificate_hash": "f3146ce881144dab0f9719fa35810ab8134f6d36"
+          }
+        },
+        {
+          "client_id": "29559896656-66tru35mqk4ahpovvqpe4pjnq650646s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCdFgEPuDFzUDmkwfKqvfNMRx1Rs-dMiCo"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "29559896656-66tru35mqk4ahpovvqpe4pjnq650646s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "29559896656-khbnite9chiu6cq5bbd69j34a5hm09ei.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gympad.gympad"
+              }
+            }
+          ]
         }
       }
     }

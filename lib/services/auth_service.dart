@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 
 class AuthService {
@@ -16,7 +17,7 @@ class AuthService {
   static const String _userIdKey = 'userId';
   static const String _gymIdKey = 'gymIdKey';
 
-  /// Check if user is locally saved (userId and gymId exist)
+  /// Check locally saved user data (userId and gymId exist)
   Future<Map<String, String?>> getLocalUserData() async {
     final prefs = await SharedPreferences.getInstance();
     return {
@@ -42,90 +43,51 @@ class AuthService {
   /// Sign in with Google and register/login with backend
   Future<Map<String, dynamic>?> signInWithGoogle() async {
     try {
-      User? googleUser;
-      bool authSuccessful = false;
-
-      // Handle different platforms
+      // Sign in via Google
+      UserCredential userCredential;
       if (kIsWeb) {
-        // For web platform, try a simpler approach first
-        try {
-          GoogleAuthProvider authProvider = GoogleAuthProvider();
-          UserCredential userCredential = await _auth.signInWithPopup(
-            authProvider,
-          );
-          authSuccessful = userCredential.user != null;
-          googleUser = userCredential.user;
-        } catch (e) {
-          print('Web authentication error: $e');
-          // If the new API doesn't work on web, provide helpful error
-          return {
-            'success': false,
-            'error':
-                'Google Sign-In on web requires proper configuration. Please ensure the Google Sign-In JavaScript SDK is loaded and your web client ID is configured correctly.',
-          };
-        }
+        // Web: use Firebase Auth popup
+        final provider = GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        userCredential = await _auth.signInWithPopup(provider);
       } else {
-        // For mobile platforms - simplified approach
-        try {
-          // For mobile, we'll use Firebase Auth directly with Google provider
-          // This bypasses the complex Google Sign-In API issues
-          GoogleAuthProvider googleProvider = GoogleAuthProvider();
-          
-          // Add scopes if needed
-          googleProvider.addScope('email');
-          googleProvider.addScope('profile');
-          
-          // Sign in with redirect (works better on mobile)
-          final UserCredential userCredential = await _auth.signInWithProvider(googleProvider);
-          authSuccessful = userCredential.user != null;
-          googleUser = userCredential.user;
-        } catch (e) {
-          print('Mobile authentication error: $e');
-          return {
-            'success': false,
-            'error': 'Mobile authentication failed: $e. Please ensure Google Sign-In is properly configured.',
-          };
-        }
+        await GoogleSignIn.instance.initialize();
+        // Mobile: sign in with google_sign_in plugin
+        final googleUser = await GoogleSignIn.instance.authenticate();
+        final googleAuth = await googleUser.authentication;
+        // Create credential with ID token
+        final credential = GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+        userCredential = await _auth.signInWithCredential(credential);
       }
-
-      // Check if authentication was successful
-      if (!authSuccessful) {
-        return null; // User canceled or authentication failed
-      }
-
-      if (googleUser == null) {
-        throw Exception('Failed to create Firebase user');
-      }
-
-      // Send user details to backend
-      // final backendResponse = await _registerWithBackend(
-      //   googleUser.uid,
-      //   googleUser.displayName ?? '',
-      //   googleUser.email ?? '',
-      //   googleUser.photoURL ?? '',
-      // );
-
-      const Map<String, dynamic> backendResponse = {
-        'success': true,
-        'gymId': 'exampleGymId', // Simulated response
-      }; // Simulated backend response for testing
-
+      final user = userCredential.user;
+      if (user == null) throw Exception('Google sign-in failed');
+      // Register/login with backend
+      final backendResponse = await _registerWithBackend(
+        user.uid,
+        user.displayName ?? '',
+        user.email ?? '',
+        user.photoURL ?? '',
+      );
       if (backendResponse != null && backendResponse['success'] == true) {
-        // Save user data locally
-        await saveLocalUserData(googleUser.uid, backendResponse['gymId'] ?? '');
-
+        await saveLocalUserData(user.uid, backendResponse['gymId'] ?? '');
         return {
           'success': true,
-          'userId': googleUser.uid,
+          'userId': user.uid,
           'gymId': backendResponse['gymId'],
-          'user': googleUser,
-          'googleUser': googleUser,
+          'user': user,
         };
-      } else {
-        throw Exception(
-          'Backend registration failed: ${backendResponse?['error'] ?? 'Unknown error'}',
-        );
       }
+      throw Exception(
+        'Backend registration failed: ${backendResponse?['error'] ?? 'Unknown error'}',
+      );
+    } on GoogleSignInException catch (e) {
+      // User canceled or other sign-in error
+      if (e.code == GoogleSignInExceptionCode.canceled) return null;
+      print('GoogleSignIn error: ${e.code}');
+      return {'success': false, 'error': e.description ?? e.code};
     } catch (e) {
       print('Sign in error: $e');
       return {'success': false, 'error': e.toString()};
@@ -140,6 +102,7 @@ class AuthService {
     String photoUrl,
   ) async {
     try {
+      return {"success": true};
       final response = await http.post(
         Uri.parse('https://be.gympad.co/sign-up'),
         headers: {'Content-Type': 'application/json'},
@@ -169,6 +132,10 @@ class AuthService {
   /// Sign out
   Future<void> signOut() async {
     await _auth.signOut();
+    // On mobile, also sign out of GoogleSignIn plugin
+    if (!kIsWeb) {
+      await GoogleSignIn.instance.signOut();
+    }
     await clearLocalUserData();
   }
 

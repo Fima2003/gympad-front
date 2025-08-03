@@ -16,10 +16,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final result = await _authService.signInWithGoogle();
-      
+
       if (result != null && result['success'] == true) {
         // Navigate to main screen
         if (mounted) {
@@ -48,16 +48,17 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Sign In Error', style: AppTextStyles.titleMedium),
-        content: Text(message, style: AppTextStyles.bodyMedium),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('OK', style: AppTextStyles.button),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Sign In Error', style: AppTextStyles.titleMedium),
+            content: Text(message, style: AppTextStyles.bodyMedium),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('OK', style: AppTextStyles.button),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -85,9 +86,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: AppColors.accent,
                 ),
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // App title
               Text(
                 'GymPad',
@@ -96,9 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontStyle: FontStyle.italic,
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Subtitle
               Text(
                 'Your personal workout companion',
@@ -107,9 +108,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 60),
-              
+
               // Sign In with Google button
               if (_isLoading)
                 Column(
@@ -139,11 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       elevation: 2,
                     ),
-                    icon: Icon(
-                      Icons.login,
-                      size: 24,
-                      color: AppColors.accent,
-                    ),
+                    icon: Icon(Icons.login, size: 24, color: AppColors.accent),
                     label: Text(
                       'Sign In with Google',
                       style: AppTextStyles.button.copyWith(
@@ -153,9 +150,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Terms and privacy info
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),

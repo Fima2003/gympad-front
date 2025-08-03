@@ -45,7 +45,22 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: AppColors.background,
       ),
-      home: const SplashScreen(),
+      home: FutureBuilder<Map<String, String?>>(
+        future: AuthService().getLocalUserData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const SplashScreen();
+          }
+          final data = snapshot.data;
+          final userId = data?['userId'];
+          final gymId = data?['gymId'];
+          if (userId != null && gymId != null) {
+            return const MainScreen();
+          } else {
+            return const LoginScreen();
+          }
+        },
+      ),
       routes: {
         '/main': (context) => const MainScreen(),
         '/login': (context) => const LoginScreen(),
