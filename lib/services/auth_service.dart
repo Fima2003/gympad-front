@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gympad/services/api/user_api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -12,25 +13,34 @@ class AuthService {
   AuthService._internal();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final UserApiService _userApiService = UserApiService();
 
   // Keys for SharedPreferences
   static const String _userIdKey = 'userId';
-  static const String _gymIdKey = 'gymIdKey';
+  static const String _gymIdKey = 'gymId';
+  static const String _idTokenKey = 'auth_token';
 
   /// Check locally saved user data (userId and gymId exist)
   Future<Map<String, String?>> getLocalUserData() async {
     final prefs = await SharedPreferences.getInstance();
+    print(prefs.getString(_userIdKey));
     return {
       'userId': prefs.getString(_userIdKey),
       'gymId': prefs.getString(_gymIdKey),
+      'auth_token': prefs.getString(_idTokenKey),
     };
   }
 
   /// Save user data locally
-  Future<void> saveLocalUserData(String userId, String gymId) async {
+  Future<void> saveLocalUserData({
+    String? userId,
+    String? gymId,
+    String? idToken,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userIdKey, userId);
-    await prefs.setString(_gymIdKey, gymId);
+    userId != null && await prefs.setString(_userIdKey, userId);
+    gymId != null && await prefs.setString(_gymIdKey, gymId);
+    idToken != null && await prefs.setString(_idTokenKey, idToken);
   }
 
   /// Clear local user data
@@ -38,6 +48,7 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userIdKey);
     await prefs.remove(_gymIdKey);
+    await prefs.remove(_idTokenKey);
   }
 
   /// Sign in with Google and register/login with backend
@@ -64,24 +75,29 @@ class AuthService {
       }
       final user = userCredential.user;
       if (user == null) throw Exception('Google sign-in failed');
+
+      final idToken = await user.getIdToken();
+      if (idToken == null) throw Exception('Could not verify id token');
+
       // Register/login with backend
-      final backendResponse = await _registerWithBackend(
-        user.uid,
-        user.displayName ?? '',
-        user.email ?? '',
-        user.photoURL ?? '',
-      );
-      if (backendResponse != null && backendResponse['success'] == true) {
-        await saveLocalUserData(user.uid, backendResponse['gymId'] ?? '');
+      await user.reload();
+      final backendResponse = await _userApiService.userPartialRead();
+      if (backendResponse.success) {
+        print('User registered with backend: ${user.uid}');
+        await saveLocalUserData(
+          userId: user.uid,
+          gymId: backendResponse.data?.gymId,
+          idToken: idToken,
+        );
         return {
           'success': true,
           'userId': user.uid,
-          'gymId': backendResponse['gymId'],
+          'gymId': backendResponse.data?.gymId,
           'user': user,
         };
       }
       throw Exception(
-        'Backend registration failed: ${backendResponse?['error'] ?? 'Unknown error'}',
+        'Backend registration failed: ${backendResponse.message ?? 'Unknown error'}',
       );
     } on GoogleSignInException catch (e) {
       // User canceled or other sign-in error
@@ -91,41 +107,6 @@ class AuthService {
     } catch (e) {
       print('Sign in error: $e');
       return {'success': false, 'error': e.toString()};
-    }
-  }
-
-  /// Register/login with backend
-  Future<Map<String, dynamic>?> _registerWithBackend(
-    String userId,
-    String displayName,
-    String email,
-    String photoUrl,
-  ) async {
-    try {
-      return {"success": true};
-      final response = await http.post(
-        Uri.parse('https://be.gympad.co/sign-up'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'userId': userId,
-          'displayName': displayName,
-          'email': email,
-          'photoUrl': photoUrl,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        print('Backend error: ${response.statusCode} - ${response.body}');
-        return {
-          'success': false,
-          'error': 'Backend error: ${response.statusCode}',
-        };
-      }
-    } catch (e) {
-      print('Network error: $e');
-      return {'success': false, 'error': 'Network error: $e'};
     }
   }
 

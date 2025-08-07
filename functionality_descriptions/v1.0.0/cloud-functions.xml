@@ -1,0 +1,67 @@
+<cloud-functions>
+    <description>
+        you are going to create a cloud-functions service.
+    </description>
+    <code-instructions>
+        use the best practices. Implement error handling. Have different types of logging:
+        development,
+        warnings, errors, info. Use http packages
+    </code-instructions>
+    <file-structure-instructions>
+        <folders>
+            a new `api` folder should be created in services. It should contain all the folders and
+            files related to the api. There should be a folder for models, that will contain the
+            types to pass as a body to the request, and the output type.
+        </folders>
+        <files>
+            For every new type of api there should be a different file(so, if the api is about users
+            — user file, if the api is about workouts — workout file, etc.)
+        </files>
+    </file-structure-instructions>
+    <functionality>
+        <main-file>
+            <f1> in the main file, there should be 4 functions(get, put, post, delete) to call with
+                the following parameters: <parameter
+                    name="fName" type="string" required="true" desc="name of the function to call" />
+                <parameter
+                    name="body" type="T" required="false" default="null" desc="the body to pass" />
+                <parameter
+                    name="auth" type="bool" required="false" default="true"
+                    desc="wether to provide auth token in a header" /> and the following generic
+                types: T — input data type and K — output data type. both of them should be descried
+                in the model folder. </f1>
+            <f2> the return from the function will be in the following form: {success: true, data:
+                data}, {success: true, message: message} or {success: false, status: status_number,
+                error: error_description, message:
+                error_message} </f2>
+            <f3> in case of successful return, the data should be parsed appropriate to the passed
+                output type. </f3>
+        </main-file>
+        <generic-api>
+            <f1>In every api file, there should be implemented methods that can be easily called
+                from anywhere in the code</f1>
+        </generic-api>
+        <specific-api> This time, implement the following users api: <api route="userPartialRead"
+                inputType="none" outputType="{name: string, gymId: string?}" auth="true" />
+            <api
+                route="userFullRead" inputType="none"
+                outputType="{email: string,
+            name: string,
+            gymId: string?,
+            workouts: workoutObject?,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+            lastLoggedIn: timestamp}"
+                auth="true" />
+            <api route="userUpdate" inputType="{name: string?, gymId: string?}"
+                outputType="none" auth="true"
+                comments="[at least one parameter should be passed in inputType, if successful — returns message, not data]" />
+                <api
+                route="userDelete" inputType="none" outputType="none" auth="true"
+                comments="if successful - returns message, not data" />
+        </specific-api>
+    </functionality>
+    <packages>
+        use dio package for https
+    </packages>
+</cloud-functions>

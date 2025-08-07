@@ -3,6 +3,7 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:gympad/firebase_options.dart';
+import 'package:gympad/services/api/api.dart';
 import 'services/analytics_service.dart';
 import 'services/auth_service.dart';
 import 'constants/app_styles.dart';
@@ -21,6 +22,7 @@ Future<void> main() async {
     // Log to console
     print('FlutterError: ${details.exception}');
   };
+  ApiService().initialize();
   // Catch all uncaught errors
   PlatformDispatcher.instance.onError = (error, stack) {
     print('Uncaught Dart error: $error');
@@ -53,8 +55,7 @@ class MyApp extends StatelessWidget {
           }
           final data = snapshot.data;
           final userId = data?['userId'];
-          final gymId = data?['gymId'];
-          if (userId != null && gymId != null) {
+          if (userId != null) {
             return const MainScreen();
           } else {
             return const LoginScreen();
@@ -104,11 +105,13 @@ class _SplashScreenState extends State<SplashScreen> {
     // Check if user is locally saved (userId and gymId exist)
     final localUserData = await _authService.getLocalUserData();
     final userId = localUserData['userId'];
-    final gymId = localUserData['gymId'];
+
+    if (!mounted) return;
+    print(userId);
 
     setState(() => _isLoading = false);
 
-    if (userId != null && gymId != null) {
+    if (userId != null) {
       // User is locally saved, navigate to main screen
       if (mounted) {
         Navigator.of(context).pushReplacement(

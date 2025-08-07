@@ -1,6 +1,6 @@
 # Gympad
 
-**Efim Rubin**  
+**Yukhym Rubin**  
 *July 2025*
 
 ---
