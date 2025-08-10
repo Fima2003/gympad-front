@@ -1,0 +1,158 @@
+<workout-flow>
+    <description>
+        This .xml document describes the expected behavior of the full workout
+        flow. At the moment, there is a small part of workout flow implemented, which is partially
+        incorrect, i.e. exercise_screen. Now, I will explain in more detail what should be the
+        actual flow.
+    </description>
+
+    <models>
+        - workout consists of multiple exercises 
+        - every exercise consists of multiple sets 
+        - every set consists of multiple reps 
+        - rep is the smallest unit in a workout(it is one movement of your body). Can be represented by a simple
+        int. 
+        <set-model>
+            - the amount of reps
+            - time it took to complete this set
+            - weight that was used during this set.
+        </set-model>
+        <exercise-model>
+            - id of the exercise
+            - name of the exercise
+            - id of the equipment(optional)
+            - group to which the exercise belongs(for example, legs or biceps, or chest, etc.)
+            - list of sets
+            - time it took to finish this exercise
+        </exercise-model>
+        <workout-model>
+            - every exercise performed in this workout
+            - time it took to complete the workout
+            - whether it was uploaded to the backend or not
+            - currently ongoing or not
+        </workout-model>
+    </models>
+
+    <within-app-functionality>
+        <main_screen>
+            <feature id="1">
+                <UI>
+                    On the main page there should be a button "Start a workout".
+                </UI>
+                <functionality>
+                    By pressing on this button, it takes you to a page of selecting group of exercises.
+                </functionality>
+            </feature>
+        </main_screen>
+
+        <select_exercise_screen>
+            <feature id="1">
+                <UI>
+                    Exercises should be separated by muscle groups. For example: group of leg exercises, group of abs exercises, group of bicep exercises, etc. 
+                    Groups should be displayed as a 2-column grid.
+                </UI>
+                <functionality>
+                    By selecting a group, exercises in this group appear.
+                </functionality>
+            </feature>
+            <feature id="2">
+                <UI>
+                    2-column grid of exercise for the specific muscle group. 
+                    on the top there should be the name of the muscle group.
+                    back button to go to group selection.
+                </UI>
+                <functionality>
+                    By selecting an exercise, move to exercise_screen.
+                    By selecting a back button, go to the muscle group selection.
+                </functionality>
+            </feature>
+            <feature id="3">
+                <UI>
+                    Search bar at the top
+                </UI>
+                <functionality>
+                    One can enter the name of the exercise or muscle group. all of the results should appear
+                </functionality>
+            </feature>
+        </select_exercise_screen>
+
+        <exercise_screen>
+            In general, keep the exercise screen as is. There should be just a couple of tweaks in functionality, and how it looks.
+            <feature id="1">
+                <functionality>
+                    By pressing "Start Set", if there is no current workouts, create a new workout, start the timer, add exercise. If there is a current workout, check if the exercise being performed is in the exercise list. If it is not — add a new exercise and a new exercise.
+                    the timer should be taken from the global timer. Note the time the set started, and update the widget using the global timer. do not create a new one.
+                </functionality>
+            </feature>
+            <feature id="2">
+                <UI>button "Stop Set"</UI>
+                <functionality>
+                    by pressing on this button:
+                        - stop the set timer(keep the global one running)
+                        - add the set and its data to the exercise in the workout
+                        - display the 3 buttons from feature.id=3
+                </functionality>
+            </feature>
+            <feature id="3">
+                <UI>
+                    there are now 2 buttons after a set is complete: "Start a new set" and "Finish Exercise". Now I want to have the following buttons: "New set", "New exercise", "Finish workout"
+                </UI>
+            </feature>
+            <feature id="4">
+                <UI>button with text "New set"</UI>
+                <functionality>
+                    by pressing this button:
+                        - reset the timer
+                        - add a row to the table(look at the `exercise_screen.dart` implementation to understand what table)
+                </functionality>
+            </feature>
+            <feature id="5">
+                <UI>button with text "New exercise"</UI>
+                <functionality>
+                    by pressing on this button:
+                        - select_exercise_screen should appear in the muscle group of previous exercise with an option of selecting a different muscle group.
+                        - the timer for that exercise should be over.
+                        - option to come back to the existing exercise.
+                </functionality>
+            </feature>
+            <feature id="6">
+                <UI>button with text "Finish workout"</UI>
+                <functionality>
+                    by pressing on this button:
+                        - stop the timer
+                        - save the workout locally
+                        - try to post it to the backend. If successful — update the parameter that defines whether it was uploaded to true.
+                        - go to well_done_screen
+                </functionality>
+            </feature>
+        </exercise_screen>
+
+        <well_done_screen>
+            <feature id="1">
+                currently, well_done displays the table of sets. Now, I want to display the table of exercises. the columns are the following:
+                    - exercise name
+                    - amount of sets done
+                    - time to perform the exercise
+                    - average weight
+            </feature>
+        </well_done_screen>
+
+        <general>
+            Should be one global timer for the whole application. When a new workout is created, this timer starts. When a new exercise is created — it shouldn't create a new timer for that exercise, rather note when the exercise started, and note when the exercise ended. The same for the set.
+        </general>
+    </within-app-functionality>
+
+    <general-instructions>
+        - You can edit the files that you think need to be edited(for example, in assets/mock_data). 
+        - When you finish, create one final .md document, that would explain what you have done, how to test, what can be improved, what should be improved, etc.
+        - Use the styles and colors provided in `constants/app_styles.dart`
+        - Use bloc^9.0.0 and flutter_bloc^9.1.1 packages for state management.
+        - Every time a user opens an app, try to upload all of the workouts that haven't been uploaded yet to backend
+    </general-instructions>
+    <reporting>
+        go feature-by-feature in the order that will be easier for you to implement everything. Report after implementing every feature. at the end — check once more if every feature is implemented. if not — go back and implement.
+    </reporting>
+    <final-words>
+        GOOD LUCK!!
+    </final-words>
+</workout-flow>

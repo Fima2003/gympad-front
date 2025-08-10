@@ -4,8 +4,10 @@ import '../constants/app_styles.dart';
 
 class RepsSelector extends StatefulWidget {
   final Function(int) onRepsSelected;
+  final int? initialReps;
 
-  const RepsSelector({Key? key, required this.onRepsSelected})
+  const RepsSelector({Key? key, required this.onRepsSelected,
+    this.initialReps,})
     : super(key: key);
 
   @override
@@ -14,6 +16,12 @@ class RepsSelector extends StatefulWidget {
 
 class _RepsSelectorState extends State<RepsSelector> {
   int _reps = 8; // Default to 8 reps
+
+  @override
+  void initState() {
+    super.initState();
+    _reps = widget.initialReps ?? 8; // Default to 8 reps
+  }
 
   @override
   Widget build(BuildContext context) {

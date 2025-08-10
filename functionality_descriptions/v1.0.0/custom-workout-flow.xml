@@ -1,0 +1,131 @@
+<custom-workout-flow>
+    <description>
+        custom workout flow is very similar to workout-flow. The only difference is that instead of choosing your own exercises, the exercises are chosen for you. A template for such a workout can be found in assets/mock_data/workouts.json.
+    </description>
+    <instructions>
+        1. Populate `assets/mock_data/workouts.json` with actual workouts. If you feel like there are more fields needed there — add them.
+        2. Familiarize yourself with the existing code, models, api calls, code structure, tech stack, BLoC, global timer service.
+        3. custom workouts is a whole new screen(so add a bottom navigation bar with 2 things: free workout and custom workout)
+        4. After every implemented feature and screen, report about it
+        <models>
+            <workout-model>
+                There is already existing workout model, so add a field "name" to it, so that if it is a custom workout flow, you can add the name of that custom workout, otherwise it can be random.
+            </workout-model>
+        </models>
+        <flow>
+            <custom_workouts_screen>
+                <feature id="1">
+                    <UI>List with the names of workout, its difficulty, muscles groups it targets and an image</UI>
+                    <functionality>
+                        By pressing on a workout, navigate to custom_workout_detailed_screen.
+                    </functionality>
+                </feature>
+            </custom_workouts_screen>
+
+            <custom_workout_detailed_screen>
+                <feature id="1">
+                    <UI>
+                        should be displayed the name of the workout, the muscles that work, the exercises that are going to be performed, time between breaks for each one of them, maybe the calories burnt. should have "go back button" on the appbar, and no bottom navigation bar.
+                    </UI>
+                    <functionality>Should be scrollable.</functionality>
+                </feature>
+                <feature id="2">
+                    <UI>Fixed to the bottom(with some margin) at the page, a button "Start workout"</UI>
+                    <functionality>By pressing, start a workout and navigate to custom_workout_exercise_screen</functionality>
+                </feature>
+            </custom_workout_detailed_screen>
+
+            <prepare_to_start_workout_screen>
+                <description>This screen is a bridge between description of the workout and an actual workout. It has a countdown timer to start the workout</description>
+                <feature id="1">
+                    <UI>
+                        monotone-colored screen, that is different from the one before. The name of the workout, and the name of the first exercise
+                    </UI>
+                </feature>
+                <feature id="2">
+                    <UI>Countdown from 5 to 0</UI>
+                    <functionality>when the countdown reaches 0, move to custom-workout_exercise_screen</functionality>
+                </feature>
+                <feature id="3">
+                    <UI>Text button "Cancel"</UI>
+                    <functionality>If pressed, go back to detailed view of the workout</functionality>
+                </feature>
+            </prepare_to_start_workout_screen>
+
+            <custom_workout_exercise_screen>
+                <feature id="1">
+                    <functionality>On start of the workout, create a workout model and start the global timer.</functionality>
+                </feature>
+                <feature id="2">
+                    <UI>
+                        should display the following parameters: exercise name, the target muscle of the exercise, time passed since the start of the set, some image, and below the table of the previous sets of the same exercise if there were any
+                    </UI>
+                </feature>
+                <feature id="3">
+                    <UI>
+                        Button "Finish set", "Finish exercise" or "Finish workout" depending on where in the workout the user is.
+                    </UI>
+                    <functionality>By pressing on the button, open a pop-up to select amount of reps with default to suggested one in workout description.</functionality>
+                    <functionality for="Finish set button">By pressing on the button, move to break_screen.</functionality>
+                    <functionality for="Finish exercise button">By pressing on the button, move to break_screen.</functionality>
+                    <functionality for="Finish workout button">By pressing on the button, move to well_done_screen</functionality>
+                </feature>
+                <feature id="4">
+                    <UI>
+                        The appbar should match the color of the screen, so that visually it looks like there is no appbar. the only thing that should be there is an icon "exit".
+                    </UI>
+                    <functionality>
+                        By pressing on 'exit' icon, make a pop-up that asks "Are you sure you want to quit this workout?" with yes and no answers. if pressed yes - move to well_done_page with the workout that was done. if pressed no - remove the pop-up
+                    </functionality>
+                </feature>
+                <feature id="5">
+                    <UI>
+                        Should display weight scroller with suggested weight.
+                    </UI>
+                    <functionality>
+                        The scroller should be scrollable
+                    </functionality>
+                </feature>
+            </custom_workout_exercise_screen>
+
+            <break_screen>
+                <description>This screen provides the information during the break</description>
+                <feature id="1">
+                    <UI>Countdown timer</UI>
+                    <functionality>
+                        Based on the break time provided in workout, start the countdown timer. Once it's done, move to custom_workout_exercise_screen with the next exercise or set.
+                    </functionality>
+                </feature>
+                <feature id="2">
+                    <UI>Next exercise description: name of the exercise, target muscle, set number, etc.</UI>
+                </feature>
+                <feature id="3">
+                    <UI>Progress towards overall workout. there should be some kind of horizontal bar, that is divided into the amount of exercises(so, if there are 3 exercises - there are 3 bars in a row, etc.). Every exercise finished - the bar is colored, ever set is finished - the appropriate proportion of the bar is colored, etc.</UI>
+                </feature>
+                <feature id="4">
+                    <UI>Button "Skip the break"</UI>
+                    <functionality>
+                        By pressing this button, assume that the time for the break is 0, and move to custom_workout_exercise_screen with the next exercise or the next set, whatever it is
+                    </functionality>
+                </feature>
+                <feature id="5">
+                    <UI>IconButton +1'</UI>
+                    <functionality>
+                        By pressing on that button, the countdowntimer should have 1 more minute for the break. so if it was 30s left, and I press +1', it should be now 1:30 left.
+                    </functionality>
+                </feature>
+            </break_screen>
+            <well_done_screen>
+                Well Done screen should be the same as in a classic workout-flow.
+            </well_done_screen>
+        </flow>
+
+        4. In simple terms the flow should be the following:
+            4.1. a person goes to the custom workouts in navigation bar, and a screen appears with available workouts with their names and difficulty level line-by-line.
+            4.2. when a person selects a workout, a screen without bottom navigation bar appears and on that screen you have a more detailed description of the workout. and a fixed button at the bottom: Start Workout
+            4.3. pressing on that button, you start the workout., exercise-by-exercise, set-by-set.
+            4.4. The person should know what set he is on and out of how many, and after each exercise he should know what the next exercise is. there should be a timer for the breaks.
+            4.5. On the final page, show the summary, as in free workout.
+    </instructions>
+    Have Fun
+</custom-workout-flow>

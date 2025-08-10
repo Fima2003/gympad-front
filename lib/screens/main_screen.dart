@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../constants/app_styles.dart';
 import '../services/auth_service.dart';
+import '../blocs/workout_bloc.dart';
+import 'free_workout_screens/free_workout_screen.dart';
 import 'login_screen.dart';
-import 'dev_exercise_selector.dart';
+import 'custom_workout_screens/custom_workouts_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -13,6 +16,12 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final AuthService _authService = AuthService();
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    const FreeWorkoutScreen(),
+    const PredefinedWorkoutsScreen(),
+  ];
 
   Future<void> _signOut() async {
     await _authService.signOut();
@@ -25,96 +34,55 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text('GymPad', style: AppTextStyles.appBarTitle),
+    return BlocListener<WorkoutBloc, WorkoutState>(
+      listener: (context, state) {
+        if (state is WorkoutError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
         backgroundColor: AppColors.background,
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: _signOut,
-            icon: Icon(Icons.logout, color: AppColors.primary),
-          ),
-        ],
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Welcome to GymPad!',
-                style: AppTextStyles.titleLarge.copyWith(
-                  fontSize: 32,
-                  fontStyle: FontStyle.italic,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'You are successfully signed in.',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 40),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.accent, width: 2),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.nfc, size: 64, color: AppColors.primary),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Ready to scan NFC tags',
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 60),
-
-              // Development Mode Button
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const DevExerciseSelector(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'DEV: Test Exercises',
-                    style: AppTextStyles.button.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+        appBar: AppBar(
+          title: Text('GymPad', style: AppTextStyles.appBarTitle),
+          backgroundColor: AppColors.background,
+          elevation: 0,
+          actions: [
+            IconButton(
+              onPressed: _signOut,
+              icon: Icon(Icons.logout, color: AppColors.primary),
+            ),
+          ],
+        ),
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _screens,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          backgroundColor: AppColors.white,
+          selectedItemColor: AppColors.primary,
+          unselectedItemColor: AppColors.textSecondary,
+          type: BottomNavigationBarType.fixed,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.fitness_center),
+              label: 'Free Workout',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list_alt),
+              label: 'Custom Workout',
+            ),
+          ],
         ),
       ),
     );

@@ -6,19 +6,18 @@ A new Flutter project.
 
 # GymPad
 
-A Flutter application that enables gym-goers to track their workout performance using NFC technology. This is the MVP version that opens exercise screens through deep links and saves workout data locally.
+A Flutter application that enables gym-goers to track their workout performance using NFC technology. This MVP saves workout data locally.
 
 ## Features
 
 ### Current Implementation
-- **Deep Link Support**: Opens exercise screens via URLs with gym and equipment IDs
 - **Exercise Tracking**: Timer, weight selection, and rep counting
 - **Local Data Storage**: Saves workout data using SharedPreferences
 - **Clean UI**: Follows the specified design system with Bebas Neue and Kanit fonts
 - **Cross-Platform**: Works on Android, iOS, and Web
 
 ### App Flow
-1. **Home Screen**: Shows "Ready to scan" interface waiting for NFC/deep link
+1. **Home Screen**: Shows "Ready to scan" interface
 2. **Exercise Screen**: 
    - Displays gym info and exercise name
    - Timer functionality (start/stop)
@@ -48,7 +47,7 @@ A Flutter application that enables gym-goers to track their workout performance 
 
 - **Flutter**: Cross-platform framework
 - **shared_preferences**: Local data storage
-- **app_links**: Deep link handling
+ 
 - **google_fonts**: Typography
 - **url_launcher**: WhatsApp integration
 
@@ -77,43 +76,7 @@ A Flutter application that enables gym-goers to track their workout performance 
    flutter run -d macos
    ```
 
-## Testing Deep Links
-
-### Test URLs
-You can test the app using these sample URLs:
-
-1. **Gym ABC + Equipment 123 (Bicep Curls)**:
-   ```
-   https://gympad-e44fc.web.app/gymId="GYM_ABC"&equipmentId="123"
-   ```
-
-2. **Gym XYZ + Equipment 456 (Tricep Extensions)**:
-   ```
-   https://gympad-e44fc.web.app/gymId="GYM_XYZ"&equipmentId="456"
-   ```
-
-3. **Multi-exercise Equipment (Cable Machine)**:
-   ```
-   https://gympad-e44fc.web.app/gymId="GYM_ABC"&equipmentId="40938"
-   ```
-
-### Testing Methods
-
-#### Method 1: Browser (Web)
-1. Run `flutter run -d chrome`
-2. In the browser, navigate to one of the test URLs above
-3. The app should automatically open the exercise screen
-
-#### Method 2: Mobile Deep Link Testing
-1. Install the app on device: `flutter install`
-2. Use ADB (Android) or simulator (iOS) to test deep links:
-   ```bash
-   # Android
-   adb shell am start -W -a android.intent.action.VIEW -d "https://gympad-e44fc.web.app/gymId=\"GYM_ABC\"&equipmentId=\"123\"" com.example.gympad
-   
-   # iOS Simulator
-   xcrun simctl openurl booted "https://gympad-e44fc.web.app/gymId=\"GYM_ABC\"&equipmentId=\"123\""
-   ```
+ 
 
 ## Data Structure
 
@@ -145,7 +108,7 @@ lib/
 ├── services/
 │   ├── data_service.dart        # Mock data loading
 │   ├── storage_service.dart     # Local data persistence
-│   └── url_parsing_service.dart # Deep link parsing
+│   └── storage_service.dart     # Local data persistence
 ├── widgets/
 │   ├── reps_selector.dart       # Modal rep counter
 │   ├── weight_selector.dart     # Horizontal weight picker

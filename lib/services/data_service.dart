@@ -87,4 +87,46 @@ class DataService {
     
     return null;
   }
+
+  List<Exercise> getAllExercises() {
+    return _exercises?.values.toList() ?? [];
+  }
+
+  List<String> getAllMuscleGroups() {
+    if (_exercises == null) return [];
+    
+    final groups = <String>{};
+    for (final exercise in _exercises!.values) {
+      groups.add(exercise.muscleGroup);
+    }
+    
+    return groups.toList()..sort();
+  }
+
+  List<Exercise> getExercisesForMuscleGroup(String muscleGroup) {
+    if (_exercises == null) return [];
+    
+    return _exercises!.values
+        .where((exercise) => exercise.muscleGroup == muscleGroup)
+        .toList();
+  }
+
+  List<Exercise> getRopeExercises() {
+    if (_exercises == null) return [];
+    
+    return _exercises!.values
+        .where((exercise) => exercise.muscleGroup == 'cardio' || exercise.name.toLowerCase().contains('rope'))
+        .toList();
+  }
+
+  List<String> getRopeMuscleGroups() {
+    final ropeExercises = getRopeExercises();
+    final groups = <String>{};
+    
+    for (final exercise in ropeExercises) {
+      groups.add(exercise.muscleGroup);
+    }
+    
+    return groups.toList()..sort();
+  }
 }

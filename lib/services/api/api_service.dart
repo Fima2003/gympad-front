@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:logging/logging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gympad/services/logger_service.dart';
 
 /// Generic API response model
 class ApiResponse<T> {
@@ -21,11 +21,7 @@ class ApiResponse<T> {
   });
 
   factory ApiResponse.success({T? data, String? message}) {
-    return ApiResponse(
-      success: true,
-      data: data,
-      message: message,
-    );
+    return ApiResponse(success: true, data: data, message: message);
   }
 
   factory ApiResponse.failure({
@@ -49,28 +45,24 @@ class ApiService {
   ApiService._internal();
 
   late final Dio _dio;
-  late final Logger _logger;
+  final AppLogger _logger = AppLogger();
 
   // Base domain for Firebase Functions
   static const String _baseDomain = 'ocycwbq2ka-uc.a.run.app';
 
   void initialize() {
-    // Enable hierarchical logging
-    hierarchicalLoggingEnabled = true;
-    
-    _logger = Logger('ApiService');
-    _logger.level = Level.ALL;
-
     // Note: baseUrl will be set dynamically per request
-    _dio = Dio(BaseOptions(
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      sendTimeout: const Duration(seconds: 30),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    ));
+    _dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 30),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
 
     // Add interceptors for logging
     _dio.interceptors.add(
@@ -81,7 +73,7 @@ class ApiService {
         responseHeader: true,
         responseBody: true,
         error: true,
-        logPrint: (object) => _logger.info(object),
+        logPrint: (object) => _logger.info(object.toString()),
       ),
     );
 
@@ -110,13 +102,10 @@ class ApiService {
   }) async {
     try {
       _logInfo('Making GET request to $fName');
-      
+
       final options = await _buildRequestOptions(auth);
       final url = _buildFunctionUrl(fName);
-      final response = await _dio.get(
-        url,
-        options: options,
-      );
+      final response = await _dio.get(url, options: options);
 
       return _handleResponse<K>(response, parser);
     } catch (e) {
@@ -133,7 +122,7 @@ class ApiService {
   }) async {
     try {
       _logInfo('Making POST request to $fName');
-      
+
       final options = await _buildRequestOptions(auth);
       final url = _buildFunctionUrl(fName);
       final response = await _dio.post(
@@ -157,7 +146,7 @@ class ApiService {
   }) async {
     try {
       _logInfo('Making PUT request to $fName');
-      
+
       final options = await _buildRequestOptions(auth);
       final url = _buildFunctionUrl(fName);
       final response = await _dio.put(
@@ -181,7 +170,7 @@ class ApiService {
   }) async {
     try {
       _logInfo('Making DELETE request to $fName');
-      
+
       final options = await _buildRequestOptions(auth);
       final url = _buildFunctionUrl(fName);
       final response = await _dio.delete(
@@ -202,7 +191,7 @@ class ApiService {
 
     if (includeAuth) {
       String? token = await _getAuthToken();
-      
+
       if (token != null) {
         headers['Authorization'] = 'Bearer $token';
         _logInfo('Added authorization header');
@@ -216,19 +205,19 @@ class ApiService {
   }
 
   /// Get authentication token from local storage or Firebase
-  /// First tries to get from local storage, then from Firebase, 
+  /// First tries to get from local storage, then from Firebase,
   /// and gives up if both fail
   Future<String?> _getAuthToken() async {
     try {
       // First try to get token from local storage
       final prefs = await SharedPreferences.getInstance();
       String? cachedToken = prefs.getString('auth_token');
-      
+
       if (cachedToken != null) {
         _logInfo('Retrieved auth token from local storage');
         return cachedToken;
       }
-      
+
       // If no cached token, try to get from Firebase
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
@@ -242,7 +231,7 @@ class ApiService {
           }
         } catch (e) {
           _logError('Failed to get auth token from Firebase', e);
-          
+
           // Try to reload user and get token again
           try {
             await user.reload();
@@ -262,7 +251,7 @@ class ApiService {
       } else {
         _logWarning('No authenticated user found');
       }
-      
+
       return null;
     } catch (e) {
       _logError('Error retrieving auth token', e);
@@ -294,7 +283,7 @@ class ApiService {
       // Check if response indicates success
       if (responseData is Map<String, dynamic>) {
         final success = responseData['success'] as bool? ?? false;
-        
+
         if (success) {
           final data = responseData['data'];
           final message = responseData['message'] as String?;
@@ -316,10 +305,11 @@ class ApiService {
           }
         } else {
           // Server returned success: false
-          final status = responseData['status'] as int? ?? response.statusCode ?? 500;
+          final status =
+              responseData['status'] as int? ?? response.statusCode ?? 500;
           final error = responseData['error'] as String? ?? 'Unknown error';
           final message = responseData['message'] as String?;
-          
+
           return ApiResponse.failure(
             status: status,
             error: error,
@@ -353,7 +343,7 @@ class ApiService {
         case DioExceptionType.badResponse:
           final statusCode = error.response?.statusCode ?? 500;
           final responseData = error.response?.data;
-          
+
           if (responseData is Map<String, dynamic>) {
             return ApiResponse.failure(
               status: statusCode,
@@ -361,7 +351,7 @@ class ApiService {
               message: responseData['message'] as String?,
             );
           }
-          
+
           return ApiResponse.failure(
             status: statusCode,
             error: 'Server error',
@@ -406,6 +396,6 @@ class ApiService {
   }
 
   void _logError(String message, dynamic error) {
-    _logger.severe('$message: $error');
+    _logger.error('$message: $error');
   }
 }

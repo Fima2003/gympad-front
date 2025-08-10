@@ -1,11 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gympad/services/api/user_api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'dart:convert';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
+import 'package:gympad/services/logger_service.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -15,6 +14,8 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final UserApiService _userApiService = UserApiService();
 
+  final AppLogger _logger = AppLogger();
+
   // Keys for SharedPreferences
   static const String _userIdKey = 'userId';
   static const String _gymIdKey = 'gymId';
@@ -23,9 +24,10 @@ class AuthService {
   /// Check locally saved user data (userId and gymId exist)
   Future<Map<String, String?>> getLocalUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    print(prefs.getString(_userIdKey));
+    final userId = prefs.getString(_userIdKey);
+    _logger.debug('Retrieved userId from local storage: $userId');
     return {
-      'userId': prefs.getString(_userIdKey),
+      'userId': userId,
       'gymId': prefs.getString(_gymIdKey),
       'auth_token': prefs.getString(_idTokenKey),
     };
@@ -83,7 +85,7 @@ class AuthService {
       await user.reload();
       final backendResponse = await _userApiService.userPartialRead();
       if (backendResponse.success) {
-        print('User registered with backend: ${user.uid}');
+        _logger.info('User registered with backend: ${user.uid}');
         await saveLocalUserData(
           userId: user.uid,
           gymId: backendResponse.data?.gymId,
@@ -102,10 +104,10 @@ class AuthService {
     } on GoogleSignInException catch (e) {
       // User canceled or other sign-in error
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
-      print('GoogleSignIn error: ${e.code}');
+      _logger.error('GoogleSignIn error: ${e.code}', e);
       return {'success': false, 'error': e.description ?? e.code};
     } catch (e) {
-      print('Sign in error: $e');
+      _logger.error('Sign in error', e);
       return {'success': false, 'error': e.toString()};
     }
   }

@@ -1,0 +1,127 @@
+{
+    "upper_body_strength": {
+        "name": "Upper Body Strength",
+        "description": "This workout targets your upper body muscles including chest, shoulders, and arms",
+        "difficulty": "Intermediate",
+        "muscle_groups": ["Chest", "Shoulders", "Arms"],
+        "estimated_calories": 350,
+        "bench_press": {
+            "sets_amount": 4,
+            "weight": 60,
+            "suggested_reps": 8,
+            "rest_time": 120
+        },
+        "shoulder_press": {
+            "sets_amount": 3,
+            "weight": 25,
+            "suggested_reps": 10,
+            "rest_time": 90
+        },
+        "incline_dumbbell_press": {
+            "sets_amount": 3,
+            "weight": 30,
+            "suggested_reps": 10,
+            "rest_time": 90
+        }
+    },
+    "leg_day_blast": {
+        "name": "Leg Day Blast",
+        "description": "Intensive leg workout targeting quads, hamstrings, and glutes",
+        "difficulty": "Advanced",
+        "muscle_groups": ["Legs", "Glutes"],
+        "estimated_calories": 450,
+        "squats": {
+            "sets_amount": 4,
+            "weight": 80,
+            "suggested_reps": 12,
+            "rest_time": 120
+        },
+        "lunges": {
+            "sets_amount": 3,
+            "weight": 20,
+            "suggested_reps": 10,
+            "rest_time": 90
+        },
+        "leg_press": {
+            "sets_amount": 3,
+            "weight": 100,
+            "suggested_reps": 15,
+            "rest_time": 90
+        }
+    },
+    "strength_training": {
+        "name": "Strength Training",
+        "description": "Complete strength training workout with compound movements",
+        "difficulty": "Intermediate",
+        "muscle_groups": ["Full Body"],
+        "estimated_calories": 300,
+        "deadlifts": {
+            "sets_amount": 4,
+            "weight": 70,
+            "suggested_reps": 8,
+            "rest_time": 150
+        },
+        "barbell_rows": {
+            "sets_amount": 3,
+            "weight": 50,
+            "suggested_reps": 10,
+            "rest_time": 120
+        },
+        "overhead_press": {
+            "sets_amount": 3,
+            "weight": 40,
+            "suggested_reps": 8,
+            "rest_time": 120
+        }
+    },
+    "arms_focus": {
+        "name": "Arms Focus",
+        "description": "Targeted arm workout for biceps and triceps",
+        "difficulty": "Beginner",
+        "muscle_groups": ["Arms"],
+        "estimated_calories": 200,
+        "bicep_curls": {
+            "sets_amount": 3,
+            "weight": 15,
+            "suggested_reps": 12,
+            "rest_time": 60
+        },
+        "tricep_extensions": {
+            "sets_amount": 3,
+            "weight": 12,
+            "suggested_reps": 12,
+            "rest_time": 60
+        },
+        "hammer_curls": {
+            "sets_amount": 2,
+            "weight": 12,
+            "suggested_reps": 10,
+            "rest_time": 60
+        }
+    },
+    "cardio_hiit": {
+        "name": "HIIT Cardio Blast",
+        "description": "High-intensity interval training for maximum calorie burn",
+        "difficulty": "Advanced",
+        "muscle_groups": ["Cardio"],
+        "estimated_calories": 400,
+        "kettlebell_swings": {
+            "sets_amount": 4,
+            "weight": 16,
+            "suggested_reps": 15,
+            "rest_time": 60
+        },
+        "dumbbell_thrusters": {
+            "sets_amount": 3,
+            "weight": 10,
+            "suggested_reps": 12,
+            "rest_time": 45
+        },
+        "weighted_burpees": {
+            "sets_amount": 3,
+            "weight": 5,
+            "suggested_reps": 8,
+            "rest_time": 60
+        }
+    }
+}

@@ -3,102 +3,140 @@
         "leg_press": {
             "name": "Leg Press",
             "description": "Targets quadriceps and glutes. Push the platform away from you.",
-            "image": "https://example.com/images/leg_press_full.gif"
+            "image": "https://example.com/images/leg_press_full.gif",
+            "muscleGroup": "legs"
         },
         "squats": {
             "name": "Barbell Squats",
             "description": "Compound exercise for lower body. Keep your back straight, descend until thighs are parallel to the floor.",
-            "image": "https://example.com/images/squats_full.gif"
+            "image": "https://example.com/images/squats_full.gif",
+            "muscleGroup": "legs"
         },
         "bicep_curls": {
             "name": "Dumbbell Bicep Curls",
             "description": "Isolate the biceps. Keep elbows tucked in and curl dumbbells towards shoulders.",
-            "image": "https://example.com/images/bicep_curls_full.gif"
+            "image": "https://example.com/images/bicep_curls_full.gif",
+            "muscleGroup": "arms"
         },
         "tricep_extensions": {
             "name": "Overhead Tricep Extensions",
             "description": "Targets triceps. Extend dumbbells overhead, keeping elbows close to head.",
-            "image": "https://example.com/images/tricep_extensions_full.gif"
+            "image": "https://example.com/images/tricep_extensions_full.gif",
+            "muscleGroup": "arms"
         },
         "shoulder_press_machine": {
             "name": "Machine Shoulder Press",
             "description": "Targets shoulders. Push handles overhead in a controlled motion.",
-            "image": "https://example.com/images/shoulder_press_machine_full.gif"
+            "image": "https://example.com/images/shoulder_press_machine_full.gif",
+            "muscleGroup": "shoulders"
         },
         "crunches": {
             "name": "Crunches",
             "description": "Targets upper abs. Lift shoulders off the floor, engaging core.",
-            "image": "https://example.com/images/crunches_full.gif"
+            "image": "https://example.com/images/crunches_full.gif",
+            "muscleGroup": "abs"
         },
         "plank": {
             "name": "Plank",
             "description": "Core stability exercise. Maintain a straight line from head to heels.",
-            "image": "https://example.com/images/plank_full.gif"
+            "image": "https://example.com/images/plank_full.gif",
+            "muscleGroup": "abs"
         },
         "bench_press": {
             "name": "Barbell Bench Press",
             "description": "Targets chest, shoulders, triceps. Lower barbell to mid-chest, then push up.",
-            "image": "https://example.com/images/bench_press_full.gif"
+            "image": "https://example.com/images/bench_press_full.gif",
+            "muscleGroup": "chest"
         },
         "overhead_press": {
             "name": "Dumbbell Overhead Press",
             "description": "Targets shoulders. Press dumbbells overhead, keeping core tight.",
-            "image": "https://example.com/images/overhead_press_full.gif"
+            "image": "https://example.com/images/overhead_press_full.gif",
+            "muscleGroup": "shoulders"
         },
         "deadlifts": {
             "name": "Barbell Deadlifts",
             "description": "Full body exercise. Lift barbell from the floor, keeping back straight, and stand up.",
-            "image": "https://example.com/images/deadlifts_full.gif"
+            "image": "https://example.com/images/deadlifts_full.gif",
+            "muscleGroup": "back"
         },
         "rows": {
             "name": "Bent-Over Rows",
             "description": "Targets back. Bend at hips, pull barbell towards lower chest, squeezing shoulder blades.",
-            "image": "https://example.com/images/rows_full.gif"
+            "image": "https://example.com/images/rows_full.gif",
+            "muscleGroup": "back"
         },
         "cable_kickbacks": {
             "name": "Cable Kickbacks",
             "description": "Targets glutes and hamstrings. Attach ankle strap to cable, kick leg back and up, squeezing glutes.",
-            "image": "https://example.com/images/cable_kickbacks_full.gif"
+            "image": "https://example.com/images/cable_kickbacks_full.gif",
+            "muscleGroup": "legs"
         },
         "cable_pull_throughs": {
             "name": "Cable Pull-Throughs",
             "description": "Targets glutes and hamstrings. Stand facing away from cable, pull handle between legs, driving hips forward.",
-            "image": "https://example.com/images/cable_pull_throughs_full.gif"
+            "image": "https://example.com/images/cable_pull_throughs_full.gif",
+            "muscleGroup": "legs"
         },
         "cable_crunches": {
             "name": "Cable Crunches",
             "description": "Targets abs. Kneel facing cable, hold rope behind head, crunch down, engaging core.",
-            "image": "https://example.com/images/cable_crunches_full.gif"
+            "image": "https://example.com/images/cable_crunches_full.gif",
+            "muscleGroup": "abs"
         },
         "cable_wood_chops": {
             "name": "Cable Wood Chops",
             "description": "Targets obliques and core. Stand sideways to cable, pull handle across body in a chopping motion.",
-            "image": "https://example.com/images/cable_wood_chops_full.gif"
+            "image": "https://example.com/images/cable_wood_chops_full.gif",
+            "muscleGroup": "abs"
         },
         "cable_chest_flyes": {
             "name": "Cable Chest Flyes",
             "description": "Targets chest. Stand in center of cable machine, bring handles together in a 'hugging' motion.",
-            "image": "https://example.com/images/cable_chest_flyes_full.gif"
+            "image": "https://example.com/images/cable_chest_flyes_full.gif",
+            "muscleGroup": "chest"
         },
         "cable_tricep_pushdowns": {
             "name": "Cable Tricep Pushdowns",
             "description": "Targets triceps. Stand facing cable, push bar down towards thighs, fully extending arms.",
-            "image": "https://example.com/images/cable_tricep_pushdowns_full.gif"
+            "image": "https://example.com/images/cable_tricep_pushdowns_full.gif",
+            "muscleGroup": "arms"
         },
         "cable_bicep_curls": {
             "name": "Cable Bicep Curls",
             "description": "Targets biceps. Stand facing cable, curl bar towards shoulders, squeezing biceps.",
-            "image": "https://example.com/images/cable_bicep_curls_full.gif"
+            "image": "https://example.com/images/cable_bicep_curls_full.gif",
+            "muscleGroup": "arms"
         },
         "cable_seated_rows": {
             "name": "Cable Seated Rows",
             "description": "Targets back. Sit on bench, pull handle towards lower abdomen, squeezing shoulder blades.",
-            "image": "https://example.com/images/cable_seated_rows_full.gif"
+            "image": "https://example.com/images/cable_seated_rows_full.gif",
+            "muscleGroup": "back"
         },
         "cable_lat_pulldowns": {
             "name": "Cable Lat Pulldowns",
             "description": "Targets lats. Sit on bench, pull bar down to upper chest, squeezing shoulder blades.",
-            "image": "https://example.com/images/cable_lat_pulldowns_full.gif"
+            "image": "https://example.com/images/cable_lat_pulldowns_full.gif",
+            "muscleGroup": "back"
+        },
+        "rope_waves": {
+            "name": "Rope Waves",
+            "description": "Full body cardio exercise with battle ropes. Create alternating waves with both arms.",
+            "image": "https://example.com/images/rope_waves_full.gif",
+            "muscleGroup": "cardio"
+        },
+        "rope_slams": {
+            "name": "Rope Slams",
+            "description": "Explosive movement with battle ropes. Slam both ropes down simultaneously.",
+            "image": "https://example.com/images/rope_slams_full.gif",
+            "muscleGroup": "cardio"
+        },
+        "rope_spirals": {
+            "name": "Rope Spirals",
+            "description": "Core-focused battle rope exercise. Create spiral motions with alternating arms.",
+            "image": "https://example.com/images/rope_spirals_full.gif",
+            "muscleGroup": "abs"
         }
     }
 }

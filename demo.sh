@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # GymPad Demo Script
-# This script demonstrates the deep linking functionality of the GymPad app
+# This script launches the GymPad app in web mode.
 
 echo "🏋️  GymPad Demo - Deep Link Testing"
 echo "=================================="
@@ -28,28 +28,7 @@ FLUTTER_PID=$!
 echo "⏳ Waiting for app to start..."
 sleep 10
 
-echo "🔗 Testing Deep Links:"
-echo ""
-
-# Test URLs
-echo "1. Bicep Curls at Elite Fitness Center:"
-echo "   https://gympad-e44fc.web.app/gymId=\"GYM_ABC\"&equipmentId=\"123\""
-echo ""
-
-echo "2. Tricep Extensions at Urban Strength Hub:"
-echo "   https://gympad-e44fc.web.app/gymId=\"GYM_XYZ\"&equipmentId=\"456\""
-echo ""
-
-echo "3. Cable Machine (Multi-exercise) at Elite Fitness Center:"
-echo "   https://gympad-e44fc.web.app/gymId=\"GYM_ABC\"&equipmentId=\"40938\""
-echo ""
-
-echo "📝 Instructions:"
-echo "   1. Copy one of the URLs above"
-echo "   2. Open a new browser tab"
-echo "   3. Paste the URL and press Enter"
-echo "   4. The GymPad exercise screen should open automatically"
-echo ""
+echo "Open http://localhost:8080 in your browser."
 
 echo "🛑 Press Ctrl+C to stop the demo"
 
