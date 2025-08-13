@@ -24,12 +24,7 @@ class _PredefinedWorkoutsScreenState extends State<PredefinedWorkoutsScreen> {
 
   Future<void> _loadWorkouts() async {
     try {
-      print('Starting to load workouts...');
       final workouts = await _workoutService.loadPredefinedWorkouts();
-      print('Loaded ${workouts.length} workouts');
-      for (final workout in workouts) {
-        print('Workout: ${workout.name} - ${workout.exercises.length} exercises');
-      }
       setState(() {
         _workouts = workouts;
         _isLoading = false;

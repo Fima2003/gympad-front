@@ -1,16 +1,17 @@
 <cloud-functions>
     <description>
-        you are going to create a cloud-functions service.
+        you are going to update an already-existing cloud-functions service for workout.
     </description>
     <code-instructions>
         use the best practices. Implement error handling. Have different types of logging:
         development,
         warnings, errors, info. Use http packages
+        Take a look before at how users api is implemented and use that as a reference
     </code-instructions>
     <file-structure-instructions>
         <folders>
-            a new `api` folder should be created in services. It should contain all the folders and
-            files related to the api. There should be a folder for models, that will contain the
+            an `api` folder is already created in services. It should contain all the folders and
+            files related to the api. There is a folder for models, that contains the
             types to pass as a body to the request, and the output type.
         </folders>
         <files>
@@ -41,24 +42,53 @@
             <f1>In every api file, there should be implemented methods that can be easily called
                 from anywhere in the code</f1>
         </generic-api>
-        <specific-api> This time, implement the following users api: <api route="userPartialRead"
-                inputType="none" outputType="{name: string, gymId: string?}" auth="true" />
+        <specific-api> This time, implement the following workout api: 
+            <api route="getAllMyWorkouts"
+                inputType="none" outputType="{ id: string, name: string?, muscleGroups: string[] }[]" auth="true" method="GET" />
             <api
-                route="userFullRead" inputType="none"
-                outputType="{email: string,
-            name: string,
-            gymId: string?,
-            workouts: workoutObject?,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-            lastLoggedIn: timestamp}"
-                auth="true" />
-            <api route="userUpdate" inputType="{name: string?, gymId: string?}"
+                route="getMyWorkout" inputType="{ workoutId: string }"
+                outputType="{
+                                id: string,
+                                name: string?,
+                                exercises: {
+                                    exerciseId: string,
+                                    name: string,
+                                    equipmentId: string?,
+                                    muscleGroup: string,
+                                    sets: {
+                                        setNumber: int,
+                                        reps: int,
+                                        weight: double,
+                                        time: int
+                                    }[]
+                                }[],
+                                startTime: DateTime,
+                                endTime: DateTime
+                            }"
+                auth="true"  method="GET"/>
+            <api route="createWorkout" inputType="{
+                                                    id: string,
+                                                    name: string?,
+                                                    exercises: {
+                                                        exerciseId: string,
+                                                        name: string,
+                                                        equipmentId: string?,
+                                                        muscleGroup: string,
+                                                        sets: {
+                                                            setNumber: int,
+                                                            reps: int,
+                                                            weight: double,
+                                                            time: int
+                                                        }[]
+                                                    }[],
+                                                    startTime: DateTime,
+                                                    endTime: DateTime
+                                                }"
                 outputType="none" auth="true"
-                comments="[at least one parameter should be passed in inputType, if successful — returns message, not data]" />
+                comments="[if successful, returns success: true, otherwise success: false]" method="POST" />
                 <api
-                route="userDelete" inputType="none" outputType="none" auth="true"
-                comments="if successful - returns message, not data" />
+                route="deleteWorkout" inputType="workoutDelete" outputType="none" auth="true"
+                method="DELETE" />
         </specific-api>
     </functionality>
     <packages>

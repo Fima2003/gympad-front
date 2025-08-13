@@ -7,10 +7,10 @@ class WeightSelector extends StatefulWidget {
   final Function(double) onWeightChanged;
 
   const WeightSelector({
-    Key? key,
+    super.key,
     this.initialWeight = 15.0,
     required this.onWeightChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<WeightSelector> createState() => _WeightSelectorState();

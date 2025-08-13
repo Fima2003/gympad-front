@@ -99,16 +99,42 @@ class ApiService {
     T? body,
     bool auth = true,
     K Function(dynamic)? parser,
+    Map<String, dynamic>? queryParameters,
   }) async {
     try {
       _logInfo('Making GET request to $fName');
 
       final options = await _buildRequestOptions(auth);
       final url = _buildFunctionUrl(fName);
-      final response = await _dio.get(url, options: options);
+      final response = await _dio.get(
+        url,
+        options: options,
+        queryParameters: queryParameters,
+      );
 
       return _handleResponse<K>(response, parser);
     } catch (e) {
+      // Retry once on auth failure after refreshing token
+      if (e is DioException &&
+          e.type == DioExceptionType.badResponse &&
+          (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
+        _logWarning('Auth failed (GET $fName). Attempting token refresh and retry.');
+        final refreshed = await _forceRefreshAuthToken();
+        if (refreshed) {
+          try {
+            final options = await _buildRequestOptions(auth);
+            final url = _buildFunctionUrl(fName);
+            final response = await _dio.get(
+              url,
+              options: options,
+              queryParameters: queryParameters,
+            );
+            return _handleResponse<K>(response, parser);
+          } catch (retryError) {
+            return _handleError<K>(retryError);
+          }
+        }
+      }
       return _handleError<K>(e);
     }
   }
@@ -133,6 +159,26 @@ class ApiService {
 
       return _handleResponse<K>(response, parser);
     } catch (e) {
+      if (e is DioException &&
+          e.type == DioExceptionType.badResponse &&
+          (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
+        _logWarning('Auth failed (POST $fName). Attempting token refresh and retry.');
+        final refreshed = await _forceRefreshAuthToken();
+        if (refreshed) {
+          try {
+            final options = await _buildRequestOptions(auth);
+            final url = _buildFunctionUrl(fName);
+            final response = await _dio.post(
+              url,
+              data: body != null ? jsonEncode(body) : null,
+              options: options,
+            );
+            return _handleResponse<K>(response, parser);
+          } catch (retryError) {
+            return _handleError<K>(retryError);
+          }
+        }
+      }
       return _handleError<K>(e);
     }
   }
@@ -157,6 +203,26 @@ class ApiService {
 
       return _handleResponse<K>(response, parser);
     } catch (e) {
+      if (e is DioException &&
+          e.type == DioExceptionType.badResponse &&
+          (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
+        _logWarning('Auth failed (PUT $fName). Attempting token refresh and retry.');
+        final refreshed = await _forceRefreshAuthToken();
+        if (refreshed) {
+          try {
+            final options = await _buildRequestOptions(auth);
+            final url = _buildFunctionUrl(fName);
+            final response = await _dio.put(
+              url,
+              data: body != null ? jsonEncode(body) : null,
+              options: options,
+            );
+            return _handleResponse<K>(response, parser);
+          } catch (retryError) {
+            return _handleError<K>(retryError);
+          }
+        }
+      }
       return _handleError<K>(e);
     }
   }
@@ -181,7 +247,50 @@ class ApiService {
 
       return _handleResponse<K>(response, parser);
     } catch (e) {
+      if (e is DioException &&
+          e.type == DioExceptionType.badResponse &&
+          (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
+        _logWarning('Auth failed (DELETE $fName). Attempting token refresh and retry.');
+        final refreshed = await _forceRefreshAuthToken();
+        if (refreshed) {
+          try {
+            final options = await _buildRequestOptions(auth);
+            final url = _buildFunctionUrl(fName);
+            final response = await _dio.delete(
+              url,
+              data: body != null ? jsonEncode(body) : null,
+              options: options,
+            );
+            return _handleResponse<K>(response, parser);
+          } catch (retryError) {
+            return _handleError<K>(retryError);
+          }
+        }
+      }
       return _handleError<K>(e);
+    }
+  }
+
+  /// Force refresh auth token and cache it
+  Future<bool> _forceRefreshAuthToken() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        _logWarning('No authenticated user for token refresh');
+        return false;
+      }
+      final freshToken = await user.getIdToken(true);
+      if (freshToken == null) {
+        _logWarning('Token refresh returned null token');
+        return false;
+      }
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', freshToken);
+      _logInfo('Auth token refreshed and cached');
+      return true;
+    } catch (e) {
+      _logError('Failed to refresh auth token', e);
+      return false;
     }
   }
 

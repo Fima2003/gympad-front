@@ -100,7 +100,17 @@ class _SplashScreenState extends State<SplashScreen> {
       _logger.warning('AnalyticsService.incrementAppOpen failed', e, st);
     }
 
-    // Check local user auth state (needed for fallback navigation)
+    // If signed in, fetch user from backend (refresh token and retry if needed)
+    if (_authService.isSignedIn) {
+      try {
+        final ok = await _authService.fetchUserOnAppStartWithRetry();
+        _logger.info('Splash: backend user fetch ${ok ? 'succeeded' : 'failed'}');
+      } catch (e, st) {
+        _logger.warning('Splash: backend user fetch failed', e, st);
+      }
+    }
+
+    // Check local user auth state (fallback navigation)
     final localUserData = await _authService.getLocalUserData();
     final userId = localUserData['userId'];
     _logger.info('Splash: local userId=$userId');

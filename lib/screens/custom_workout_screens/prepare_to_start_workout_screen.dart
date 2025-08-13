@@ -3,6 +3,7 @@ import 'dart:async';
 import '../../constants/app_styles.dart';
 import '../../models/predefined_workout.dart';
 import 'custom_workouts_run_screen.dart';
+import '../../services/data_service.dart';
 
 class PrepareToStartWorkoutScreen extends StatefulWidget {
   final PredefinedWorkout workout;
@@ -121,10 +122,12 @@ class _PrepareToStartWorkoutScreenState extends State<PrepareToStartWorkoutScree
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            Text(
-              widget.workout.exercises.isNotEmpty
-                  ? widget.workout.exercises.first.name.replaceAll('_', ' ').toUpperCase()
-                  : 'Exercise',
+      Text(
+        widget.workout.exercises.isNotEmpty
+          ? (DataService().getExercise(widget.workout.exercises.first.id)?.name ?? widget.workout.exercises.first.id)
+            .replaceAll('_', ' ')
+            .toUpperCase()
+          : 'Exercise',
               style: AppTextStyles.titleMedium.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -148,7 +151,7 @@ class _PrepareToStartWorkoutScreenState extends State<PrepareToStartWorkoutScree
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 20,
                           offset: const Offset(0, 4),
                         ),

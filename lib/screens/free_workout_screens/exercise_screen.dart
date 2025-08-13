@@ -7,8 +7,7 @@ import '../../models/workout_set.dart';
 import '../../services/global_timer_service.dart';
 import '../../blocs/workout_bloc.dart';
 import '../../widgets/weight_selector.dart';
-import '../../widgets/workout_timer.dart';
-import '../../widgets/workout_sets_table.dart';
+import 'dart:async';
 import '../../widgets/reps_selector.dart';
 import 'select_exercise_screen.dart';
 import 'free_workout_break_screen.dart';
@@ -19,26 +18,42 @@ class ExerciseScreen extends StatefulWidget {
   final bool isPartOfWorkout;
 
   const ExerciseScreen({
-    Key? key, 
+    super.key, 
     this.gym, 
     required this.exercise,
     this.isPartOfWorkout = false,
-  }) : super(key: key);
+  });
 
   @override
   State<ExerciseScreen> createState() => _ExerciseScreenState();
 }
 
 class _ExerciseScreenState extends State<ExerciseScreen> {
-  final GlobalKey<WorkoutTimerState> _timerKey = GlobalKey();
   final GlobalTimerService _globalTimerService = GlobalTimerService();
 
   bool _isTimerRunning = false;
   double _selectedWeight = 15.0;
-  Duration _currentSetTime = Duration.zero;
+  Duration _setDuration = Duration.zero;
+  Timer? _setTimer;
   List<WorkoutSet> _completedSets = [];
   bool _hasCompletedSets = false;
-  DateTime? _setStartTime;
+  bool _isAwaitingReps = false; // keep header at current set while selecting reps
+
+  @override
+  void initState() {
+    super.initState();
+    // If this exercise exists in the current workout, preload its sets
+    final state = context.read<WorkoutBloc>().state;
+    if (state is WorkoutInProgress) {
+      final existing = state.workout.exercises
+          .where((e) => e.exerciseId == widget.exercise.id)
+          .toList();
+      if (existing.isNotEmpty) {
+        _completedSets = List<WorkoutSet>.from(existing.last.sets);
+        _hasCompletedSets = _completedSets.isNotEmpty;
+      }
+    }
+  }
 
   void _startSet() {
     // Create workout and add exercise only when starting the first set
@@ -57,20 +72,18 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
       ));
     }
     
-    _setStartTime = DateTime.now();
-    setState(() {
-      _isTimerRunning = true;
-    });
+  _startSetTimer();
   }
 
   void _stopSet() {
-    setState(() {
-      _isTimerRunning = false;
-    });
     _showRepsSelector();
   }
 
   void _showRepsSelector() {
+    _stopSetTimer(); // Stop timer when showing reps selector
+    setState(() {
+      _isAwaitingReps = true;
+    });
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -84,9 +97,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   }
 
   void _saveSet(int reps) {
-    final setDuration = _setStartTime != null 
-        ? DateTime.now().difference(_setStartTime!)
-        : _currentSetTime;
+    final setDuration = _setDuration;
     
     final newSet = WorkoutSet(
       setNumber: _completedSets.length + 1,
@@ -98,6 +109,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     setState(() {
       _completedSets.add(newSet);
       _hasCompletedSets = true;
+  _isAwaitingReps = false;
     });
 
     // If part of workout, add set to the workout
@@ -109,8 +121,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
       ));
     }
 
-    // Reset timer for next set
-    _timerKey.currentState?.reset();
+  // Reset timer for next set
+  _resetSetTimer();
     
     // Navigate to break screen
     Navigator.of(context).push(
@@ -133,10 +145,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   }
 
   void _startNewSet() {
-    _setStartTime = DateTime.now();
-    setState(() {
-      _isTimerRunning = true;
-    });
+  _startSetTimer();
   }
 
   void _newExercise() {
@@ -157,11 +166,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate button container width matching WeightSelector
-    final screenWidth = MediaQuery.of(context).size.width;
-    final int weightSelectorItemCount =
-        ((screenWidth / 80).floor() ~/ 2) * 2 + 1;
-    final double buttonWidth = weightSelectorItemCount * 65.0;
+  const double buttonWidth = 280.0;
 
     return Scaffold(
         backgroundColor: AppColors.background,
@@ -193,77 +198,185 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Exercise title
-            Text(widget.exercise.name, style: AppTextStyles.titleLarge),
-            const SizedBox(height: 32),
-
-            // Timer
-            Center(
-              child: WorkoutTimer(
-                key: _timerKey,
-                isRunning: _isTimerRunning,
-                onTimeChanged: (time) {
-                  _currentSetTime = time;
-                },
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              // Exercise name
+              Text(
+                widget.exercise.name.replaceAll('_', ' ').toUpperCase(),
+                style: AppTextStyles.titleLarge.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 32),
 
-            // Weight selector
-            Center(
-              child: WeightSelector(
-                initialWeight: _selectedWeight,
-                onWeightChanged: (weight) {
-                  setState(() {
-                    _selectedWeight = weight;
-                  });
-                },
+              const SizedBox(height: 8),
+
+              // Set info (no total in free mode)
+              Text(
+                'Set ${_completedSets.length + ((_isTimerRunning || _isAwaitingReps) ? 1 : 0)}',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.primary.withValues(alpha: 0.7),
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
 
-            // Action buttons - simplified to only Start/Stop Set
-            Center(
-              child: SizedBox(
-                width: buttonWidth,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isTimerRunning ? _stopSet : _startSet,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _isTimerRunning
-                            ? AppColors.accent
-                            : AppColors.primary,
-                    alignment: Alignment.center,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+              const SizedBox(height: 24),
+
+              // Timer display (pill)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: _isTimerRunning ? AppColors.accent : AppColors.accent.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Text(
+                  '${_setDuration.inMinutes.toString().padLeft(2, '0')}:${(_setDuration.inSeconds % 60).toString().padLeft(2, '0')}',
+                  style: AppTextStyles.titleLarge.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
                   ),
-                  child: Text(
-                    _isTimerRunning ? 'Stop Set' : 'Start Set',
-                    style: AppTextStyles.button.copyWith(
-                      color:
-                          _isTimerRunning
-                              ? AppColors.primary
-                              : AppColors.white,
-                      fontSize: 18,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Weight selector
+              Center(
+                child: WeightSelector(
+                  initialWeight: _selectedWeight,
+                  onWeightChanged: (weight) {
+                    setState(() {
+                      _selectedWeight = weight;
+                    });
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Completed sets list (styled similar to custom)
+              if (_completedSets.isNotEmpty) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Completed Sets',
+                        style: AppTextStyles.titleSmall.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ...(_completedSets.map((set) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Set ${set.setNumber}',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.primary.withValues(alpha: 0.7),
+                              ),
+                            ),
+                            Text(
+                              '${set.reps} reps × ${set.weight}kg',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              '${set.time.inMinutes}:${(set.time.inSeconds % 60).toString().padLeft(2, '0')}',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.primary.withValues(alpha: 0.5),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ))),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+
+              const Spacer(),
+
+              // Action button
+              Center(
+                child: SizedBox(
+                  width: buttonWidth,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _isTimerRunning ? _stopSet : _startSet,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isTimerRunning ? AppColors.accent : AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      _isTimerRunning ? 'Stop Set' : 'Start Set',
+                      style: AppTextStyles.button.copyWith(
+                        color: _isTimerRunning ? AppColors.primary : AppColors.white,
+                        fontSize: 18,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 32),
 
-            // Workout sets table
-            WorkoutSetsTable(sets: _completedSets),
-          ], // Close Column children
-        ), // Close Column
-      ), // Close SingleChildScrollView
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
     ); // Close Scaffold
+  }
+
+  void _startSetTimer() {
+    _setTimer?.cancel();
+    _setDuration = Duration.zero;
+    _setTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _setDuration = Duration(seconds: _setDuration.inSeconds + 1);
+      });
+    });
+    setState(() {
+      _isTimerRunning = true;
+    });
+  }
+
+  void _stopSetTimer() {
+    _setTimer?.cancel();
+    setState(() {
+      _isTimerRunning = false;
+    });
+  }
+
+  void _resetSetTimer() {
+    _setTimer?.cancel();
+    setState(() {
+      _setDuration = Duration.zero;
+      _isTimerRunning = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _setTimer?.cancel();
+    super.dispose();
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_styles.dart';
 import '../../models/predefined_workout.dart';
 import 'prepare_to_start_workout_screen.dart';
+import '../../services/data_service.dart';
 
 class PredefinedWorkoutDetailScreen extends StatelessWidget {
   final PredefinedWorkout workout;
@@ -53,7 +54,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -186,7 +187,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppColors.accent.withOpacity(0.3),
+                      color: AppColors.accent.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -215,7 +216,9 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              exercise.name.replaceAll('_', ' ').toUpperCase(),
+                (DataService().getExercise(exercise.id)?.name ?? exercise.id)
+                  .replaceAll('_', ' ')
+                  .toUpperCase(),
                               style: AppTextStyles.titleSmall.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -306,7 +309,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.accent.withOpacity(0.1),
+        color: AppColors.accent.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

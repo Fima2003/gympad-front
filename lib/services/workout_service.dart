@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/workout.dart';
@@ -15,12 +16,12 @@ class WorkoutService {
   static const String _workoutHistoryKey = 'workout_history';
 
   final AppLogger _logger = AppLogger();
-  final ApiService _apiService = ApiService();
+  final WorkoutApiService _workoutApiService = WorkoutApiService();
 
   Workout? _currentWorkout;
   Workout? get currentWorkout => _currentWorkout;
 
-  Future<void> startWorkout() async {
+  Future<void> startWorkout({String? name}) async {
     if (_currentWorkout != null && _currentWorkout!.isOngoing) {
       _logger.warning('Workout already in progress');
       return;
@@ -28,6 +29,7 @@ class WorkoutService {
 
     _currentWorkout = Workout(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
       exercises: [],
       startTime: DateTime.now(),
     );
@@ -45,8 +47,15 @@ class WorkoutService {
     final existingIndex = _currentWorkout!.exercises.indexWhere((e) => e.exerciseId == exerciseId);
     
     if (existingIndex != -1) {
-      _logger.info('Exercise $name already exists in current workout');
-      return;
+  // Make the existing exercise the current (last) one so sets append correctly
+  final exercises = [..._currentWorkout!.exercises];
+  final existing = exercises.removeAt(existingIndex);
+  exercises.add(existing);
+
+  _currentWorkout = _currentWorkout!.copyWith(exercises: exercises);
+  await _saveCurrentWorkout();
+  _logger.info('Exercise $name already exists — set as current exercise');
+  return;
     }
 
     final workoutExercise = WorkoutExercise(
@@ -138,7 +147,7 @@ class WorkoutService {
     await _clearCurrentWorkout();
 
     // Try to upload to backend
-    await _uploadWorkout(_currentWorkout!);
+    unawaited(_uploadWorkout(_currentWorkout!));
 
     _logger.info('Workout finished and saved');
     _currentWorkout = null;
@@ -174,7 +183,7 @@ class WorkoutService {
     final pendingWorkouts = workouts.where((w) => !w.isUploaded).toList();
 
     for (final workout in pendingWorkouts) {
-      await _uploadWorkout(workout);
+      unawaited(_uploadWorkout(workout));
     }
   }
 
@@ -202,13 +211,48 @@ class WorkoutService {
 
   Future<void> _uploadWorkout(Workout workout) async {
     try {
-      // TODO: Implement actual API call
-      await _apiService.post('/workouts', body: workout.toJson());
-      
-      // Mark as uploaded in history
-      await _markWorkoutAsUploaded(workout.id);
-      
-      _logger.info('Successfully uploaded workout ${workout.id}');
+      // Build DTO request from domain model
+  final request = WorkoutCreateRequest(
+        id: workout.id,
+        name: workout.name,
+        exercises: workout.exercises
+            .map(
+              (e) => WorkoutExerciseDto(
+                exerciseId: e.exerciseId,
+                name: e.name,
+                equipmentId: e.equipmentId,
+                muscleGroup: e.muscleGroup,
+                sets: e.sets
+                    .map(
+                      (s) => WorkoutSetDto(
+                        setNumber: s.setNumber,
+                        reps: s.reps,
+                        weight: s.weight,
+                        time: s.time.inSeconds,
+                      ),
+                    )
+                    .toList(),
+        startTime: e.startTime,
+        endTime: e.endTime,
+              ),
+            )
+            .toList(),
+        startTime: workout.startTime,
+        endTime: workout.endTime ?? DateTime.now(),
+      );
+
+      final response = await _workoutApiService.createWorkout(request);
+      _logger.info(response.success.toString());
+
+      if (response.success) {
+        // Mark as uploaded in history
+        await _markWorkoutAsUploaded(workout.id);
+        _logger.info('Successfully uploaded workout ${workout.id}');
+      } else {
+        _logger.warning(
+          'Workout upload failed ${workout.id}: status=${response.status}, error=${response.error}, message=${response.message}',
+        );
+      }
     } catch (e, st) {
       _logger.warning('Failed to upload workout ${workout.id}', e, st);
     }

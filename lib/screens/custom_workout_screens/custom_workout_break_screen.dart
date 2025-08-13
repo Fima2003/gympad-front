@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../constants/app_styles.dart';
 import '../../models/predefined_workout.dart';
+import '../../services/data_service.dart';
 
 class PredefinedWorkoutBreakScreen extends StatefulWidget {
   final int restTime; // in seconds
@@ -117,7 +118,7 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
                     child: CircularProgressIndicator(
                       value: (_totalTime - _remainingTime) / _totalTime,
                       strokeWidth: 8,
-                      backgroundColor: Colors.white.withOpacity(0.2),
+                      backgroundColor: Colors.white.withValues(alpha: 0.2),
                       valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
                     ),
                   ),
@@ -149,9 +150,9 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                 ),
                 child: Column(
                   children: [
@@ -165,7 +166,9 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      widget.nextExercise.name.replaceAll('_', ' ').toUpperCase(),
+                      (DataService().getExercise(widget.nextExercise.id)?.name ?? widget.nextExercise.id)
+                          .replaceAll('_', ' ')
+                          .toUpperCase(),
                       style: AppTextStyles.titleMedium.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -201,7 +204,7 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
                     width: double.infinity,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: FractionallySizedBox(
@@ -231,7 +234,7 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
               Row(
                 children: [
                   // Add minute button - circular design
-                  Container(
+                  SizedBox(
                     width: 60,
                     height: 60,
                     child: OutlinedButton(
@@ -247,7 +250,7 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
                             style: AppTextStyles.bodySmall.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 10,
+                              fontSize: 14,
                             ),
                           ),
                     ),

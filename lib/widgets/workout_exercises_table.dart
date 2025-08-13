@@ -5,7 +5,7 @@ import '../models/workout_exercise.dart';
 class WorkoutExercisesTable extends StatelessWidget {
   final List<WorkoutExercise> exercises;
 
-  const WorkoutExercisesTable({Key? key, required this.exercises}) : super(key: key);
+  const WorkoutExercisesTable({super.key, required this.exercises});
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -27,7 +27,7 @@ class WorkoutExercisesTable extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
         ),
         child: Text(
           'No exercises recorded',
@@ -43,7 +43,7 @@ class WorkoutExercisesTable extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,8 +60,8 @@ class WorkoutExercisesTable extends StatelessWidget {
             child: DataTable(
               columnSpacing: 16,
               horizontalMargin: 16,
-              headingRowColor: MaterialStateProperty.all(
-                AppColors.primary.withOpacity(0.1),
+              headingRowColor: WidgetStateProperty.all(
+                AppColors.primary.withValues(alpha: 0.1),
               ),
               columns: [
                 DataColumn(

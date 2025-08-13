@@ -5,24 +5,11 @@
         "difficulty": "Intermediate",
         "muscle_groups": ["Chest", "Shoulders", "Arms"],
         "estimated_calories": 350,
-        "bench_press": {
-            "sets_amount": 4,
-            "weight": 60,
-            "suggested_reps": 8,
-            "rest_time": 120
-        },
-        "shoulder_press": {
-            "sets_amount": 3,
-            "weight": 25,
-            "suggested_reps": 10,
-            "rest_time": 90
-        },
-        "incline_dumbbell_press": {
-            "sets_amount": 3,
-            "weight": 30,
-            "suggested_reps": 10,
-            "rest_time": 90
-        }
+        "exercises": [
+            {"id": "bench_press", "sets_amount": 4, "weight": 60, "suggested_reps": 8, "rest_time": 120},
+            {"id": "overhead_press", "sets_amount": 3, "weight": 25, "suggested_reps": 10, "rest_time": 90},
+            {"id": "cable_chest_flyes", "sets_amount": 3, "weight": 30, "suggested_reps": 10, "rest_time": 90}
+        ]
     },
     "leg_day_blast": {
         "name": "Leg Day Blast",
@@ -30,24 +17,11 @@
         "difficulty": "Advanced",
         "muscle_groups": ["Legs", "Glutes"],
         "estimated_calories": 450,
-        "squats": {
-            "sets_amount": 4,
-            "weight": 80,
-            "suggested_reps": 12,
-            "rest_time": 120
-        },
-        "lunges": {
-            "sets_amount": 3,
-            "weight": 20,
-            "suggested_reps": 10,
-            "rest_time": 90
-        },
-        "leg_press": {
-            "sets_amount": 3,
-            "weight": 100,
-            "suggested_reps": 15,
-            "rest_time": 90
-        }
+        "exercises": [
+            {"id": "squats", "sets_amount": 4, "weight": 80, "suggested_reps": 12, "rest_time": 120},
+            {"id": "cable_kickbacks", "sets_amount": 3, "weight": 20, "suggested_reps": 10, "rest_time": 90},
+            {"id": "leg_press", "sets_amount": 3, "weight": 100, "suggested_reps": 15, "rest_time": 90}
+        ]
     },
     "strength_training": {
         "name": "Strength Training",
@@ -55,24 +29,11 @@
         "difficulty": "Intermediate",
         "muscle_groups": ["Full Body"],
         "estimated_calories": 300,
-        "deadlifts": {
-            "sets_amount": 4,
-            "weight": 70,
-            "suggested_reps": 8,
-            "rest_time": 150
-        },
-        "barbell_rows": {
-            "sets_amount": 3,
-            "weight": 50,
-            "suggested_reps": 10,
-            "rest_time": 120
-        },
-        "overhead_press": {
-            "sets_amount": 3,
-            "weight": 40,
-            "suggested_reps": 8,
-            "rest_time": 120
-        }
+        "exercises": [
+            {"id": "deadlifts", "sets_amount": 4, "weight": 70, "suggested_reps": 8, "rest_time": 150},
+            {"id": "rows", "sets_amount": 3, "weight": 50, "suggested_reps": 10, "rest_time": 120},
+            {"id": "overhead_press", "sets_amount": 3, "weight": 40, "suggested_reps": 8, "rest_time": 120}
+        ]
     },
     "arms_focus": {
         "name": "Arms Focus",
@@ -80,24 +41,11 @@
         "difficulty": "Beginner",
         "muscle_groups": ["Arms"],
         "estimated_calories": 200,
-        "bicep_curls": {
-            "sets_amount": 3,
-            "weight": 15,
-            "suggested_reps": 12,
-            "rest_time": 60
-        },
-        "tricep_extensions": {
-            "sets_amount": 3,
-            "weight": 12,
-            "suggested_reps": 12,
-            "rest_time": 60
-        },
-        "hammer_curls": {
-            "sets_amount": 2,
-            "weight": 12,
-            "suggested_reps": 10,
-            "rest_time": 60
-        }
+        "exercises": [
+            {"id": "bicep_curls", "sets_amount": 3, "weight": 15, "suggested_reps": 12, "rest_time": 60},
+            {"id": "tricep_extensions", "sets_amount": 3, "weight": 12, "suggested_reps": 12, "rest_time": 60},
+            {"id": "cable_bicep_curls", "sets_amount": 2, "weight": 12, "suggested_reps": 10, "rest_time": 60}
+        ]
     },
     "cardio_hiit": {
         "name": "HIIT Cardio Blast",
@@ -105,23 +53,10 @@
         "difficulty": "Advanced",
         "muscle_groups": ["Cardio"],
         "estimated_calories": 400,
-        "kettlebell_swings": {
-            "sets_amount": 4,
-            "weight": 16,
-            "suggested_reps": 15,
-            "rest_time": 60
-        },
-        "dumbbell_thrusters": {
-            "sets_amount": 3,
-            "weight": 10,
-            "suggested_reps": 12,
-            "rest_time": 45
-        },
-        "weighted_burpees": {
-            "sets_amount": 3,
-            "weight": 5,
-            "suggested_reps": 8,
-            "rest_time": 60
-        }
+        "exercises": [
+            {"id": "rope_waves", "sets_amount": 4, "weight": 0, "suggested_reps": 15, "rest_time": 60},
+            {"id": "rope_slams", "sets_amount": 3, "weight": 0, "suggested_reps": 12, "rest_time": 45},
+            {"id": "rope_spirals", "sets_amount": 3, "weight": 0, "suggested_reps": 8, "rest_time": 60}
+        ]
     }
 }

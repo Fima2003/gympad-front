@@ -6,9 +6,8 @@ class RepsSelector extends StatefulWidget {
   final Function(int) onRepsSelected;
   final int? initialReps;
 
-  const RepsSelector({Key? key, required this.onRepsSelected,
-    this.initialReps,})
-    : super(key: key);
+  const RepsSelector({super.key, required this.onRepsSelected,
+    this.initialReps,});
 
   @override
   State<RepsSelector> createState() => _RepsSelectorState();
@@ -50,7 +49,7 @@ class _RepsSelectorState extends State<RepsSelector> {
                 color: AppColors.primary,
               ),
               textStyle: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.primary.withOpacity(0.5),
+                color: AppColors.primary.withValues(alpha: 0.5),
               ),
               decoration: BoxDecoration(
                 color: AppColors.accent,

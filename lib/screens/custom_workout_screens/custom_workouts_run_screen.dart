@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import '../../constants/app_styles.dart';
 import '../../models/predefined_workout.dart';
-import '../../models/workout.dart';
-import '../../models/workout_exercise.dart';
 import '../../models/workout_set.dart';
 import '../../blocs/workout_bloc.dart';
 import '../../services/global_timer_service.dart';
@@ -12,6 +10,7 @@ import '../../widgets/weight_selector.dart';
 import '../../widgets/reps_selector.dart';
 import 'custom_workout_break_screen.dart';
 import '../well_done_workout_screen.dart';
+import '../../services/data_service.dart';
 
 class PredefinedWorkoutsRunScreen extends StatefulWidget {
   final PredefinedWorkout workout;
@@ -26,7 +25,6 @@ class PredefinedWorkoutsRunScreen extends StatefulWidget {
 }
 
 class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScreen> {
-  late Workout _currentWorkout;
   int _currentExerciseIndex = 0;
   int _currentSetIndex = 0;
   double _selectedWeight = 0.0;
@@ -35,32 +33,24 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
   Duration _setDuration = Duration.zero;
   bool _isTimerRunning = false;
   List<WorkoutSet> _completedSets = [];
+  bool _isFinishing = false;
 
   @override
   void initState() {
     super.initState();
     _initializeWorkout();
-    // Automatically start timer for first set
     _startSetTimer();
   }
 
   void _initializeWorkout() {
-    // Create a workout based on the predefined workout
-    _currentWorkout = Workout(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: widget.workout.name,
-      exercises: [],
-      startTime: DateTime.now(),
-    );
+    // Start the workout through WorkoutBloc with the predefined workout name
+    context.read<WorkoutBloc>().add(WorkoutStarted(name: widget.workout.name));
+    GlobalTimerService().start();
 
     // Set initial weight and reps
-    final firstExercise = widget.workout.exercises[_currentExerciseIndex];
-    _selectedWeight = firstExercise.suggestedWeight ?? 0.0;
-    _selectedReps = firstExercise.suggestedReps ?? 10;
-
-    // Start the workout
-    context.read<WorkoutBloc>().add(WorkoutStarted());
-    GlobalTimerService().start();
+  final firstExercise = widget.workout.exercises[_currentExerciseIndex];
+  _selectedWeight = firstExercise.suggestedWeight ?? 0.0;
+  _selectedReps = firstExercise.suggestedReps ?? 10;
   }
 
   void _startSetTimer() {
@@ -131,34 +121,28 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
       time: _setDuration,
     );
 
-    // Add to local completed sets
+    // Add to local completed sets for UI purposes
     setState(() {
       _completedSets.add(workoutSet);
     });
 
-    // Find or create the current exercise in the workout
-    WorkoutExercise? currentWorkoutExercise;
-    try {
-      currentWorkoutExercise = _currentWorkout.exercises.firstWhere(
-        (ex) => ex.name == _currentExercise.name,
-      );
-    } catch (e) {
-      // Exercise doesn't exist yet, create it
-      currentWorkoutExercise = WorkoutExercise(
-        exerciseId: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _currentExercise.name,
-        muscleGroup: widget.workout.muscleGroups.isNotEmpty 
-            ? widget.workout.muscleGroups.first 
-            : 'Unknown',
-        equipmentId: null,
-        sets: [],
-        startTime: DateTime.now(),
-      );
-      _currentWorkout.exercises.add(currentWorkoutExercise);
+    // If this is the first set of the exercise, add the exercise to the workout
+    if (_currentSetIndex == 0) {
+      final exerciseMeta = DataService().getExercise(_currentExercise.id);
+      context.read<WorkoutBloc>().add(ExerciseAdded(
+        exerciseId: _currentExercise.id,
+        name: exerciseMeta?.name ?? _currentExercise.id,
+        muscleGroup: exerciseMeta?.muscleGroup ??
+            (widget.workout.muscleGroups.isNotEmpty ? widget.workout.muscleGroups.first : 'Unknown'),
+      ));
     }
 
-    // Add the set
-    currentWorkoutExercise.sets.add(workoutSet);
+    // Add the set to the current exercise
+    context.read<WorkoutBloc>().add(SetAdded(
+      reps: _selectedReps,
+      weight: _selectedWeight,
+      duration: _setDuration,
+    ));
 
     if (_isLastSet && _isLastExercise) {
       _finishWorkout();
@@ -192,6 +176,9 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
   }
 
   void _moveToNextExercise() {
+    // Finish the current exercise
+    context.read<WorkoutBloc>().add(ExerciseFinished());
+    
     _currentExerciseIndex++;
     _currentSetIndex = 0;
     _resetSetTimer();
@@ -202,7 +189,7 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
     });
     
     // Update weight and reps for next exercise
-    final nextExercise = widget.workout.exercises[_currentExerciseIndex];
+  final nextExercise = widget.workout.exercises[_currentExerciseIndex];
     _selectedWeight = nextExercise.suggestedWeight ?? _selectedWeight;
     _selectedReps = nextExercise.suggestedReps ?? _selectedReps;
 
@@ -225,21 +212,17 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
   }
 
   void _finishWorkout() {
-    _currentWorkout = _currentWorkout.copyWith(
-      endTime: DateTime.now(),
-      isOngoing: false,
-    );
+    if (_isFinishing) return; // prevent duplicate triggers
+    setState(() {
+      _isFinishing = true;
+    });
+    // Finish the current exercise if there is one
+    context.read<WorkoutBloc>().add(ExerciseFinished());
     
-    GlobalTimerService().stop();
+    // Finish the workout
     context.read<WorkoutBloc>().add(WorkoutFinished());
     
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => WellDoneWorkoutScreen(
-          workout: _currentWorkout,
-        ),
-      ),
-    );
+    GlobalTimerService().stop();
   }
 
   double _calculateProgress() {
@@ -300,34 +283,62 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
   Widget build(BuildContext context) {
     const double buttonWidth = 280.0;
     
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Text(
-          widget.workout.name,
-          style: AppTextStyles.titleMedium.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: _showExitDialog,
-            icon: Icon(Icons.close, color: AppColors.primary),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
+  return BlocListener<WorkoutBloc, WorkoutState>(
+      listener: (context, state) {
+        if (state is WorkoutCompleted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => WellDoneWorkoutScreen(
+                workout: state.workout,
+              ),
+            ),
+          );
+        } else if (state is WorkoutError) {
+          if (mounted) {
+            setState(() {
+              _isFinishing = false; // allow retry if something went wrong
+            });
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: AppColors.background,
+            appBar: AppBar(
+              backgroundColor: AppColors.background,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              title: Text(
+                widget.workout.name,
+                style: AppTextStyles.titleMedium.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: _isFinishing ? null : _showExitDialog,
+                  icon: Icon(Icons.close, color: AppColors.primary),
+                ),
+              ],
+            ),
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
             children: [
               // Exercise name
               Text(
-                _currentExercise.name.replaceAll('_', ' ').toUpperCase(),
+                (DataService().getExercise(_currentExercise.id)?.name ?? _currentExercise.id)
+                    .replaceAll('_', ' ')
+                    .toUpperCase(),
                 style: AppTextStyles.titleLarge.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
@@ -341,7 +352,7 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
               Text(
                 'Set ${_currentSetIndex + 1} of ${_currentExercise.setsAmount}',
                 style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.primary.withOpacity(0.7),
+                  color: AppColors.primary.withValues(alpha: 0.7),
                 ),
               ),
               
@@ -351,7 +362,7 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 decoration: BoxDecoration(
-                  color: _isTimerRunning ? AppColors.accent : AppColors.accent.withOpacity(0.3),
+                  color: _isTimerRunning ? AppColors.accent : AppColors.accent.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Text(
@@ -386,9 +397,9 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withOpacity(0.1),
+                    color: AppColors.accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.accent.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,7 +420,7 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
                             Text(
                               'Set ${set.setNumber}',
                               style: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.primary.withOpacity(0.7),
+                                color: AppColors.primary.withValues(alpha: 0.7),
                               ),
                             ),
                             Text(
@@ -422,7 +433,7 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
                             Text(
                               '${set.time.inMinutes}:${(set.time.inSeconds % 60).toString().padLeft(2, '0')}',
                               style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.primary.withOpacity(0.5),
+                                color: AppColors.primary.withValues(alpha: 0.5),
                               ),
                             ),
                           ],
@@ -444,7 +455,7 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
                     width: buttonWidth,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _stopSet,
+                      onPressed: _isFinishing ? null : _stopSet,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.accent,
                         shape: RoundedRectangleBorder(
@@ -469,7 +480,7 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
                     width: buttonWidth,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _startSet,
+                      onPressed: _isFinishing ? null : _startSet,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
@@ -494,7 +505,7 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
                       width: buttonWidth,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: _startSet,
+                        onPressed: _isFinishing ? null : _startSet,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
@@ -521,7 +532,7 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
                             width: double.infinity,
                             height: 56,
                             child: ElevatedButton(
-                              onPressed: () => _showRepsSelector(),
+                              onPressed: _isFinishing ? null : _finishWorkout,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 shape: RoundedRectangleBorder(
@@ -541,7 +552,7 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
                             width: double.infinity,
                             height: 56,
                             child: ElevatedButton(
-                              onPressed: () => _showRepsSelector(),
+                              onPressed: _isFinishing ? null : () => _showRepsSelector(),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.accent,
                                 shape: RoundedRectangleBorder(
@@ -564,9 +575,52 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
               
               const SizedBox(height: 20),
             ],
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
-    );
+          if (_isFinishing) ...[
+            const ModalBarrier(dismissible: false, color: Colors.black26),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Finishing workout…',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ));
   }
 }

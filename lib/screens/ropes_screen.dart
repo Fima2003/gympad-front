@@ -6,14 +6,14 @@ import '../services/data_service.dart';
 import '../blocs/workout_bloc.dart';
 import 'free_workout_screens/exercise_screen.dart';
 
-class RopesScreen extends StatefulWidget {
-  const RopesScreen({Key? key}) : super(key: key);
+class MultiPurposeEquipmentScreen extends StatefulWidget {
+  const MultiPurposeEquipmentScreen({super.key});
 
   @override
-  State<RopesScreen> createState() => _RopesScreenState();
+  State<MultiPurposeEquipmentScreen> createState() => _MultiPurposeEquipmentScreenState();
 }
 
-class _RopesScreenState extends State<RopesScreen> {
+class _MultiPurposeEquipmentScreenState extends State<MultiPurposeEquipmentScreen> {
   final DataService _dataService = DataService();
   final TextEditingController _searchController = TextEditingController();
   
@@ -125,7 +125,7 @@ class _RopesScreenState extends State<RopesScreen> {
                 prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+                  borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -184,10 +184,10 @@ class _RopesScreenState extends State<RopesScreen> {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 4,
               offset: const Offset(0, 2),
@@ -203,7 +203,7 @@ class _RopesScreenState extends State<RopesScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withOpacity(0.2),
+                  color: AppColors.accent.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -278,10 +278,10 @@ class _RopesScreenState extends State<RopesScreen> {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 4,
               offset: const Offset(0, 2),
@@ -297,7 +297,7 @@ class _RopesScreenState extends State<RopesScreen> {
                 width: double.infinity,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withOpacity(0.1),
+                  color: AppColors.accent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -317,7 +317,7 @@ class _RopesScreenState extends State<RopesScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

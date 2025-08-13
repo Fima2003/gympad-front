@@ -7,10 +7,10 @@ class WorkoutTimer extends StatefulWidget {
   final Function(Duration) onTimeChanged;
 
   const WorkoutTimer({
-    Key? key,
+    super.key,
     required this.isRunning,
     required this.onTimeChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<WorkoutTimer> createState() => WorkoutTimerState();

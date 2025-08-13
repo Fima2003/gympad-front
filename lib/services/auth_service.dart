@@ -68,7 +68,7 @@ class AuthService {
         await GoogleSignIn.instance.initialize();
         // Mobile: sign in with google_sign_in plugin
         final googleUser = await GoogleSignIn.instance.authenticate();
-        final googleAuth = await googleUser.authentication;
+        final googleAuth = googleUser.authentication;
         // Create credential with ID token
         final credential = GoogleAuthProvider.credential(
           idToken: googleAuth.idToken,
@@ -127,4 +127,50 @@ class AuthService {
 
   /// Check if user is signed in
   bool get isSignedIn => _auth.currentUser != null;
+
+  /// Fetch current user info from backend; if token expired, refresh and retry once
+  Future<bool> fetchUserOnAppStartWithRetry() async {
+    try {
+      final res = await _userApiService.userPartialRead();
+      if (res.success) {
+        final user = _auth.currentUser;
+        if (user != null) {
+          final token = await user.getIdToken();
+          await saveLocalUserData(
+            userId: user.uid,
+            gymId: res.data?.gymId,
+            idToken: token,
+          );
+        }
+        return true;
+      }
+
+      // If unauthorized/forbidden, refresh and retry once
+      if (res.status == 401 || res.status == 403) {
+        _logger.info('Token likely expired. Refreshing and retrying userPartialRead.');
+        final user = _auth.currentUser;
+        if (user == null) return false;
+        final fresh = await user.getIdToken(true);
+        if (fresh == null) return false;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_idTokenKey, fresh);
+
+        final retry = await _userApiService.userPartialRead();
+        if (retry.success) {
+          await saveLocalUserData(
+            userId: user.uid,
+            gymId: retry.data?.gymId,
+            idToken: fresh,
+          );
+          return true;
+        }
+      }
+
+      _logger.warning('fetchUserOnAppStartWithRetry failed: status=${res.status}, error=${res.error}, message=${res.message}');
+      return false;
+    } catch (e, st) {
+      _logger.error('fetchUserOnAppStartWithRetry error', e, st);
+      return false;
+    }
+  }
 }

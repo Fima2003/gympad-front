@@ -7,105 +7,9 @@ import '../services/workout_service.dart';
 import '../services/global_timer_service.dart';
 import '../services/logger_service.dart';
 
-// Events
-abstract class WorkoutEvent extends Equatable {
-  const WorkoutEvent();
-  
-  @override
-  List<Object?> get props => [];
-}
+part 'workout_events.dart';
+part 'workout_state.dart';
 
-class WorkoutStarted extends WorkoutEvent {}
-
-class WorkoutFinished extends WorkoutEvent {}
-
-class ExerciseAdded extends WorkoutEvent {
-  final String exerciseId;
-  final String name;
-  final String muscleGroup;
-  final String? equipmentId;
-  
-  const ExerciseAdded({
-    required this.exerciseId,
-    required this.name,
-    required this.muscleGroup,
-    this.equipmentId,
-  });
-  
-  @override
-  List<Object?> get props => [exerciseId, name, muscleGroup, equipmentId];
-}
-
-class ExerciseFinished extends WorkoutEvent {}
-
-class SetAdded extends WorkoutEvent {
-  final int reps;
-  final double weight;
-  final Duration duration;
-  
-  const SetAdded({
-    required this.reps,
-    required this.weight,
-    required this.duration,
-  });
-  
-  @override
-  List<Object> get props => [reps, weight, duration];
-}
-
-class WorkoutLoaded extends WorkoutEvent {}
-
-class WorkoutHistoryRequested extends WorkoutEvent {}
-
-// States
-abstract class WorkoutState extends Equatable {
-  const WorkoutState();
-  
-  @override
-  List<Object?> get props => [];
-}
-
-class WorkoutInitial extends WorkoutState {}
-
-class WorkoutLoading extends WorkoutState {}
-
-class WorkoutInProgress extends WorkoutState {
-  final Workout workout;
-  
-  const WorkoutInProgress(this.workout);
-  
-  @override
-  List<Object> get props => [workout];
-}
-
-class WorkoutCompleted extends WorkoutState {
-  final Workout workout;
-  
-  const WorkoutCompleted(this.workout);
-  
-  @override
-  List<Object> get props => [workout];
-}
-
-class WorkoutError extends WorkoutState {
-  final String message;
-  
-  const WorkoutError(this.message);
-  
-  @override
-  List<Object> get props => [message];
-}
-
-class WorkoutHistoryLoaded extends WorkoutState {
-  final List<Workout> workouts;
-  
-  const WorkoutHistoryLoaded(this.workouts);
-  
-  @override
-  List<Object> get props => [workouts];
-}
-
-// Bloc
 class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
   final WorkoutService _workoutService = WorkoutService();
   final GlobalTimerService _timerService = GlobalTimerService();
@@ -141,7 +45,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
 
   Future<void> _onWorkoutStarted(WorkoutStarted event, Emitter<WorkoutState> emit) async {
     try {
-      await _workoutService.startWorkout();
+      await _workoutService.startWorkout(name: event.name);
       _timerService.start();
       
       final currentWorkout = _workoutService.currentWorkout;

@@ -9,9 +9,9 @@ class WellDoneWorkoutScreen extends StatefulWidget {
   final Workout workout;
 
   const WellDoneWorkoutScreen({
-    Key? key,
+    super.key,
     required this.workout,
-  }) : super(key: key);
+  });
 
   @override
   State<WellDoneWorkoutScreen> createState() => _WellDoneWorkoutScreenState();

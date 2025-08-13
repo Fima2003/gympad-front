@@ -24,8 +24,8 @@
             "image": "https://example.com/images/tricep_extensions_full.gif",
             "muscleGroup": "arms"
         },
-        "shoulder_press_machine": {
-            "name": "Machine Shoulder Press",
+        "shoulder_press": {
+            "name": "Shoulder Press",
             "description": "Targets shoulders. Push handles overhead in a controlled motion.",
             "image": "https://example.com/images/shoulder_press_machine_full.gif",
             "muscleGroup": "shoulders"

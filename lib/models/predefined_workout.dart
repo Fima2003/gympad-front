@@ -21,16 +21,31 @@ class PredefinedWorkout {
 
   factory PredefinedWorkout.fromJson(String id, Map<String, dynamic> json) {
     List<PredefinedWorkoutExercise> exercisesList = [];
-    json.forEach((key, value) {
-      if (key != 'name' && key != 'description' && key != 'difficulty' && 
-          key != 'muscle_groups' && key != 'image_url' && key != 'estimated_calories') {
-        try {
-          exercisesList.add(PredefinedWorkoutExercise.fromJson(key, value));
-        } catch (e) {
-          // Skip invalid exercises but continue parsing
+    if (json['exercises'] is List) {
+      for (final item in (json['exercises'] as List)) {
+        if (item is Map<String, dynamic>) {
+          try {
+            exercisesList.add(PredefinedWorkoutExercise.fromMap(item));
+          } catch (_) {
+            // Skip invalid exercises but continue parsing
+          }
         }
       }
-    });
+    } else {
+      // Backward compatibility: collect any unknown keys as exercises
+      json.forEach((key, value) {
+        if (key != 'name' &&
+            key != 'description' &&
+            key != 'difficulty' &&
+            key != 'muscle_groups' &&
+            key != 'image_url' &&
+            key != 'estimated_calories') {
+          try {
+            exercisesList.add(PredefinedWorkoutExercise.fromLegacy(key, value));
+          } catch (_) {}
+        }
+      });
+    }
 
     return PredefinedWorkout(
       id: id,
@@ -45,7 +60,7 @@ class PredefinedWorkout {
   }
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {
+    final Map<String, dynamic> json = {
       'name': name,
       'description': description,
       'difficulty': difficulty,
@@ -54,34 +69,42 @@ class PredefinedWorkout {
       'estimated_calories': estimatedCalories,
     };
 
-    for (var exercise in exercises) {
-      json[exercise.name] = exercise.toJson();
-    }
-
+    json['exercises'] = exercises.map((e) => e.toJson()).toList();
     return json;
   }
 }
 
 class PredefinedWorkoutExercise {
-  final String name;
+  final String id; // references exercises.json key
   final int setsAmount;
   final double? suggestedWeight;
   final int restTime; // in seconds
   final int? suggestedReps;
 
   PredefinedWorkoutExercise({
-    required this.name,
+    required this.id,
     required this.setsAmount,
     this.suggestedWeight,
     required this.restTime,
     this.suggestedReps,
   });
 
-  factory PredefinedWorkoutExercise.fromJson(String name, Map<String, dynamic> json) {
+  factory PredefinedWorkoutExercise.fromMap(Map<String, dynamic> json) {
     return PredefinedWorkoutExercise(
-      name: name,
+      id: json['id'] as String,
       setsAmount: json['sets_amount'] ?? 3,
-      suggestedWeight: json['weight']?.toDouble(),
+      suggestedWeight: json['weight'] == null ? null : (json['weight'] as num).toDouble(),
+      restTime: json['rest_time'] ?? 90,
+      suggestedReps: json['suggested_reps'],
+    );
+  }
+
+  // Legacy support when workout JSON used top-level exercise keys
+  factory PredefinedWorkoutExercise.fromLegacy(String id, Map<String, dynamic> json) {
+    return PredefinedWorkoutExercise(
+      id: id,
+      setsAmount: json['sets_amount'] ?? 3,
+      suggestedWeight: json['weight'] == null ? null : (json['weight'] as num).toDouble(),
       restTime: json['rest_time'] ?? 90,
       suggestedReps: json['suggested_reps'],
     );
@@ -89,6 +112,7 @@ class PredefinedWorkoutExercise {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'sets_amount': setsAmount,
       'weight': suggestedWeight,
       'rest_time': restTime,
