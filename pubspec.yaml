@@ -29,6 +29,7 @@ dependencies:
   bloc: ^8.1.2
   equatable: ^2.0.5
   infinite_listview: ^1.1.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:

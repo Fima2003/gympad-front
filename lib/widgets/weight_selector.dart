@@ -25,9 +25,11 @@ class _WeightSelectorState extends State<WeightSelector> {
   @override
   void initState() {
     super.initState();
-    // Convert double weight to int index (2.5kg = 1, 5.0kg = 2, etc.)
-    _currentWeightInt =
-        ((widget.initialWeight - _minWeight) / _increment).round() + 1;
+  // Convert double weight to int index (2.5kg = 1, 5.0kg = 2, etc.)
+  final rawIndex =
+    ((widget.initialWeight - _minWeight) / _increment).round() + 1;
+  // Clamp to valid range to satisfy NumberPicker assertion
+  _currentWeightInt = rawIndex.clamp(_minValue, _maxValue);
   }
 
   double get _currentWeight =>

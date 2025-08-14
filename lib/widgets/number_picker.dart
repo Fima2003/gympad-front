@@ -74,8 +74,7 @@ class NumberPicker extends StatefulWidget {
     this.zeroPad = false,
     this.textMapper,
     this.infiniteLoop = false,
-  }) : assert(minValue <= value),
-       assert(value <= maxValue);
+  }) : assert(minValue <= maxValue);
 
   @override
   State<NumberPicker> createState() => _NumberPickerState();
@@ -87,8 +86,10 @@ class _NumberPickerState extends State<NumberPicker> {
   @override
   void initState() {
     super.initState();
+  // Safeguard: clamp value to valid range to avoid assertion failures
+  final clampedValue = widget.value.clamp(widget.minValue, widget.maxValue);
     final initialOffset =
-        (widget.value - widget.minValue) ~/ widget.step * itemExtent;
+    (clampedValue - widget.minValue) ~/ widget.step * itemExtent;
     if (widget.infiniteLoop) {
       _scrollController = InfiniteScrollController(
         initialScrollOffset: initialOffset,
@@ -254,7 +255,7 @@ class _NumberPickerState extends State<NumberPicker> {
 
   void _maybeCenterValue() {
     if (_scrollController.hasClients && !isScrolling) {
-      int diff = widget.value - widget.minValue;
+  int diff = widget.value.clamp(widget.minValue, widget.maxValue) - widget.minValue;
       int index = diff ~/ widget.step;
       if (widget.infiniteLoop) {
         final offset = _scrollController.offset + 0.5 * itemExtent;

@@ -19,7 +19,9 @@ class _RepsSelectorState extends State<RepsSelector> {
   @override
   void initState() {
     super.initState();
-    _reps = widget.initialReps ?? 8; // Default to 8 reps
+  // Default to 8 reps and clamp to picker bounds [1, 100]
+  final initial = widget.initialReps ?? 8;
+  _reps = initial.clamp(1, 100);
   }
 
   @override
