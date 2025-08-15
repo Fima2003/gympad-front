@@ -56,6 +56,9 @@ class NumberPicker extends StatefulWidget {
 
   final bool infiniteLoop;
 
+  /// Optional custom scroll physics
+  final ScrollPhysics? physics;
+
   const NumberPicker({
     super.key,
     required this.minValue,
@@ -73,7 +76,8 @@ class NumberPicker extends StatefulWidget {
     this.decoration,
     this.zeroPad = false,
     this.textMapper,
-    this.infiniteLoop = false,
+  this.infiniteLoop = false,
+  this.physics,
   }) : assert(minValue <= maxValue);
 
   @override
@@ -194,6 +198,7 @@ class _NumberPickerState extends State<NumberPicker> {
                 itemCount: listItemsCount,
                 scrollDirection: widget.axis,
                 controller: _scrollController,
+                physics: widget.physics,
                 itemExtent: itemExtent,
                 itemBuilder: _itemBuilder,
                 padding: EdgeInsets.zero,

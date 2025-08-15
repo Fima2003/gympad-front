@@ -58,5 +58,18 @@
             {"id": "rope_slams", "sets_amount": 3, "weight": 0, "suggested_reps": 12, "rest_time": 45},
             {"id": "rope_spirals", "sets_amount": 3, "weight": 0, "suggested_reps": 8, "rest_time": 60}
         ]
+    },
+    "shoulder_burner": {
+        "name": "Shoulder Burner",
+        "description": "Focused shoulder session targeting anterior, lateral, and posterior delts",
+        "difficulty": "Intermediate",
+        "muscle_groups": ["Shoulders"],
+        "estimated_calories": 320,
+        "exercises": [
+            {"id": "overhead_press", "sets_amount": 4, "weight": 20, "suggested_reps": 10, "rest_time": 90},
+            {"id": "shoulder_press", "sets_amount": 4, "weight": 20, "suggested_reps": 10, "rest_time": 90},
+            {"id": "lateral_raises", "sets_amount": 3, "weight": 8, "suggested_reps": 12, "rest_time": 75},
+            {"id": "face_pulls", "sets_amount": 3, "weight": 15, "suggested_reps": 12, "rest_time": 75}
+        ]
     }
 }

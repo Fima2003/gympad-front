@@ -14,25 +14,12 @@ class DataService {
   Map<String, Equipment>? _equipment;
 
   Future<void> loadData() async {
-    if (_gyms == null) {
-      await _loadGyms();
-    }
     if (_exercises == null) {
       await _loadExercises();
     }
     if (_equipment == null) {
       await _loadEquipment();
     }
-  }
-
-  Future<void> _loadGyms() async {
-    final String jsonString = await rootBundle.loadString('assets/mock_data/gyms.json');
-    final Map<String, dynamic> jsonData = json.decode(jsonString);
-    
-    _gyms = {};
-    jsonData['gyms'].forEach((key, value) {
-      _gyms![key] = Gym.fromJson(key, value);
-    });
   }
 
   Future<void> _loadExercises() async {

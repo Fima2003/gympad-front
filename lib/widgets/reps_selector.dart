@@ -3,10 +3,9 @@ import 'package:gympad/widgets/number_picker.dart';
 import '../constants/app_styles.dart';
 
 class RepsSelector extends StatefulWidget {
-  final Function(int) onRepsSelected;
   final int? initialReps;
 
-  const RepsSelector({super.key, required this.onRepsSelected,
+  const RepsSelector({super.key,
     this.initialReps,});
 
   @override
@@ -65,8 +64,8 @@ class _RepsSelectorState extends State<RepsSelector> {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
-                  widget.onRepsSelected(_reps);
+                  // Return selected reps to the caller
+                  Navigator.of(context).pop(_reps);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,

@@ -6,7 +6,7 @@ import '../../models/exercise.dart';
 import '../../models/workout_set.dart';
 import '../../services/global_timer_service.dart';
 import '../../blocs/workout_bloc.dart';
-import '../../widgets/weight_selector.dart';
+import '../../widgets/velocity_weight_selector.dart';
 import 'dart:async';
 import '../../widgets/reps_selector.dart';
 import 'select_exercise_screen.dart';
@@ -72,7 +72,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
       ));
     }
     
-  _startSetTimer();
+  _startSetTimer(reset: true);
   }
 
   void _stopSet() {
@@ -80,20 +80,28 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   }
 
   void _showRepsSelector() {
-    _stopSetTimer(); // Stop timer when showing reps selector
+    // Pause timer while selecting reps
+    _stopSetTimer();
     setState(() {
       _isAwaitingReps = true;
     });
-    showDialog(
+
+    showDialog<int>(
       context: context,
-      barrierDismissible: false,
-      builder:
-          (context) => RepsSelector(
-            onRepsSelected: (reps) {
-              _saveSet(reps);
-            },
-          ),
-    );
+      barrierDismissible: true, // allow tapping outside to go back
+      builder: (context) => const RepsSelector(),
+    ).then((reps) {
+      // If user tapped outside or pressed back, reps will be null -> resume timer
+      if (!mounted) return;
+      if (reps == null) {
+        setState(() {
+          _isAwaitingReps = false;
+        });
+        _startSetTimer(reset: false);
+      } else {
+        _saveSet(reps);
+      }
+    });
   }
 
   void _saveSet(int reps) {
@@ -145,7 +153,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   }
 
   void _startNewSet() {
-  _startSetTimer();
+  _startSetTimer(reset: true);
   }
 
   void _newExercise() {
@@ -244,9 +252,9 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
               const SizedBox(height: 32),
 
-              // Weight selector
+              // Weight selector (velocity-aware, 0.5kg steps)
               Center(
-                child: WeightSelector(
+                child: WeightSelectorVelocity(
                   initialWeight: _selectedWeight,
                   onWeightChanged: (weight) {
                     setState(() {
@@ -346,9 +354,11 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     ); // Close Scaffold
   }
 
-  void _startSetTimer() {
+  void _startSetTimer({bool reset = false}) {
     _setTimer?.cancel();
-    _setDuration = Duration.zero;
+    if (reset) {
+      _setDuration = Duration.zero;
+    }
     _setTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _setDuration = Duration(seconds: _setDuration.inSeconds + 1);

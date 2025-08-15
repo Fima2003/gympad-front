@@ -66,6 +66,18 @@
             "image": "https://example.com/images/rows_full.gif",
             "muscleGroup": "back"
         },
+        "lateral_raises": {
+            "name": "Lateral Raises",
+            "description": "Targets shoulders. Raise dumbbells out to the sides until parallel to the ground.",
+            "image": "https://example.com/images/lateral_raises_full.gif",
+            "muscleGroup": "shoulders"
+        },
+        "face_pulls": {
+            "name": "Face Pulls",
+            "description": "Targets rear delts and upper back. Pull rope towards face, keeping elbows high.",
+            "image": "https://example.com/images/face_pulls_full.gif",
+            "muscleGroup": "shoulders"
+        },
         "cable_kickbacks": {
             "name": "Cable Kickbacks",
             "description": "Targets glutes and hamstrings. Attach ankle strap to cable, kick leg back and up, squeezing glutes.",

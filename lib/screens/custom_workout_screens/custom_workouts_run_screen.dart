@@ -78,22 +78,27 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
   bool get _isLastExercise => _currentExerciseIndex >= widget.workout.exercises.length - 1;
 
   void _showRepsSelector() {
-    _stopSetTimer(); // Stop timer when showing reps selector
-    showDialog(
+    _stopSetTimer(); // Pause timer while showing reps selector
+    showDialog<int>(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true, // allow tapping outside to go back
       builder: (BuildContext context) {
         return RepsSelector(
           initialReps: _currentExercise.suggestedReps,
-          onRepsSelected: (int reps) {
-            setState(() {
-              _selectedReps = reps;
-            });
-            _finishCurrentAction();
-          },
         );
       },
-    );
+    ).then((reps) {
+      if (!mounted) return;
+      if (reps == null) {
+        // User dismissed: resume timer
+        _startSetTimer();
+        return;
+      }
+      setState(() {
+        _selectedReps = reps;
+      });
+      _finishCurrentAction();
+    });
   }
 
   void _startSet() {
@@ -162,6 +167,8 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
         builder: (context) => PredefinedWorkoutBreakScreen(
           restTime: _currentExercise.restTime,
           nextExercise: _currentExercise,
+          allExercises: widget.workout.exercises,
+          currentExerciseIndex: _currentExerciseIndex,
           currentSetIndex: _currentSetIndex,
           totalSets: _currentExercise.setsAmount,
           workoutProgress: _calculateProgress(),
@@ -198,6 +205,8 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
         builder: (context) => PredefinedWorkoutBreakScreen(
           restTime: widget.workout.exercises[_currentExerciseIndex - 1].restTime,
           nextExercise: nextExercise,
+          allExercises: widget.workout.exercises,
+          currentExerciseIndex: _currentExerciseIndex,
           currentSetIndex: _currentSetIndex,
           totalSets: nextExercise.setsAmount,
           workoutProgress: _calculateProgress(),
@@ -242,35 +251,6 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
     }
 
     return totalSetsCompleted / totalSets;
-  }
-
-  void _showExitDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Exit Workout'),
-          content: const Text('Are you sure you want to quit this workout?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('No'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                _finishWorkout();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Yes'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -322,12 +302,6 @@ class _PredefinedWorkoutsRunScreenState extends State<PredefinedWorkoutsRunScree
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              actions: [
-                IconButton(
-                  onPressed: _isFinishing ? null : _showExitDialog,
-                  icon: Icon(Icons.close, color: AppColors.primary),
-                ),
-              ],
             ),
             body: SafeArea(
               child: Padding(

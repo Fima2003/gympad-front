@@ -10,6 +10,7 @@ import '../../blocs/workout_bloc.dart';
 import '../../services/global_timer_service.dart';
 import '../../services/storage_service.dart';
 import '../well_done_workout_screen.dart';
+import '../../widgets/exercise_chip.dart';
 
 class FreeWorkoutBreakScreen extends StatefulWidget {
   final Exercise currentExercise;
@@ -250,6 +251,20 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
                 ),
               ),
 
+              // Previous exercises (visual only) — show only in workout mode
+              if (widget.isPartOfWorkout) ...[
+                const SizedBox(height: 16),
+                BlocBuilder<WorkoutBloc, WorkoutState>(
+                  builder: (context, state) {
+                    if (state is! WorkoutInProgress) return const SizedBox.shrink();
+                    final list = state.workout.exercises;
+                    if (list.length <= 1) return const SizedBox.shrink();
+                    final previous = list.take(list.length - 1).toList();
+                    return _PreviousExercisesRow(items: previous);
+                  },
+                ),
+              ],
+
               const SizedBox(height: 80),
 
               // Action buttons
@@ -418,3 +433,26 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
     ),); // Closing BlocListener
   }
 }
+
+class _PreviousExercisesRow extends StatelessWidget {
+  final List<WorkoutExercise> items;
+  const _PreviousExercisesRow({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: items.map((e) {
+          return ExerciseChip(
+            title: e.name.replaceAll('_', ' ').toUpperCase(),
+            setsCount: e.sets.length,
+            variant: ExerciseChipVariant.previous,
+            margin: const EdgeInsets.only(top: 8, right: 10),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+

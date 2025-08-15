@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../services/audio_service.dart';
 import 'dart:async';
 import '../../constants/app_styles.dart';
 import '../../models/predefined_workout.dart';
 import '../../services/data_service.dart';
+import '../../blocs/workout_bloc.dart';
+import '../../services/global_timer_service.dart';
+import '../well_done_workout_screen.dart';
+import '../../widgets/exercise_chip.dart';
 
 class PredefinedWorkoutBreakScreen extends StatefulWidget {
   final int restTime; // in seconds
-  final PredefinedWorkoutExercise nextExercise;
+  final PredefinedWorkoutExercise? nextExercise;
+  final List<PredefinedWorkoutExercise> allExercises;
+  final int currentExerciseIndex;
   final int currentSetIndex;
   final int totalSets;
   final double workoutProgress;
@@ -16,6 +24,8 @@ class PredefinedWorkoutBreakScreen extends StatefulWidget {
     super.key,
     required this.restTime,
     required this.nextExercise,
+    required this.allExercises,
+    required this.currentExerciseIndex,
     required this.currentSetIndex,
     required this.totalSets,
     required this.workoutProgress,
@@ -30,6 +40,7 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
   late int _remainingTime;
   late int _totalTime; // Track total time including added minutes
   Timer? _timer;
+  bool _finishing = false;
 
   @override
   void initState() {
@@ -44,8 +55,15 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_remainingTime > 1) {
-          _remainingTime--;
+          final next = _remainingTime - 1;
+          // Play a tick when 5 seconds or less remain (5,4,3,2,1)
+          if (next <= 5 && next >= 1) {
+            AudioService().playTick();
+          }
+          _remainingTime = next;
         } else {
+          // Countdown finished: play start sound then complete break
+          AudioService().playStart();
           _timer?.cancel();
           widget.onBreakComplete();
         }
@@ -72,6 +90,41 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
     _startCountdown();
   }
 
+  // Sound playback is handled via AudioService for easy future swaps
+
+  void _showFinishDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Finish workout?'),
+        content: const Text('Are you sure you want to finish this workout now?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('No'),
+          ),
+          ElevatedButton(
+            onPressed: _finishing ? null : () {
+              Navigator.of(context).pop();
+              _finishWorkout();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _finishWorkout() {
+    if (_finishing) return;
+    setState(() => _finishing = true);
+    _timer?.cancel();
+    GlobalTimerService().stop();
+    context.read<WorkoutBloc>().add(ExerciseFinished());
+    context.read<WorkoutBloc>().add(WorkoutFinished());
+  }
+
   String _formatTime(int seconds) {
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
@@ -86,14 +139,45 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    // Build previous/future lists for visual chips (current is represented by the Next box)
+    final exercises = widget.allExercises;
+    final idx = widget.currentExerciseIndex.clamp(0, exercises.length - 1);
+    final previous = exercises.take(idx).toList();
+    final future = idx + 1 < exercises.length ? exercises.sublist(idx + 1) : const <PredefinedWorkoutExercise>[];
+
+    return BlocListener<WorkoutBloc, WorkoutState>(
+      listener: (context, state) {
+        if (state is WorkoutCompleted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => WellDoneWorkoutScreen(workout: state.workout),
+            ),
+            (route) => route.isFirst,
+          );
+        }
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFF1a1a1a), // Darker background for better contrast
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1a1a1a),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            tooltip: 'Finish workout',
+            icon: const Icon(Icons.flag, color: Colors.white),
+            onPressed: _showFinishDialog,
+          ),
+        ],
+      ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               // Rest title
               Text(
                 'REST TIME',
@@ -143,47 +227,72 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
                 ],
               ),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 40),
 
-              // Next exercise info
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'NEXT UP',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1,
+              // Next exercise info (optional)
+              if (widget.nextExercise != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                  ),
+                  child: Column(
+                    children: [
+                      // Explicit NEXT label
+                      Text(
+                        'NEXT:',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
                       ),
+                      const SizedBox(height: 12),
+                      Text(
+                        (DataService().getExercise(widget.nextExercise!.id)?.name ?? widget.nextExercise!.id)
+                            .replaceAll('_', ' ')
+                            .toUpperCase(),
+                        style: AppTextStyles.titleMedium.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Set ${widget.currentSetIndex + 1} of ${widget.totalSets}',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 24),
+
+              // Visual chips: previous (check), future (clock). Current is the Next box above.
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (previous.isNotEmpty) ...[
+                    _PredefinedExerciseChipsRow(
+                      items: previous,
+                      variant: ExerciseChipVariant.previous,
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      (DataService().getExercise(widget.nextExercise.id)?.name ?? widget.nextExercise.id)
-                          .replaceAll('_', ' ')
-                          .toUpperCase(),
-                      style: AppTextStyles.titleMedium.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Set ${widget.currentSetIndex + 1} of ${widget.totalSets}',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.white70,
-                      ),
+                  ],
+                  if (future.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _PredefinedExerciseChipsRow(
+                      items: future,
+                      variant: ExerciseChipVariant.future,
                     ),
                   ],
-                ),
+                ],
               ),
 
               const SizedBox(height: 30),
@@ -282,10 +391,42 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
                   ),
                 ],
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
+    ),
+  ),
+);
+  }
+}
+
+class _PredefinedExerciseChipsRow extends StatelessWidget {
+  final List<PredefinedWorkoutExercise> items;
+  final ExerciseChipVariant variant;
+
+  const _PredefinedExerciseChipsRow({
+    required this.items,
+    required this.variant,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: items.map((e) {
+          final meta = DataService().getExercise(e.id);
+          final name = (meta?.name ?? e.id).replaceAll('_', ' ').toUpperCase();
+          return ExerciseChip(
+            title: name,
+            setsCount: e.setsAmount,
+            variant: variant,
+          );
+        }).toList(),
+      ),
     );
   }
 }
+
