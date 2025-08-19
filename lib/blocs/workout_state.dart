@@ -46,3 +46,12 @@ class WorkoutHistoryLoaded extends WorkoutState {
   @override
   List<Object> get props => [workouts];
 }
+
+class PersonalWorkoutsLoaded extends WorkoutState {
+  final List<PersonalWorkout> workouts;
+
+  const PersonalWorkoutsLoaded(this.workouts);
+
+  @override
+  List<Object> get props => [workouts];
+}

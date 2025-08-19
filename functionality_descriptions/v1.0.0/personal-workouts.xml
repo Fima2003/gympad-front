@@ -1,0 +1,14 @@
+<personal-workouts>
+    <description>This file is dedicated to adding functionality of loading your personally created workout</description>
+    <flow>
+        <onAppLoad>
+            <functionality>
+                When app is loaded, make a call to fetch all the personal workouts(WorkoutApiService.getPersonalWorkouts()). Compare them to the ones that are in the local storage. make sure that the ones that are stored locally match the ones that are on the server
+            </functionality>
+        </onAppLoad>
+        <personal_workout_screen>
+            Create a third screen in the bottom navigation bar: Personal Workouts
+            Similar screen to Custom Workouts, but now the card instead of difficulty does not show anything. If there is no description, skip it. using exercises.json, figure out the muscle group. The rest should be the same. The flow is the same as in personal_workout_screen.
+        </personal_workout_screen>
+    </flow>
+</personal-workouts>

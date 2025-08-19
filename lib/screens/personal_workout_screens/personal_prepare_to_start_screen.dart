@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../constants/app_styles.dart';
-import '../../models/custom_workout.dart';
-import 'custom_workout_run_screen.dart';
+import '../../services/api/models/workout_models.dart';
+import 'personal_workouts_run_screen.dart';
 import '../../services/data_service.dart';
 
-class PrepareToStartWorkoutScreen extends StatefulWidget {
-  final CustomWorkout workout;
+class PersonalPrepareToStartScreen extends StatefulWidget {
+  final PersonalWorkoutResponse workout;
 
-  const PrepareToStartWorkoutScreen({super.key, required this.workout});
+  const PersonalPrepareToStartScreen({super.key, required this.workout});
 
   @override
-  State<PrepareToStartWorkoutScreen> createState() =>
-      _PrepareToStartWorkoutScreenState();
+  State<PersonalPrepareToStartScreen> createState() =>
+      _PersonalPrepareToStartScreenState();
 }
 
-class _PrepareToStartWorkoutScreenState
-    extends State<PrepareToStartWorkoutScreen>
+class _PersonalPrepareToStartScreenState
+    extends State<PersonalPrepareToStartScreen>
     with SingleTickerProviderStateMixin {
   int _countdown = 5;
   Timer? _timer;
@@ -60,7 +60,7 @@ class _PrepareToStartWorkoutScreenState
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder:
-              (context) => PredefinedWorkoutsRunScreen(workout: widget.workout),
+              (context) => PersonalWorkoutsRunScreen(workout: widget.workout),
         ),
       );
     }
@@ -80,6 +80,17 @@ class _PrepareToStartWorkoutScreenState
 
   @override
   Widget build(BuildContext context) {
+    final first =
+        widget.workout.exercises.isNotEmpty
+            ? widget.workout.exercises.first
+            : null;
+    final firstName =
+        first == null
+            ? 'Exercise'
+            : (DataService().getExercise(first.exerciseId)?.name ?? first.name)
+                .replaceAll('_', ' ')
+                .toUpperCase();
+
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
@@ -93,7 +104,6 @@ class _PrepareToStartWorkoutScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Workout name
             Text(
               widget.workout.name,
               style: AppTextStyles.titleLarge.copyWith(
@@ -103,35 +113,21 @@ class _PrepareToStartWorkoutScreenState
               ),
               textAlign: TextAlign.center,
             ),
-
             const SizedBox(height: 24),
-
-            // First exercise name
             Text(
               'Starting with:',
               style: AppTextStyles.bodyLarge.copyWith(color: Colors.white70),
-              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              widget.workout.exercises.isNotEmpty
-                  ? (DataService()
-                              .getExercise(widget.workout.exercises.first.id)
-                              ?.name ??
-                          widget.workout.exercises.first.id)
-                      .replaceAll('_', ' ')
-                      .toUpperCase()
-                  : 'Exercise',
+              firstName,
               style: AppTextStyles.titleMedium.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
             ),
-
             const SizedBox(height: 60),
-
-            // Countdown timer
             AnimatedBuilder(
               animation: _scaleAnimation,
               builder: (context, child) {
@@ -165,10 +161,7 @@ class _PrepareToStartWorkoutScreenState
                 );
               },
             ),
-
             const SizedBox(height: 60),
-
-            // Get ready text
             Text(
               _countdown > 1 ? 'Get Ready!' : "Let's Go!",
               style: AppTextStyles.titleMedium.copyWith(
@@ -178,10 +171,7 @@ class _PrepareToStartWorkoutScreenState
               ),
               textAlign: TextAlign.center,
             ),
-
             const SizedBox(height: 80),
-
-            // Cancel button
             TextButton(
               onPressed: _cancelWorkout,
               style: TextButton.styleFrom(

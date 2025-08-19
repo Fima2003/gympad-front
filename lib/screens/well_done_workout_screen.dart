@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_styles.dart';
 import '../models/workout.dart';
 import '../widgets/workout_exercises_table.dart';
+import 'free_workout_screens/save_workout_screen.dart';
 
 class WellDoneWorkoutScreen extends StatefulWidget {
   final Workout workout;
@@ -198,6 +199,36 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            // Save Workout button (free workout only)
+            if (widget.workout.isFreeWorkout)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => SaveWorkoutScreen(workout: widget.workout),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Save Workout',
+                    style: AppTextStyles.button.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

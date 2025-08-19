@@ -6,6 +6,7 @@ import '../blocs/workout_bloc.dart';
 import 'free_workout_screens/free_workout_screen.dart';
 import 'login_screen.dart';
 import 'custom_workout_screens/custom_workouts_screen.dart';
+import 'personal_workout_screens/personal_workouts_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -22,7 +23,17 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const FreeWorkoutScreen(),
     const PredefinedWorkoutsScreen(),
+    const PersonalWorkoutsScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Let the BLoC handle syncing personal workouts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WorkoutBloc>().add(PersonalWorkoutsSyncRequested());
+    });
+  }
 
   Future<void> _signOut() async {
     setState(() => _isSigningOut = true);
@@ -94,6 +105,10 @@ class _MainScreenState extends State<MainScreen> {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.list_alt),
                   label: 'Custom Workout',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person),
+                  label: 'Personal',
                 ),
               ],
             ),

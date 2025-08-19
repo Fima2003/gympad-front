@@ -28,4 +28,17 @@ class WorkoutSet {
       time: Duration(seconds: json['time'] ?? 0),
     );
   }
+  WorkoutSet copyWith({
+    int? setNumber,
+    int? reps,
+    double? weight,
+    Duration? time,
+  }) {
+    return WorkoutSet(
+      setNumber: setNumber ?? this.setNumber,
+      reps: reps ?? this.reps,
+      weight: weight ?? this.weight,
+      time: time ?? this.time,
+    );
+  }
 }

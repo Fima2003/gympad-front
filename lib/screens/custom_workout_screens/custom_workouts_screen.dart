@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_styles.dart';
-import '../../models/predefined_workout.dart';
+import '../../models/custom_workout.dart';
 import '../../services/predefined_workout_service.dart';
 import 'custom_workout_detail_screen.dart';
 
@@ -8,12 +8,13 @@ class PredefinedWorkoutsScreen extends StatefulWidget {
   const PredefinedWorkoutsScreen({super.key});
 
   @override
-  State<PredefinedWorkoutsScreen> createState() => _PredefinedWorkoutsScreenState();
+  State<PredefinedWorkoutsScreen> createState() =>
+      _PredefinedWorkoutsScreenState();
 }
 
 class _PredefinedWorkoutsScreenState extends State<PredefinedWorkoutsScreen> {
   final PredefinedWorkoutService _workoutService = PredefinedWorkoutService();
-  List<PredefinedWorkout> _workouts = [];
+  List<CustomWorkout> _workouts = [];
   bool _isLoading = true;
 
   @override
@@ -61,9 +62,7 @@ class _PredefinedWorkoutsScreenState extends State<PredefinedWorkoutsScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_workouts.isEmpty) {
@@ -123,9 +122,10 @@ class _PredefinedWorkoutsScreenState extends State<PredefinedWorkoutsScreen> {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => PredefinedWorkoutDetailScreen(
-                            workout: workout,
-                          ),
+                          builder:
+                              (context) => PredefinedWorkoutDetailScreen(
+                                workout: workout,
+                              ),
                         ),
                       );
                     },
@@ -151,7 +151,9 @@ class _PredefinedWorkoutsScreenState extends State<PredefinedWorkoutsScreen> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: _getDifficultyColor(workout.difficulty),
+                                  color: _getDifficultyColor(
+                                    workout.difficulty,
+                                  ),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(

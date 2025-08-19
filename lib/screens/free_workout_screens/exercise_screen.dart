@@ -6,6 +6,7 @@ import '../../models/exercise.dart';
 import '../../models/workout_set.dart';
 import '../../services/global_timer_service.dart';
 import '../../blocs/workout_bloc.dart';
+import '../../services/workout_service.dart';
 import '../../widgets/velocity_weight_selector.dart';
 import 'dart:async';
 import '../../widgets/reps_selector.dart';
@@ -18,8 +19,8 @@ class ExerciseScreen extends StatefulWidget {
   final bool isPartOfWorkout;
 
   const ExerciseScreen({
-    super.key, 
-    this.gym, 
+    super.key,
+    this.gym,
     required this.exercise,
     this.isPartOfWorkout = false,
   });
@@ -37,7 +38,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   Timer? _setTimer;
   List<WorkoutSet> _completedSets = [];
   bool _hasCompletedSets = false;
-  bool _isAwaitingReps = false; // keep header at current set while selecting reps
+  bool _isAwaitingReps = false;
 
   @override
   void initState() {
@@ -45,9 +46,10 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     // If this exercise exists in the current workout, preload its sets
     final state = context.read<WorkoutBloc>().state;
     if (state is WorkoutInProgress) {
-      final existing = state.workout.exercises
-          .where((e) => e.exerciseId == widget.exercise.id)
-          .toList();
+      final existing =
+          state.workout.exercises
+              .where((e) => e.exerciseId == widget.exercise.id)
+              .toList();
       if (existing.isNotEmpty) {
         _completedSets = List<WorkoutSet>.from(existing.last.sets);
         _hasCompletedSets = _completedSets.isNotEmpty;
@@ -60,19 +62,21 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     if (widget.isPartOfWorkout && !_hasCompletedSets) {
       // Start global timer if not already started
       if (!_globalTimerService.isRunning) {
-        context.read<WorkoutBloc>().add(WorkoutStarted());
+        context.read<WorkoutBloc>().add(WorkoutStarted(WorkoutType.free));
         _globalTimerService.start();
       }
-      
+
       // Add exercise to workout
-      context.read<WorkoutBloc>().add(ExerciseAdded(
-        exerciseId: widget.exercise.id,
-        name: widget.exercise.name,
-        muscleGroup: widget.exercise.muscleGroup,
-      ));
+      context.read<WorkoutBloc>().add(
+        ExerciseAdded(
+          exerciseId: widget.exercise.id,
+          name: widget.exercise.name,
+          muscleGroup: widget.exercise.muscleGroup,
+        ),
+      );
     }
-    
-  _startSetTimer(reset: true);
+
+    _startSetTimer(reset: true);
   }
 
   void _stopSet() {
@@ -106,7 +110,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
   void _saveSet(int reps) {
     final setDuration = _setDuration;
-    
+
     final newSet = WorkoutSet(
       setNumber: _completedSets.length + 1,
       reps: reps,
@@ -117,43 +121,42 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     setState(() {
       _completedSets.add(newSet);
       _hasCompletedSets = true;
-  _isAwaitingReps = false;
+      _isAwaitingReps = false;
     });
 
     // If part of workout, add set to the workout
     if (widget.isPartOfWorkout) {
-      context.read<WorkoutBloc>().add(SetAdded(
-        reps: reps,
-        weight: _selectedWeight,
-        duration: setDuration,
-      ));
+      context.read<WorkoutBloc>().add(
+        SetAdded(reps: reps, weight: _selectedWeight, duration: setDuration),
+      );
     }
 
-  // Reset timer for next set
-  _resetSetTimer();
-    
+    // Reset timer for next set
+    _resetSetTimer();
+
     // Navigate to break screen
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => FreeWorkoutBreakScreen(
-          currentExercise: widget.exercise,
-          isPartOfWorkout: widget.isPartOfWorkout,
-          completedSets: _completedSets,
-          onNewSet: () {
-            Navigator.of(context).pop(); // Return to exercise screen
-            _startNewSet();
-          },
-          onNewExercise: () {
-            Navigator.of(context).pop(); // Return to exercise screen
-            _newExercise();
-          },
-        ),
+        builder:
+            (context) => FreeWorkoutBreakScreen(
+              currentExercise: widget.exercise,
+              isPartOfWorkout: widget.isPartOfWorkout,
+              completedSets: _completedSets,
+              onNewSet: () {
+                Navigator.of(context).pop(); // Return to exercise screen
+                _startNewSet();
+              },
+              onNewExercise: () {
+                Navigator.of(context).pop(); // Return to exercise screen
+                _newExercise();
+              },
+            ),
       ),
     );
   }
 
   void _startNewSet() {
-  _startSetTimer(reset: true);
+    _startSetTimer(reset: true);
   }
 
   void _newExercise() {
@@ -161,48 +164,55 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     if (widget.isPartOfWorkout) {
       context.read<WorkoutBloc>().add(ExerciseFinished());
     }
-    
+
     // Navigate to exercise selection, defaulting to current muscle group
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => SelectExerciseScreen(
-          selectedMuscleGroup: widget.exercise.muscleGroup,
-        ),
+        builder:
+            (context) => SelectExerciseScreen(
+              selectedMuscleGroup: widget.exercise.muscleGroup,
+            ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-  const double buttonWidth = 280.0;
+    const double buttonWidth = 280.0;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          automaticallyImplyLeading: !_isTimerRunning,
-          leading: _isTimerRunning ? null : IconButton(
-            icon: Icon(Icons.arrow_back, color: AppColors.primary),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(6),
+        elevation: 0,
+        automaticallyImplyLeading: !_isTimerRunning,
+        leading:
+            _isTimerRunning
+                ? null
+                : IconButton(
+                  icon: Icon(Icons.arrow_back, color: AppColors.primary),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
-                child: Icon(
-                  Icons.fitness_center,
-                  color: AppColors.white,
-                  size: 18,
-                ),
+        title: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(6),
               ),
-              const SizedBox(width: 12),
-            Text(widget.gym?.name ?? 'Workout', style: AppTextStyles.appBarTitle),
+              child: Icon(
+                Icons.fitness_center,
+                color: AppColors.white,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              widget.gym?.name ?? 'Workout',
+              style: AppTextStyles.appBarTitle,
+            ),
           ],
         ),
       ),
@@ -235,9 +245,15 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
               // Timer display (pill)
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 24,
+                ),
                 decoration: BoxDecoration(
-                  color: _isTimerRunning ? AppColors.accent : AppColors.accent.withValues(alpha: 0.3),
+                  color:
+                      _isTimerRunning
+                          ? AppColors.accent
+                          : AppColors.accent.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Text(
@@ -274,7 +290,9 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,33 +305,39 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ...(_completedSets.map((set) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Set ${set.setNumber}',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.primary.withValues(alpha: 0.7),
+                      ...(_completedSets.map(
+                        (set) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Set ${set.setNumber}',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.7,
+                                  ),
+                                ),
                               ),
-                            ),
-                            Text(
-                              '${set.reps} reps × ${set.weight}kg',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w500,
+                              Text(
+                                '${set.reps} reps × ${set.weight}kg',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            Text(
-                              '${set.time.inMinutes}:${(set.time.inSeconds % 60).toString().padLeft(2, '0')}',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.primary.withValues(alpha: 0.5),
+                              Text(
+                                '${set.time.inMinutes}:${(set.time.inSeconds % 60).toString().padLeft(2, '0')}',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ))),
+                      )),
                     ],
                   ),
                 ),
@@ -330,7 +354,10 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                   child: ElevatedButton(
                     onPressed: _isTimerRunning ? _stopSet : _startSet,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _isTimerRunning ? AppColors.accent : AppColors.primary,
+                      backgroundColor:
+                          _isTimerRunning
+                              ? AppColors.accent
+                              : AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -338,7 +365,10 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                     child: Text(
                       _isTimerRunning ? 'Stop Set' : 'Start Set',
                       style: AppTextStyles.button.copyWith(
-                        color: _isTimerRunning ? AppColors.primary : AppColors.white,
+                        color:
+                            _isTimerRunning
+                                ? AppColors.primary
+                                : AppColors.white,
                         fontSize: 18,
                       ),
                     ),

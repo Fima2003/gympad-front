@@ -1,0 +1,79 @@
+<save-workout>
+    <description>
+        Saves the free workout just performed
+    </description>
+    <flow>
+        <well_done_workout_screen>
+            The following functionality applies only to the well_done_workout_screen if the user has performed free workout.
+            <feature id="1">
+                <UI>
+                    Button 'Save Workout'
+                </UI>
+                <functionality>
+                    Move to 'save_workout_screen.dart' with just performed exercise.
+                </functionality>
+            </feature>
+        </well_done_workout_screen>
+        <save_workout_screen>
+            <feature id="1">
+                <UI>
+                    Render the workout that a user has just performed in a list with adjustable fields. Exercise-by-exercise.
+                </UI>
+            </feature>
+            <feature id="2">
+                <UI>
+                    Every tile of list should contain exercise's name, amount of sets, reps time for breaks and average weight. Also, at the top right there should be a trash icon.
+                </UI>
+                <functionality>
+                    By pressing on the trash icon, remove the exercise from the list.
+                </functionality>
+            </feature>
+            <feature id="3">
+                <UI>
+                    An open exercise panel
+                </UI>
+                <functionality>
+                    by pressing on the exercise, a panel should open to adjust the amount of sets, amount of reps/set, rest time and the weight.
+                </functionality>
+            </feature>
+            <feature id="4">
+                <UI>
+                    button "Continue"
+                </UI>
+                <functionality>
+                    By pressing on "Continue" button a quick form to fill in the name and description(optional)
+                </functionality>
+            </feature>
+            <feature id="5">
+                <UI>name field</UI>
+                <functionality>
+                    The field should be one-lined only with english letters, no more than 100 symbols, no less than 6 letters. no special characters
+                </functionality>
+            </feature>
+            <feature id="6">
+                <UI>description field</UI>
+                <functionality>
+                    The field should be multi-lined only with english letters, no more than 200 symbols, no less than 10 letters. no special characters
+                </functionality>
+            </feature>
+            <feature id="7">
+                <UI>OutlinedButton "Back"</UI>
+                <functionality>
+                    Pressing on the button, it returns to selecting exercises with the swipe.
+                </functionality>
+            </feature>
+            <feature id="8">
+                <UI>at the bottom Button "Save"</UI>
+                <functionality>
+                    Pressing on the button, it creates a `createCustomWorkout` request(see `workout_api_service.dart`). If successful, show a toast Created a custom workout with button "Go Home" and either way navigate home after 3 seconds. If unsuccessful, create toast "Something went wrong. Try again later" or something like this, with a button "Go Home".
+                </functionality>
+            </feature>
+        </save_workout_screen>
+    </flow>
+    <reporting>
+        After completion of every feature, report about it.
+    </reporting>
+    <general-instructions>
+        Every tab in flow has multiple screens. If this screen exists in the codebase, then you need to edit it. If the screen does not exist - create it. If you think you need to create an extra screen, model, component, etc. - create it.
+    </general-instructions>
+</save-workout>

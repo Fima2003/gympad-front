@@ -24,6 +24,21 @@ class WorkoutApiService {
     );
   }
 
+  /// GET getPersonalWorkouts
+  /// Returns: List of { name ,description?,exercises:[{ exerciseId, name,sets,weight,reps,restTime }] }
+  Future<ApiResponse<List<PersonalWorkoutResponse>>> getPersonalWorkouts() async {
+    return _api.get<void, List<PersonalWorkoutResponse>>(
+      'getPersonalWorkouts',
+      auth: true,
+      parser: (data) {
+        final list = (data as List<dynamic>);
+        return list
+            .map((e) => PersonalWorkoutResponse.fromJson(e as Map<String, dynamic>))
+            .toList();
+      },
+    );
+  }
+
   /// GET getMyWorkout with query param workoutId
   Future<ApiResponse<WorkoutDetailResponse>> getMyWorkout({
     required String workoutId,
@@ -32,8 +47,9 @@ class WorkoutApiService {
       'getMyWorkout',
       auth: true,
       queryParameters: {'workoutId': workoutId},
-      parser: (data) =>
-          WorkoutDetailResponse.fromJson(data as Map<String, dynamic>),
+      parser:
+          (data) =>
+              WorkoutDetailResponse.fromJson(data as Map<String, dynamic>),
     );
   }
 
@@ -42,6 +58,18 @@ class WorkoutApiService {
   Future<ApiResponse<void>> createWorkout(WorkoutCreateRequest request) async {
     return _api.post<WorkoutCreateRequest, void>(
       'createWorkout',
+      body: request,
+      auth: true,
+    );
+  }
+
+  /// POST createCustomWorkout
+  /// Input is custom workout payload, returns sucess only
+  Future<ApiResponse<void>> createCustomWorkout(
+    CreatePersonalWorkoutRequest request,
+  ) async {
+    return _api.post<CreatePersonalWorkoutRequest, void>(
+      'createCustomWorkout',
       body: request,
       auth: true,
     );

@@ -1,3 +1,4 @@
+
 import 'workout_exercise.dart';
 
 class Workout {
@@ -8,6 +9,11 @@ class Workout {
   DateTime? endTime;
   final bool isUploaded;
   final bool isOngoing;
+  /// Returns true if this workout is a free workout (no predefined name/id pattern)
+  bool get isFreeWorkout {
+    // Heuristic: free workouts have id starting with 'free_' or no name
+    return id.startsWith('free_') || (name == null || name!.isEmpty);
+  }
 
   Workout({
     required this.id,

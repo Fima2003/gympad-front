@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import '../models/gym.dart';
@@ -18,14 +19,16 @@ class DataService {
       await _loadExercises();
     }
     if (_equipment == null) {
-      await _loadEquipment();
+      unawaited(_loadEquipment());
     }
   }
 
   Future<void> _loadExercises() async {
-    final String jsonString = await rootBundle.loadString('assets/mock_data/exercises.json');
+    final String jsonString = await rootBundle.loadString(
+      'assets/mock_data/exercises.json',
+    );
     final Map<String, dynamic> jsonData = json.decode(jsonString);
-    
+
     _exercises = {};
     jsonData['exercises'].forEach((key, value) {
       _exercises![key] = Exercise.fromJson(key, value);
@@ -33,9 +36,11 @@ class DataService {
   }
 
   Future<void> _loadEquipment() async {
-    final String jsonString = await rootBundle.loadString('assets/mock_data/equipment.json');
+    final String jsonString = await rootBundle.loadString(
+      'assets/mock_data/equipment.json',
+    );
     final Map<String, dynamic> jsonData = json.decode(jsonString);
-    
+
     _equipment = {};
     jsonData['equipment'].forEach((key, value) {
       _equipment![key] = Equipment.fromJson(key, value);
@@ -61,7 +66,7 @@ class DataService {
     if (equipment.type == 'direct_exercise') {
       return equipment.data as String;
     }
-    
+
     // For muscle_group_selector, we'll return the first exercise from the first group
     if (equipment.type == 'muscle_group_selector' && equipment.data is Map) {
       final Map<String, dynamic> data = equipment.data as Map<String, dynamic>;
@@ -71,7 +76,7 @@ class DataService {
         }
       }
     }
-    
+
     return null;
   }
 
@@ -81,39 +86,29 @@ class DataService {
 
   List<String> getAllMuscleGroups() {
     if (_exercises == null) return [];
-    
+
     final groups = <String>{};
     for (final exercise in _exercises!.values) {
       groups.add(exercise.muscleGroup);
     }
-    
+
     return groups.toList()..sort();
   }
 
   List<Exercise> getExercisesForMuscleGroup(String muscleGroup) {
     if (_exercises == null) return [];
-    
+
     return _exercises!.values
         .where((exercise) => exercise.muscleGroup == muscleGroup)
         .toList();
   }
 
-  List<Exercise> getRopeExercises() {
-    if (_exercises == null) return [];
-    
-    return _exercises!.values
-        .where((exercise) => exercise.muscleGroup == 'cardio' || exercise.name.toLowerCase().contains('rope'))
-        .toList();
-  }
-
-  List<String> getRopeMuscleGroups() {
-    final ropeExercises = getRopeExercises();
-    final groups = <String>{};
-    
-    for (final exercise in ropeExercises) {
-      groups.add(exercise.muscleGroup);
+  List<String>? getMuscleGroupForExercise(String exerciseId) {
+    if (!(exerciseId == '' &&
+        _exercises != null &&
+        _exercises![exerciseId] == null)) {
+      return null;
     }
-    
-    return groups.toList()..sort();
+    return [_exercises![exerciseId]!.muscleGroup];
   }
 }

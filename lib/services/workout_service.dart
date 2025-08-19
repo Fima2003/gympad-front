@@ -7,6 +7,8 @@ import '../models/workout_set.dart';
 import '../services/api/api.dart';
 import '../services/logger_service.dart';
 
+enum WorkoutType { custom, free, personal }
+
 class WorkoutService {
   static final WorkoutService _instance = WorkoutService._internal();
   factory WorkoutService() => _instance;
@@ -21,14 +23,15 @@ class WorkoutService {
   Workout? _currentWorkout;
   Workout? get currentWorkout => _currentWorkout;
 
-  Future<void> startWorkout({String? name}) async {
+  Future<void> startWorkout(WorkoutType type, {String? name}) async {
     if (_currentWorkout != null && _currentWorkout!.isOngoing) {
       _logger.warning('Workout already in progress');
       return;
     }
 
     _currentWorkout = Workout(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          "${type == WorkoutType.free ? 'free' : 'custom'}_${DateTime.now().millisecondsSinceEpoch.toString()}",
       name: name,
       exercises: [],
       startTime: DateTime.now(),
@@ -38,24 +41,31 @@ class WorkoutService {
     _logger.info('New workout started with ID: ${_currentWorkout!.id}');
   }
 
-  Future<void> addExercise(String exerciseId, String name, String muscleGroup, {String? equipmentId}) async {
+  Future<void> addExercise(
+    String exerciseId,
+    String name,
+    String muscleGroup, {
+    String? equipmentId,
+  }) async {
     if (_currentWorkout == null || !_currentWorkout!.isOngoing) {
-      await startWorkout();
+      await startWorkout(WorkoutType.free);
     }
 
     // Check if exercise already exists in current workout
-    final existingIndex = _currentWorkout!.exercises.indexWhere((e) => e.exerciseId == exerciseId);
-    
-    if (existingIndex != -1) {
-  // Make the existing exercise the current (last) one so sets append correctly
-  final exercises = [..._currentWorkout!.exercises];
-  final existing = exercises.removeAt(existingIndex);
-  exercises.add(existing);
+    final existingIndex = _currentWorkout!.exercises.indexWhere(
+      (e) => e.exerciseId == exerciseId,
+    );
 
-  _currentWorkout = _currentWorkout!.copyWith(exercises: exercises);
-  await _saveCurrentWorkout();
-  _logger.info('Exercise $name already exists — set as current exercise');
-  return;
+    if (existingIndex != -1) {
+      // Make the existing exercise the current (last) one so sets append correctly
+      final exercises = [..._currentWorkout!.exercises];
+      final existing = exercises.removeAt(existingIndex);
+      exercises.add(existing);
+
+      _currentWorkout = _currentWorkout!.copyWith(exercises: exercises);
+      await _saveCurrentWorkout();
+      _logger.info('Exercise $name already exists — set as current exercise');
+      return;
     }
 
     final workoutExercise = WorkoutExercise(
@@ -75,7 +85,11 @@ class WorkoutService {
     _logger.info('Added exercise $name to workout');
   }
 
-  Future<void> addSetToCurrentExercise(int reps, double weight, Duration duration) async {
+  Future<void> addSetToCurrentExercise(
+    int reps,
+    double weight,
+    Duration duration,
+  ) async {
     if (_currentWorkout == null || _currentWorkout!.exercises.isEmpty) {
       _logger.error('No current exercise to add set to');
       return;
@@ -156,7 +170,7 @@ class WorkoutService {
   Future<List<Workout>> getWorkoutHistory() async {
     final prefs = await SharedPreferences.getInstance();
     final historyJson = prefs.getString(_workoutHistoryKey);
-    
+
     if (historyJson == null) return [];
 
     final historyList = json.decode(historyJson) as List;
@@ -166,7 +180,7 @@ class WorkoutService {
   Future<void> loadCurrentWorkout() async {
     final prefs = await SharedPreferences.getInstance();
     final workoutJson = prefs.getString(_currentWorkoutKey);
-    
+
     if (workoutJson != null) {
       try {
         _currentWorkout = Workout.fromJson(json.decode(workoutJson));
@@ -191,7 +205,10 @@ class WorkoutService {
     if (_currentWorkout == null) return;
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_currentWorkoutKey, json.encode(_currentWorkout!.toJson()));
+    await prefs.setString(
+      _currentWorkoutKey,
+      json.encode(_currentWorkout!.toJson()),
+    );
   }
 
   Future<void> _saveWorkoutToHistory() async {
@@ -201,7 +218,10 @@ class WorkoutService {
     workouts.add(_currentWorkout!);
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_workoutHistoryKey, json.encode(workouts.map((w) => w.toJson()).toList()));
+    await prefs.setString(
+      _workoutHistoryKey,
+      json.encode(workouts.map((w) => w.toJson()).toList()),
+    );
   }
 
   Future<void> _clearCurrentWorkout() async {
@@ -212,31 +232,33 @@ class WorkoutService {
   Future<void> _uploadWorkout(Workout workout) async {
     try {
       // Build DTO request from domain model
-  final request = WorkoutCreateRequest(
+      final request = WorkoutCreateRequest(
         id: workout.id,
         name: workout.name,
-        exercises: workout.exercises
-            .map(
-              (e) => WorkoutExerciseDto(
-                exerciseId: e.exerciseId,
-                name: e.name,
-                equipmentId: e.equipmentId,
-                muscleGroup: e.muscleGroup,
-                sets: e.sets
-                    .map(
-                      (s) => WorkoutSetDto(
-                        setNumber: s.setNumber,
-                        reps: s.reps,
-                        weight: s.weight,
-                        time: s.time.inSeconds,
-                      ),
-                    )
-                    .toList(),
-        startTime: e.startTime,
-        endTime: e.endTime,
-              ),
-            )
-            .toList(),
+        exercises:
+            workout.exercises
+                .map(
+                  (e) => WorkoutExerciseDto(
+                    exerciseId: e.exerciseId,
+                    name: e.name,
+                    equipmentId: e.equipmentId,
+                    muscleGroup: e.muscleGroup,
+                    sets:
+                        e.sets
+                            .map(
+                              (s) => WorkoutSetDto(
+                                setNumber: s.setNumber,
+                                reps: s.reps,
+                                weight: s.weight,
+                                time: s.time.inSeconds,
+                              ),
+                            )
+                            .toList(),
+                    startTime: e.startTime,
+                    endTime: e.endTime,
+                  ),
+                )
+                .toList(),
         startTime: workout.startTime,
         endTime: workout.endTime ?? DateTime.now(),
       );
@@ -261,12 +283,15 @@ class WorkoutService {
   Future<void> _markWorkoutAsUploaded(String workoutId) async {
     final workouts = await getWorkoutHistory();
     final index = workouts.indexWhere((w) => w.id == workoutId);
-    
+
     if (index != -1) {
       workouts[index] = workouts[index].copyWith(isUploaded: true);
-      
+
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_workoutHistoryKey, json.encode(workouts.map((w) => w.toJson()).toList()));
+      await prefs.setString(
+        _workoutHistoryKey,
+        json.encode(workouts.map((w) => w.toJson()).toList()),
+      );
     }
   }
 }

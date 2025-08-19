@@ -1,32 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:gympad/models/custom_workout.dart';
 import '../../constants/app_styles.dart';
-import '../../models/custom_workout.dart';
-import 'prepare_to_start_workout_screen.dart';
+import '../../models/personal_workout.dart';
 import '../../services/data_service.dart';
+import '../custom_workout_screens/prepare_to_start_workout_screen.dart';
 
-class PredefinedWorkoutDetailScreen extends StatelessWidget {
-  final CustomWorkout workout;
+class PersonalWorkoutDetailScreen extends StatelessWidget {
+  final PersonalWorkout workout;
 
-  const PredefinedWorkoutDetailScreen({
-    super.key,
-    required this.workout,
-  });
+  const PersonalWorkoutDetailScreen({super.key, required this.workout});
 
-  Color _getDifficultyColor(String difficulty) {
-    switch (difficulty.toLowerCase()) {
-      case 'beginner':
-        return Colors.green;
-      case 'intermediate':
-        return Colors.orange;
-      case 'advanced':
-        return Colors.red;
-      default:
-        return AppColors.textSecondary;
+  List<String> _collectMuscleGroups() {
+    final data = DataService();
+    final set = <String>{};
+    for (final ex in workout.exercises) {
+      final m = data.getExercise(ex.exerciseId)?.muscleGroup;
+      if (m != null && m.isNotEmpty) set.add(m);
     }
+    return set.isEmpty ? const [] : set.toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final muscleGroups = _collectMuscleGroups();
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -36,14 +32,10 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
           icon: Icon(Icons.arrow_back, color: AppColors.primary),
         ),
-        title: Text(
-          workout.name,
-          style: AppTextStyles.appBarTitle,
-        ),
+        title: Text(workout.name, style: AppTextStyles.appBarTitle),
       ),
       body: Column(
         children: [
-          // Fixed header section
           Padding(
             padding: const EdgeInsets.all(16),
             child: Container(
@@ -63,62 +55,42 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          workout.name,
-                          style: AppTextStyles.titleLarge.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getDifficultyColor(workout.difficulty),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          workout.difficulty,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
                   Text(
-                    workout.description,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                    workout.name,
+                    style: AppTextStyles.titleLarge.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.fitness_center,
-                        size: 18,
-                        color: AppColors.primary,
+                  if ((workout.description ?? '').trim().isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      workout.description!.trim(),
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.textSecondary,
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          'Target Muscles: ${workout.muscleGroups.join(', ')}',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w500,
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  if (muscleGroups.isNotEmpty)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.fitness_center,
+                          size: 18,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Target Muscles: ${muscleGroups.join(', ')}',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -134,29 +106,12 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                       ),
-                      if (workout.estimatedCalories != null) ...[
-                        const SizedBox(width: 20),
-                        Icon(
-                          Icons.local_fire_department,
-                          size: 18,
-                          color: AppColors.accent,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '≈${workout.estimatedCalories} calories',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ],
               ),
             ),
           ),
-
-          // Exercises section header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Align(
@@ -171,15 +126,15 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-
-          // Scrollable exercises list
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: workout.exercises.length,
               itemBuilder: (context, index) {
-                final exercise = workout.exercises[index];
-                
+                final ex = workout.exercises[index];
+                final meta = DataService().getExercise(ex.exerciseId);
+                final displayName =
+                    (meta?.name ?? ex.name).replaceAll('_', ' ').toUpperCase();
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(16),
@@ -216,9 +171,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                (DataService().getExercise(exercise.id)?.name ?? exercise.id)
-                  .replaceAll('_', ' ')
-                  .toUpperCase(),
+                              displayName,
                               style: AppTextStyles.titleSmall.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -229,23 +182,11 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          _buildInfoChip(
-                            Icons.repeat,
-                            '${exercise.setsAmount} sets',
-                          ),
+                          _chip(Icons.repeat, '${ex.sets} sets'),
                           const SizedBox(width: 8),
-                          if (exercise.suggestedReps != null)
-                            _buildInfoChip(
-                              Icons.numbers,
-                              '${exercise.suggestedReps} reps',
-                            ),
-                          if (exercise.suggestedWeight != null) ...[
-                            const SizedBox(width: 8),
-                            _buildInfoChip(
-                              Icons.fitness_center,
-                              '${exercise.suggestedWeight}kg',
-                            ),
-                          ],
+                          _chip(Icons.numbers, '${ex.reps} reps'),
+                          const SizedBox(width: 8),
+                          _chip(Icons.fitness_center, '${ex.weight}kg'),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -258,7 +199,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Rest: ${exercise.restTime}s between sets',
+                            'Rest: ${ex.restTime}s between sets',
                             style: AppTextStyles.bodySmall.copyWith(
                               color: AppColors.textSecondary,
                             ),
@@ -271,8 +212,6 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
               },
             ),
           ),
-
-          // Bottom padding for floating action button
           const SizedBox(height: 80),
         ],
       ),
@@ -283,9 +222,10 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => PrepareToStartWorkoutScreen(
-                  workout: workout,
-                ),
+                builder:
+                    (context) => PrepareToStartWorkoutScreen(
+                      workout: CustomWorkout.fromPersonalWorkout(workout),
+                    ),
               ),
             );
           },
@@ -305,7 +245,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoChip(IconData icon, String text) {
+  Widget _chip(IconData icon, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -315,11 +255,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 14,
-            color: AppColors.primary,
-          ),
+          Icon(icon, size: 14, color: AppColors.primary),
           const SizedBox(width: 4),
           Text(
             text,

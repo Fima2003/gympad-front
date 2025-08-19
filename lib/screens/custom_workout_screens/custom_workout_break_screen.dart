@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/audio_service.dart';
 import 'dart:async';
 import '../../constants/app_styles.dart';
-import '../../models/predefined_workout.dart';
+import '../../models/custom_workout.dart';
 import '../../services/data_service.dart';
 import '../../blocs/workout_bloc.dart';
 import '../../services/global_timer_service.dart';
@@ -12,8 +12,8 @@ import '../../widgets/exercise_chip.dart';
 
 class PredefinedWorkoutBreakScreen extends StatefulWidget {
   final int restTime; // in seconds
-  final PredefinedWorkoutExercise? nextExercise;
-  final List<PredefinedWorkoutExercise> allExercises;
+  final CustomWorkoutExercise? nextExercise;
+  final List<CustomWorkoutExercise> allExercises;
   final int currentExerciseIndex;
   final int currentSetIndex;
   final int totalSets;
@@ -143,7 +143,7 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
     final exercises = widget.allExercises;
     final idx = widget.currentExerciseIndex.clamp(0, exercises.length - 1);
     final previous = exercises.take(idx).toList();
-    final future = idx + 1 < exercises.length ? exercises.sublist(idx + 1) : const <PredefinedWorkoutExercise>[];
+    final future = idx + 1 < exercises.length ? exercises.sublist(idx + 1) : const <CustomWorkoutExercise>[];
 
     return BlocListener<WorkoutBloc, WorkoutState>(
       listener: (context, state) {
@@ -403,7 +403,7 @@ class _PredefinedWorkoutBreakScreenState extends State<PredefinedWorkoutBreakScr
 }
 
 class _PredefinedExerciseChipsRow extends StatelessWidget {
-  final List<PredefinedWorkoutExercise> items;
+  final List<CustomWorkoutExercise> items;
   final ExerciseChipVariant variant;
 
   const _PredefinedExerciseChipsRow({
