@@ -65,11 +65,11 @@ class WorkoutApiService {
 
   /// POST createCustomWorkout
   /// Input is custom workout payload, returns sucess only
-  Future<ApiResponse<void>> createCustomWorkout(
+  Future<ApiResponse<void>> createPersonalWorkout(
     CreatePersonalWorkoutRequest request,
   ) async {
     return _api.post<CreatePersonalWorkoutRequest, void>(
-      'createCustomWorkout',
+      'createPersonalWorkout',
       body: request,
       auth: true,
     );

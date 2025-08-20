@@ -1,5 +1,62 @@
 {
     "exercises": {
+        "standing_shoulder_press": {
+            "name": "Standing Dumbbell Shoulder Press",
+            "description": "Targets shoulders. Push dumbbells overhead in a controlled motion.",
+            "image": "https://example.com/images/standing_shoulder_press_full.gif",
+            "muscleGroup": "shoulders"
+        },
+        "overhead_press": {
+            "name": "Barbell Overhead Press",
+            "description": "Targets shoulders. Press barbell overhead, keeping core tight.",
+            "image": "https://example.com/images/overhead_press_full.gif",
+            "muscleGroup": "shoulders"
+        },
+        "lateral_raises": {
+            "name": "Lateral Raises",
+            "description": "Targets shoulders. Raise dumbbells out to the sides until parallel to the ground.",
+            "image": "https://example.com/images/lateral_raises_full.gif",
+            "muscleGroup": "shoulders"
+        },
+        "cable_face_pulls": {
+            "name": "Cable Face Pulls",
+            "description": "Targets rear delts and upper back. Pull rope towards face, keeping elbows high.",
+            "image": "https://example.com/images/face_pulls_full.gif",
+            "muscleGroup": "shoulders"
+        },
+        "reverse_fly": {
+            "name": "Bent Over Dumbbell Reverse Fly",
+            "description": "Strengthening the rear delts by using the bent over rear delt fly can lead to improved posture and a greater level of strength on other lifts.",
+            "image": "https://example.com/images/reverse_fly_full.gif",
+            "muscleGroup": "shoulders"
+        },
+        "seated_shoulder_press": {
+            "name": "Seated Dumbbell Press",
+            "description": "Utilizing dumbbells as opposed to performing with a barbell will allow the individual to strengthen each side of the muscle equally.",
+            "image": "https://example.com/images/seated_shoulder_press_full.gif",
+            "muscleGroup": "shoulders"
+        },
+        "seated_arnold_press": {
+            "name": "Seated Arnold Press",
+            "description": "The seated Arnold press is a variation of the seated dumbbell press and an exercise utilized to build shoulder muscle size and strength.",
+            "image": "https://example.com/images/seated_arnold_press.gif",
+            "muscleGroup": "shoulders"
+        },
+        "reverse_cable_crossover": {
+            "name": "Reverse Cable Crossover",
+            "description": "Cross your hands in front with cables. pull them all the way to the bottom.",
+            "image": "https://example.com/images/reverse_cable_crossover.gif",
+            "muscleGroup": "shoulders"
+        },
+
+        "shoulder_shrugs": {
+            "name": "Shoulder Shrugs",
+            "description": "Shoulder Shrugs is an exercise where you lift your shoulders straight up towards your ears, holding a weight in each hand.",
+            "image": "https://example.com/images/shoulder_shrugs.gif",
+            "muscleGroup": "back"
+        },
+        
+
         "leg_press": {
             "name": "Leg Press",
             "description": "Targets quadriceps and glutes. Push the platform away from you.",
@@ -24,12 +81,7 @@
             "image": "https://example.com/images/tricep_extensions_full.gif",
             "muscleGroup": "arms"
         },
-        "shoulder_press": {
-            "name": "Shoulder Press",
-            "description": "Targets shoulders. Push handles overhead in a controlled motion.",
-            "image": "https://example.com/images/shoulder_press_machine_full.gif",
-            "muscleGroup": "shoulders"
-        },
+        
         "crunches": {
             "name": "Crunches",
             "description": "Targets upper abs. Lift shoulders off the floor, engaging core.",
@@ -48,12 +100,6 @@
             "image": "https://example.com/images/bench_press_full.gif",
             "muscleGroup": "chest"
         },
-        "overhead_press": {
-            "name": "Dumbbell Overhead Press",
-            "description": "Targets shoulders. Press dumbbells overhead, keeping core tight.",
-            "image": "https://example.com/images/overhead_press_full.gif",
-            "muscleGroup": "shoulders"
-        },
         "deadlifts": {
             "name": "Barbell Deadlifts",
             "description": "Full body exercise. Lift barbell from the floor, keeping back straight, and stand up.",
@@ -65,18 +111,6 @@
             "description": "Targets back. Bend at hips, pull barbell towards lower chest, squeezing shoulder blades.",
             "image": "https://example.com/images/rows_full.gif",
             "muscleGroup": "back"
-        },
-        "lateral_raises": {
-            "name": "Lateral Raises",
-            "description": "Targets shoulders. Raise dumbbells out to the sides until parallel to the ground.",
-            "image": "https://example.com/images/lateral_raises_full.gif",
-            "muscleGroup": "shoulders"
-        },
-        "face_pulls": {
-            "name": "Face Pulls",
-            "description": "Targets rear delts and upper back. Pull rope towards face, keeping elbows high.",
-            "image": "https://example.com/images/face_pulls_full.gif",
-            "muscleGroup": "shoulders"
         },
         "cable_kickbacks": {
             "name": "Cable Kickbacks",

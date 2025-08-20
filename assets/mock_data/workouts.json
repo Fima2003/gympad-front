@@ -59,17 +59,26 @@
             {"id": "rope_spirals", "sets_amount": 3, "weight": 0, "suggested_reps": 8, "rest_time": 60}
         ]
     },
-    "shoulder_burner": {
-        "name": "Shoulder Burner",
-        "description": "Focused shoulder session targeting anterior, lateral, and posterior delts",
+
+    "shoulders_burner": {
+        "name": "Shoulders Burner",
+        "description": "Try lifting up your bag after. I'll bet you can't",
         "difficulty": "Intermediate",
         "muscle_groups": ["Shoulders"],
-        "estimated_calories": 320,
+        "estimated_calories": 500,
         "exercises": [
-            {"id": "overhead_press", "sets_amount": 4, "weight": 20, "suggested_reps": 10, "rest_time": 90},
-            {"id": "shoulder_press", "sets_amount": 4, "weight": 20, "suggested_reps": 10, "rest_time": 90},
-            {"id": "lateral_raises", "sets_amount": 3, "weight": 8, "suggested_reps": 12, "rest_time": 75},
-            {"id": "face_pulls", "sets_amount": 3, "weight": 15, "suggested_reps": 12, "rest_time": 75}
+            {
+                "id": "seated_shoulder_press", "sets_amount": 5, "weight": 16, "suggested_reps": 8
+            },
+            {
+                "id": "lateral_raises", "sets_amount": 5, "weight": 6, "suggested_reps": 30
+            },
+            {
+                "id": "shoulder_shrugs", "sets_amount": 5, "weight": 14, "suggested_reps": 15
+            },
+            {
+                "id": "reverse_cable_crossover", "sets_amount": 5, "weight": 12, "suggested_reps": 12
+            }
         ]
     }
 }

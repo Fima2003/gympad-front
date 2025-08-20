@@ -455,12 +455,12 @@ class _SaveWorkoutScreenState extends State<SaveWorkoutScreen> {
       var finalName = name;
 
       final req = CreatePersonalWorkoutRequest(
-        exercises: exercisesDto,
         name: finalName,
         description: desc.isNotEmpty ? desc : null,
+        exercises: exercisesDto,
       );
 
-      final resp = await WorkoutApiService().createCustomWorkout(req);
+      final resp = await WorkoutApiService().createPersonalWorkout(req);
       if (resp.success) {
         // Refresh personal workouts via BLoC
         if (mounted) {

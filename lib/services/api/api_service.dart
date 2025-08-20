@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gympad/services/logger_service.dart';
 
@@ -92,9 +91,9 @@ class ApiService {
 
   /// Build Firebase Function URL for the given function name
   String _buildFunctionUrl(String functionName) {
-    if(kDebugMode){
-      return '$_baseDomainLocal$functionName';
-    }
+    // if(kDebugMode){
+    //   return '$_baseDomainLocal$functionName';
+    // }
     return 'https://$functionName-$_baseDomain/';
   }
 
