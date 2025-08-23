@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gympad/services/api/api.dart';
+import 'package:gympad/services/api/i_api_service.dart';
 
 void main() {
   group('User API Service Tests', () {
@@ -121,7 +122,6 @@ void main() {
     test('should create success response with data', () {
       final response = ApiResponse.success(
         data: 'test data',
-        message: 'Success message',
       );
 
       expect(response.success, true);

@@ -1,56 +1,24 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gympad/services/api/i_api_service.dart';
 import 'package:gympad/services/logger_service.dart';
 
-/// Generic API response model
-class ApiResponse<T> {
-  final bool success;
-  final T? data;
-  final String? message;
-  final int? status;
-  final String? error;
+import '../hive/user_auth_lss.dart';
 
-  ApiResponse({
-    required this.success,
-    this.data,
-    this.message,
-    this.status,
-    this.error,
-  });
-
-  factory ApiResponse.success({T? data, String? message}) {
-    return ApiResponse(success: true, data: data, message: message);
-  }
-
-  factory ApiResponse.failure({
-    required int status,
-    required String error,
-    String? message,
-  }) {
-    return ApiResponse(
-      success: false,
-      status: status,
-      error: error,
-      message: message,
-    );
-  }
-}
-
-/// Main API service class for handling HTTP requests
-class ApiService {
+class ApiService implements IApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
   ApiService._internal();
 
   late final Dio _dio;
   final AppLogger _logger = AppLogger();
+  final _userAuthStorage = UserAuthLocalStorageService();
 
   // Base domain for Firebase Functions
   static const String _baseDomain = 'ocycwbq2ka-uc.a.run.app';
-  static const String _baseDomainLocal =
-      'http://127.0.0.1:5001/gympad-e44fc/us-central1/';
+  // static const String _baseDomainLocal =
+  // 'http://127.0.0.1:5001/gympad-e44fc/us-central1/';
 
   void initialize() {
     // Note: baseUrl will be set dynamically per request
@@ -99,185 +67,136 @@ class ApiService {
   }
 
   /// GET request
+  @override
   Future<ApiResponse<K>> get<T, K>(
     String fName, {
     T? body,
     bool auth = true,
     K Function(dynamic)? parser,
     Map<String, dynamic>? queryParameters,
-  }) async {
-    try {
-      _logInfo('Making GET request to $fName');
-
-      final options = await _buildRequestOptions(auth);
-      final url = _buildFunctionUrl(fName);
-      final response = await _dio.get(
-        url,
-        options: options,
-        queryParameters: queryParameters,
-      );
-
-      return _handleResponse<K>(response, parser);
-    } catch (e) {
-      // Retry once on auth failure after refreshing token
-      if (e is DioException &&
-          e.type == DioExceptionType.badResponse &&
-          (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
-        _logWarning(
-          'Auth failed (GET $fName). Attempting token refresh and retry.',
-        );
-        final refreshed = await _forceRefreshAuthToken();
-        if (refreshed) {
-          try {
-            final options = await _buildRequestOptions(auth);
-            final url = _buildFunctionUrl(fName);
-            final response = await _dio.get(
-              url,
-              options: options,
-              queryParameters: queryParameters,
-            );
-            return _handleResponse<K>(response, parser);
-          } catch (retryError) {
-            return _handleError<K>(retryError);
-          }
-        }
-      }
-      return _handleError<K>(e);
-    }
-  }
+  }) async => _performRequest<T, K>(
+    method: 'GET',
+    fName: fName,
+    body: body,
+    auth: auth,
+    parser: parser,
+    queryParameters: queryParameters,
+  );
 
   /// POST request
+  @override
   Future<ApiResponse<K>> post<T, K>(
     String fName, {
     T? body,
     bool auth = true,
     K Function(dynamic)? parser,
-  }) async {
-    try {
-      _logInfo('Making POST request to $fName');
-
-      final options = await _buildRequestOptions(auth);
-      final url = _buildFunctionUrl(fName);
-      final response = await _dio.post(
-        url,
-        data: body != null ? jsonEncode(body) : null,
-        options: options,
-      );
-
-      return _handleResponse<K>(response, parser);
-    } catch (e) {
-      if (e is DioException &&
-          e.type == DioExceptionType.badResponse &&
-          (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
-        _logWarning(
-          'Auth failed (POST $fName). Attempting token refresh and retry.',
-        );
-        final refreshed = await _forceRefreshAuthToken();
-        if (refreshed) {
-          try {
-            final options = await _buildRequestOptions(auth);
-            final url = _buildFunctionUrl(fName);
-            final response = await _dio.post(
-              url,
-              data: body != null ? jsonEncode(body) : null,
-              options: options,
-            );
-            return _handleResponse<K>(response, parser);
-          } catch (retryError) {
-            return _handleError<K>(retryError);
-          }
-        }
-      }
-      return _handleError<K>(e);
-    }
-  }
+  }) async => _performRequest<T, K>(
+    method: 'POST',
+    fName: fName,
+    body: body,
+    auth: auth,
+    parser: parser,
+  );
 
   /// PUT request
+  @override
   Future<ApiResponse<K>> put<T, K>(
     String fName, {
     T? body,
     bool auth = true,
     K Function(dynamic)? parser,
-  }) async {
-    try {
-      _logInfo('Making PUT request to $fName');
-
-      final options = await _buildRequestOptions(auth);
-      final url = _buildFunctionUrl(fName);
-      final response = await _dio.put(
-        url,
-        data: body != null ? jsonEncode(body) : null,
-        options: options,
-      );
-
-      return _handleResponse<K>(response, parser);
-    } catch (e) {
-      if (e is DioException &&
-          e.type == DioExceptionType.badResponse &&
-          (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
-        _logWarning(
-          'Auth failed (PUT $fName). Attempting token refresh and retry.',
-        );
-        final refreshed = await _forceRefreshAuthToken();
-        if (refreshed) {
-          try {
-            final options = await _buildRequestOptions(auth);
-            final url = _buildFunctionUrl(fName);
-            final response = await _dio.put(
-              url,
-              data: body != null ? jsonEncode(body) : null,
-              options: options,
-            );
-            return _handleResponse<K>(response, parser);
-          } catch (retryError) {
-            return _handleError<K>(retryError);
-          }
-        }
-      }
-      return _handleError<K>(e);
-    }
-  }
+  }) async => _performRequest<T, K>(
+    method: 'PUT',
+    fName: fName,
+    body: body,
+    auth: auth,
+    parser: parser,
+  );
 
   /// DELETE request
+  @override
   Future<ApiResponse<K>> delete<T, K>(
     String fName, {
     T? body,
     bool auth = true,
     K Function(dynamic)? parser,
+  }) async => _performRequest<T, K>(
+    method: 'DELETE',
+    fName: fName,
+    body: body,
+    auth: auth,
+    parser: parser,
+  );
+
+  /// Centralized request performer with auth-retry handling (DRY)
+  Future<ApiResponse<K>> _performRequest<T, K>({
+    required String method,
+    required String fName,
+    T? body,
+    bool auth = true,
+    K Function(dynamic)? parser,
+    Map<String, dynamic>? queryParameters,
+    int retry = 0,
   }) async {
     try {
-      _logInfo('Making DELETE request to $fName');
-
+      _logInfo('Making $method request to $fName');
       final options = await _buildRequestOptions(auth);
       final url = _buildFunctionUrl(fName);
-      final response = await _dio.delete(
-        url,
-        data: body != null ? jsonEncode(body) : null,
-        options: options,
-      );
+
+      Response response;
+      switch (method) {
+        case 'GET':
+          response = await _dio.get(
+            url,
+            options: options,
+            queryParameters: queryParameters,
+          );
+          break;
+        case 'POST':
+          response = await _dio.post(
+            url,
+            data: body != null ? jsonEncode(body) : null,
+            options: options,
+          );
+          break;
+        case 'PUT':
+          response = await _dio.put(
+            url,
+            data: body != null ? jsonEncode(body) : null,
+            options: options,
+          );
+          break;
+        case 'DELETE':
+          response = await _dio.delete(
+            url,
+            data: body != null ? jsonEncode(body) : null,
+            options: options,
+          );
+          break;
+        default:
+          throw UnsupportedError('Unsupported HTTP method: $method');
+      }
 
       return _handleResponse<K>(response, parser);
     } catch (e) {
       if (e is DioException &&
           e.type == DioExceptionType.badResponse &&
-          (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
+          (e.response?.statusCode == 401 || e.response?.statusCode == 403) &&
+          retry < 1) {
         _logWarning(
-          'Auth failed (DELETE $fName). Attempting token refresh and retry.',
+          'Auth failed ($method $fName). Attempting token refresh and retry.',
         );
         final refreshed = await _forceRefreshAuthToken();
         if (refreshed) {
-          try {
-            final options = await _buildRequestOptions(auth);
-            final url = _buildFunctionUrl(fName);
-            final response = await _dio.delete(
-              url,
-              data: body != null ? jsonEncode(body) : null,
-              options: options,
-            );
-            return _handleResponse<K>(response, parser);
-          } catch (retryError) {
-            return _handleError<K>(retryError);
-          }
+          return _performRequest<T, K>(
+            method: method,
+            fName: fName,
+            body: body,
+            auth: auth,
+            parser: parser,
+            queryParameters: queryParameters,
+            retry: retry + 1,
+          );
         }
       }
       return _handleError<K>(e);
@@ -292,13 +211,12 @@ class ApiService {
         _logWarning('No authenticated user for token refresh');
         return false;
       }
-      final freshToken = await user.getIdToken(true);
-      if (freshToken == null) {
+      final freshToken = await user.getIdTokenResult(true);
+      if (freshToken.token == null) {
         _logWarning('Token refresh returned null token');
         return false;
       }
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', freshToken);
+      await _userAuthStorage.save(authToken: freshToken.token!);
       _logInfo('Auth token refreshed and cached');
       return true;
     } catch (e) {
@@ -316,10 +234,6 @@ class ApiService {
 
       if (token != null) {
         headers['Authorization'] = 'Bearer $token';
-        final tokenParts = token.split('.');
-        for (var i = 0; i < tokenParts.length; i++) {
-          print(tokenParts[i]);
-        }
         _logInfo('Added authorization header');
       } else {
         _logWarning('Authentication required but no token available');
@@ -336,8 +250,8 @@ class ApiService {
   Future<String?> _getAuthToken() async {
     try {
       // First try to get token from local storage
-      final prefs = await SharedPreferences.getInstance();
-      String? cachedToken = prefs.getString('auth_token');
+      final hive = await _userAuthStorage.load();
+      String? cachedToken = hive?.authToken;
 
       if (cachedToken != null) {
         _logInfo('Retrieved auth token from local storage');
@@ -351,7 +265,7 @@ class ApiService {
           final token = await user.getIdToken();
           // Cache the token in local storage for future use
           if (token != null) {
-            await prefs.setString('auth_token', token);
+            await _userAuthStorage.save(authToken: token);
             _logInfo('Retrieved and cached auth token from Firebase');
             return token;
           }
@@ -365,7 +279,7 @@ class ApiService {
             if (reloadedUser != null) {
               final token = await reloadedUser.getIdToken();
               if (token != null) {
-                await prefs.setString('auth_token', token);
+                await _userAuthStorage.save(authToken: token);
                 _logInfo('Retrieved and cached auth token after user reload');
                 return token;
               }
@@ -388,8 +302,7 @@ class ApiService {
   /// Clear cached auth token (call this when user logs out)
   Future<void> clearAuthToken() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('auth_token');
+      await _userAuthStorage.clear();
       _logInfo('Cleared cached auth token');
     } catch (e) {
       _logError('Error clearing auth token', e);
@@ -412,12 +325,11 @@ class ApiService {
 
         if (success) {
           final data = responseData['data'];
-          final message = responseData['message'] as String?;
 
           if (data != null && parser != null) {
             try {
               final parsedData = parser(data);
-              return ApiResponse.success(data: parsedData, message: message);
+              return ApiResponse.success(data: parsedData);
             } catch (e) {
               _logError('Failed to parse response data', e);
               return ApiResponse.failure(
@@ -427,7 +339,7 @@ class ApiService {
               );
             }
           } else {
-            return ApiResponse.success(message: message);
+            return ApiResponse.success(data: data);
           }
         } else {
           // Server returned success: false

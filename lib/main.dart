@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gympad/firebase_options.dart';
 import 'package:gympad/services/api/api.dart';
+import 'services/hive/hive_initializer.dart';
 import 'services/analytics_service.dart';
 import 'services/auth_service.dart';
 import 'services/logger_service.dart';
@@ -40,6 +41,9 @@ Future<void> main() async {
   };
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize Hive & register all adapters centrally
+  await HiveInitializer.init();
 
   runApp(const MyApp());
 }

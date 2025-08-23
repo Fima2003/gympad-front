@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/workout.dart';
 import '../models/workout_exercise.dart';
 import '../models/workout_set.dart';
 import '../services/api/api.dart';
 import '../services/logger_service.dart';
+import 'hive/current_workout_lss.dart';
+import 'hive/workout_history_lss.dart';
 
 enum WorkoutType { custom, free, personal }
 
@@ -14,14 +14,14 @@ class WorkoutService {
   factory WorkoutService() => _instance;
   WorkoutService._internal();
 
-  static const String _currentWorkoutKey = 'current_workout';
-  static const String _workoutHistoryKey = 'workout_history';
-
   final AppLogger _logger = AppLogger();
   final WorkoutApiService _workoutApiService = WorkoutApiService();
 
   Workout? _currentWorkout;
   Workout? get currentWorkout => _currentWorkout;
+
+  final _currentWorkoutStorage = CurrentWorkoutLocalStorageService();
+  final _historyStorage = WorkoutHistoryLocalStorageService();
 
   Future<void> startWorkout(WorkoutType type, {String? name}) async {
     if (_currentWorkout != null && _currentWorkout!.isOngoing) {
@@ -168,27 +168,18 @@ class WorkoutService {
   }
 
   Future<List<Workout>> getWorkoutHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    final historyJson = prefs.getString(_workoutHistoryKey);
-
-    if (historyJson == null) return [];
-
-    final historyList = json.decode(historyJson) as List;
-    return historyList.map((json) => Workout.fromJson(json)).toList();
+    return _historyStorage.getAll();
   }
 
   Future<void> loadCurrentWorkout() async {
-    final prefs = await SharedPreferences.getInstance();
-    final workoutJson = prefs.getString(_currentWorkoutKey);
-
-    if (workoutJson != null) {
-      try {
-        _currentWorkout = Workout.fromJson(json.decode(workoutJson));
+    try {
+      _currentWorkout = await _currentWorkoutStorage.load();
+      if (_currentWorkout != null) {
         _logger.info('Loaded current workout with ID: ${_currentWorkout!.id}');
-      } catch (e, st) {
-        _logger.error('Failed to load current workout', e, st);
-        await _clearCurrentWorkout();
       }
+    } catch (e, st) {
+      _logger.warning('Failed to load current workout', e, st);
+      await _clearCurrentWorkout();
     }
   }
 
@@ -203,30 +194,28 @@ class WorkoutService {
 
   Future<void> _saveCurrentWorkout() async {
     if (_currentWorkout == null) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _currentWorkoutKey,
-      json.encode(_currentWorkout!.toJson()),
-    );
+    try {
+      await _currentWorkoutStorage.save(_currentWorkout!);
+    } catch (e, st) {
+      _logger.warning('Failed to persist current workout', e, st);
+    }
   }
 
   Future<void> _saveWorkoutToHistory() async {
     if (_currentWorkout == null) return;
-
-    final workouts = await getWorkoutHistory();
-    workouts.add(_currentWorkout!);
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _workoutHistoryKey,
-      json.encode(workouts.map((w) => w.toJson()).toList()),
-    );
+    try {
+      await _historyStorage.add(_currentWorkout!);
+    } catch (e, st) {
+      _logger.warning('Failed to save workout to history', e, st);
+    }
   }
 
   Future<void> _clearCurrentWorkout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_currentWorkoutKey);
+    try {
+      await _currentWorkoutStorage.clear();
+    } catch (e, st) {
+      _logger.warning('Failed to clear current workout', e, st);
+    }
   }
 
   Future<void> _uploadWorkout(Workout workout) async {
@@ -281,17 +270,6 @@ class WorkoutService {
   }
 
   Future<void> _markWorkoutAsUploaded(String workoutId) async {
-    final workouts = await getWorkoutHistory();
-    final index = workouts.indexWhere((w) => w.id == workoutId);
-
-    if (index != -1) {
-      workouts[index] = workouts[index].copyWith(isUploaded: true);
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(
-        _workoutHistoryKey,
-        json.encode(workouts.map((w) => w.toJson()).toList()),
-      );
-    }
+    await _historyStorage.markUploaded(workoutId);
   }
 }

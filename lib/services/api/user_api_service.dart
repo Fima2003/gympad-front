@@ -1,20 +1,27 @@
+import 'package:gympad/services/api/i_api_service.dart';
+
 import 'api_service.dart';
 import 'models/user_models.dart';
 
 /// User API service class
 class UserApiService {
   static final UserApiService _instance = UserApiService._internal();
-  factory UserApiService() => _instance;
+  factory UserApiService({IApiService? apiService}) {
+    if (apiService != null) {
+      _instance._api = apiService;
+    }
+    return _instance;
+  }
   UserApiService._internal();
 
-  final ApiService _apiService = ApiService();
+  IApiService _api = ApiService();
 
   /// Get partial user information (name and gymId)
   ///
   /// Returns user's name and optional gym ID
   /// Requires authentication
   Future<ApiResponse<UserPartialResponse>> userPartialRead() async {
-    return await _apiService.get<void, UserPartialResponse>(
+    return await _api.get<void, UserPartialResponse>(
       'userPartialRead',
       auth: true,
       parser:
@@ -28,7 +35,7 @@ class UserApiService {
   /// and timestamp information
   /// Requires authentication
   Future<ApiResponse<UserFullResponse>> userFullRead() async {
-    return await _apiService.get<void, UserFullResponse>(
+    return await _api.get<void, UserFullResponse>(
       'userFullRead',
       auth: true,
       parser: (data) => UserFullResponse.fromJson(data as Map<String, dynamic>),
@@ -53,7 +60,7 @@ class UserApiService {
       );
     }
 
-    return await _apiService.put<UserUpdateRequest, void>(
+    return await _api.put<UserUpdateRequest, void>(
       'userUpdate',
       body: request,
       auth: true,
@@ -66,7 +73,7 @@ class UserApiService {
   /// Returns success message on completion
   /// Requires authentication
   Future<ApiResponse<void>> userDelete() async {
-    return await _apiService.delete<void, void>('userDelete', auth: true);
+    return await _api.delete<void, void>('userDelete', auth: true);
   }
 
   // Convenience methods for easier usage

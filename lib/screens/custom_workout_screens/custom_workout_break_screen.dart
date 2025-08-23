@@ -175,26 +175,28 @@ class _PredefinedWorkoutBreakScreenState
         backgroundColor: const Color(
           0xFF1a1a1a,
         ), // Darker background for better contrast
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF1a1a1a),
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          actions: [
-            IconButton(
-              tooltip: 'Finish workout',
-              icon: const Icon(Icons.flag, color: Colors.white),
-              onPressed: _showFinishDialog,
-            ),
-          ],
-        ),
         body: SafeArea(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              child: Stack(
                 children: [
+                  // Finish flag button (was in AppBar)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: IconButton(
+                      tooltip: 'Finish workout',
+                      icon: const Icon(Icons.flag, color: Colors.white),
+                      onPressed: _showFinishDialog,
+                    ),
+                  ),
+                  // Main scrollable content
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 4),
                   // Rest title
                   Text(
                     'REST TIME',
@@ -419,6 +421,8 @@ class _PredefinedWorkoutBreakScreenState
                     ],
                   ),
                   const SizedBox(height: 20),
+                    ],
+                  ),
                 ],
               ),
             ),

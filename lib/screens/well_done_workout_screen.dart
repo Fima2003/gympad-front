@@ -55,14 +55,8 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Text('Workout Complete!', style: AppTextStyles.appBarTitle),
-      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20).copyWith(top: 60),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

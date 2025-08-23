@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gympad/services/api/user_api_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gympad/services/logger_service.dart';
+import 'hive/user_auth_lss.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -16,20 +16,16 @@ class AuthService {
 
   final AppLogger _logger = AppLogger();
 
-  // Keys for SharedPreferences
-  static const String _userIdKey = 'userId';
-  static const String _gymIdKey = 'gymId';
-  static const String _idTokenKey = 'auth_token';
+  final _userAuthStorage = UserAuthLocalStorageService();
 
   /// Check locally saved user data (userId and gymId exist)
   Future<Map<String, String?>> getLocalUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString(_userIdKey);
-    _logger.debug('Retrieved userId from local storage: $userId');
+    final hive = await _userAuthStorage.load();
+    _logger.debug('Retrieved userId from Hive: ${hive?.userId}');
     return {
-      'userId': userId,
-      'gymId': prefs.getString(_gymIdKey),
-      'auth_token': prefs.getString(_idTokenKey),
+      'userId': hive?.userId,
+      'gymId': hive?.gymId,
+      'auth_token': hive?.authToken,
     };
   }
 
@@ -39,18 +35,16 @@ class AuthService {
     String? gymId,
     String? idToken,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    userId != null && await prefs.setString(_userIdKey, userId);
-    gymId != null && await prefs.setString(_gymIdKey, gymId);
-    idToken != null && await prefs.setString(_idTokenKey, idToken);
+    await _userAuthStorage.save(
+      userId: userId,
+      gymId: gymId,
+      authToken: idToken,
+    );
   }
 
   /// Clear local user data
   Future<void> clearLocalUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_userIdKey);
-    await prefs.remove(_gymIdKey);
-    await prefs.remove(_idTokenKey);
+    await _userAuthStorage.clear();
   }
 
   /// Sign in with Google and register/login with backend
@@ -79,7 +73,7 @@ class AuthService {
       if (user == null) throw Exception('Google sign-in failed');
 
       final idToken = await user.getIdToken();
-      if (idToken == null) throw Exception('Could not verify id token');
+      if (idToken == null) throw Exception('Could not verify token');
 
       // Register/login with backend
       await user.reload();
@@ -99,8 +93,7 @@ class AuthService {
         };
       }
       throw Exception(
-        'Backend registration failed: ${backendResponse.message ?? 'Unknown error'}',
-      );
+        'Registration failed. Try again later.');
     } on GoogleSignInException catch (e) {
       // User canceled or other sign-in error
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
@@ -154,8 +147,7 @@ class AuthService {
         if (user == null) return false;
         final fresh = await user.getIdToken(true);
         if (fresh == null) return false;
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(_idTokenKey, fresh);
+        await _userAuthStorage.save(authToken: fresh);
 
         final retry = await _userApiService.userPartialRead();
         if (retry.success) {
