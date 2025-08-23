@@ -11,7 +11,7 @@ class WorkoutExercisesTable extends StatelessWidget {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    
+
     if (duration.inHours > 0) {
       return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
     } else {
@@ -101,40 +101,41 @@ class WorkoutExercisesTable extends StatelessWidget {
                   ),
                 ),
               ],
-              rows: exercises.map((exercise) {
-                return DataRow(
-                  cells: [
-                    DataCell(
-                      SizedBox(
-                        width: 120,
-                        child: Text(
-                          exercise.name,
-                          style: AppTextStyles.bodyMedium,
-                          overflow: TextOverflow.ellipsis,
+              rows:
+                  exercises.map((exercise) {
+                    return DataRow(
+                      cells: [
+                        DataCell(
+                          SizedBox(
+                            width: 120,
+                            child: Text(
+                              exercise.name,
+                              style: AppTextStyles.bodyMedium,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        exercise.totalSets.toString(),
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        _formatDuration(exercise.duration),
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        '${exercise.averageWeight.toStringAsFixed(1)} kg',
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                    ),
-                  ],
-                );
-              }).toList(),
+                        DataCell(
+                          Text(
+                            exercise.totalSets.toString(),
+                            style: AppTextStyles.bodyMedium,
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            _formatDuration(exercise.duration),
+                            style: AppTextStyles.bodyMedium,
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            '${exercise.averageWeight.toStringAsFixed(1)} kg',
+                            style: AppTextStyles.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
             ),
           ),
         ],

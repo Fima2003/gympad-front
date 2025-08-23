@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../constants/app_styles.dart';
 import '../../models/personal_workout.dart';
-import '../../services/personal_workout_local_service.dart';
+import '../../services/local_storage/personal_workout_local_storage_service.dart';
 import '../../services/data_service.dart';
 import '../../blocs/workout_bloc.dart';
 import 'personal_workout_detail_screen.dart';

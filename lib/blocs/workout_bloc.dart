@@ -8,7 +8,7 @@ import '../services/workout_service.dart';
 import '../services/global_timer_service.dart';
 import '../services/logger_service.dart';
 import '../services/api/workout_api_service.dart';
-import '../services/personal_workout_local_service.dart';
+import '../services/local_storage/personal_workout_local_storage_service.dart';
 
 part 'workout_events.dart';
 part 'workout_state.dart';

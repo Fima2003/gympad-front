@@ -29,14 +29,17 @@ class _WeightSelectorVelocityState extends State<WeightSelectorVelocity> {
   late int _currentIndex; // 1-based index where 1 == minWeight
 
   int get _minIndex => 1;
-  int get _maxIndex => ((widget.maxWeight - widget.minWeight) / _stepKg).round() + 1;
+  int get _maxIndex =>
+      ((widget.maxWeight - widget.minWeight) / _stepKg).round() + 1;
 
-  double get _currentWeight => widget.minWeight + ((_currentIndex - 1) * _stepKg);
+  double get _currentWeight =>
+      widget.minWeight + ((_currentIndex - 1) * _stepKg);
 
   @override
   void initState() {
     super.initState();
-    final rawIndex = ((widget.initialWeight - widget.minWeight) / _stepKg).round() + 1;
+    final rawIndex =
+        ((widget.initialWeight - widget.minWeight) / _stepKg).round() + 1;
     _currentIndex = rawIndex.clamp(_minIndex, _maxIndex);
   }
 
@@ -49,7 +52,8 @@ class _WeightSelectorVelocityState extends State<WeightSelectorVelocity> {
   Widget build(BuildContext context) {
     // One item is one 0.5kg step
     final itemWidth = 65.0;
-    final visibleCount = ((MediaQuery.of(context).size.width / 85).floor() / 2).floor() * 2 + 1;
+    final visibleCount =
+        ((MediaQuery.of(context).size.width / 85).floor() / 2).floor() * 2 + 1;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -157,7 +161,10 @@ class _VelocityScaledFixedExtentPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
     // Inflate fling velocity so it travels further when fast.
     final m = _multiplierForVelocity(velocity);
     return super.createBallisticSimulation(position, velocity * m);

@@ -1,4 +1,3 @@
-
 import 'workout_exercise.dart';
 
 class Workout {
@@ -9,6 +8,7 @@ class Workout {
   DateTime? endTime;
   final bool isUploaded;
   final bool isOngoing;
+
   /// Returns true if this workout is a free workout (no predefined name/id pattern)
   bool get isFreeWorkout {
     // Heuristic: free workouts have id starting with 'free_' or no name
@@ -32,7 +32,8 @@ class Workout {
 
   int get totalExercises => exercises.length;
 
-  int get totalSets => exercises.fold(0, (sum, exercise) => sum + exercise.totalSets);
+  int get totalSets =>
+      exercises.fold(0, (sum, exercise) => sum + exercise.totalSets);
 
   Map<String, dynamic> toJson() {
     return {
@@ -50,9 +51,11 @@ class Workout {
     return Workout(
       id: json['id'] ?? '',
       name: json['name'],
-      exercises: (json['exercises'] as List?)
-          ?.map((exerciseJson) => WorkoutExercise.fromJson(exerciseJson))
-          .toList() ?? [],
+      exercises:
+          (json['exercises'] as List?)
+              ?.map((exerciseJson) => WorkoutExercise.fromJson(exerciseJson))
+              .toList() ??
+          [],
       startTime: DateTime.parse(json['startTime']),
       endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
       isUploaded: json['isUploaded'] ?? false,

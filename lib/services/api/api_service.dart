@@ -49,7 +49,8 @@ class ApiService {
 
   // Base domain for Firebase Functions
   static const String _baseDomain = 'ocycwbq2ka-uc.a.run.app';
-  static const String _baseDomainLocal = 'http://127.0.0.1:5001/gympad-e44fc/us-central1/';
+  static const String _baseDomainLocal =
+      'http://127.0.0.1:5001/gympad-e44fc/us-central1/';
 
   void initialize() {
     // Note: baseUrl will be set dynamically per request
@@ -122,7 +123,9 @@ class ApiService {
       if (e is DioException &&
           e.type == DioExceptionType.badResponse &&
           (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
-        _logWarning('Auth failed (GET $fName). Attempting token refresh and retry.');
+        _logWarning(
+          'Auth failed (GET $fName). Attempting token refresh and retry.',
+        );
         final refreshed = await _forceRefreshAuthToken();
         if (refreshed) {
           try {
@@ -166,7 +169,9 @@ class ApiService {
       if (e is DioException &&
           e.type == DioExceptionType.badResponse &&
           (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
-        _logWarning('Auth failed (POST $fName). Attempting token refresh and retry.');
+        _logWarning(
+          'Auth failed (POST $fName). Attempting token refresh and retry.',
+        );
         final refreshed = await _forceRefreshAuthToken();
         if (refreshed) {
           try {
@@ -210,7 +215,9 @@ class ApiService {
       if (e is DioException &&
           e.type == DioExceptionType.badResponse &&
           (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
-        _logWarning('Auth failed (PUT $fName). Attempting token refresh and retry.');
+        _logWarning(
+          'Auth failed (PUT $fName). Attempting token refresh and retry.',
+        );
         final refreshed = await _forceRefreshAuthToken();
         if (refreshed) {
           try {
@@ -254,7 +261,9 @@ class ApiService {
       if (e is DioException &&
           e.type == DioExceptionType.badResponse &&
           (e.response?.statusCode == 401 || e.response?.statusCode == 403)) {
-        _logWarning('Auth failed (DELETE $fName). Attempting token refresh and retry.');
+        _logWarning(
+          'Auth failed (DELETE $fName). Attempting token refresh and retry.',
+        );
         final refreshed = await _forceRefreshAuthToken();
         if (refreshed) {
           try {
@@ -308,7 +317,7 @@ class ApiService {
       if (token != null) {
         headers['Authorization'] = 'Bearer $token';
         final tokenParts = token.split('.');
-        for(var i=0; i<tokenParts.length; i++){
+        for (var i = 0; i < tokenParts.length; i++) {
           print(tokenParts[i]);
         }
         _logInfo('Added authorization header');

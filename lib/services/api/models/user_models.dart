@@ -3,10 +3,7 @@ class UserPartialResponse {
   final String name;
   final String? gymId;
 
-  UserPartialResponse({
-    required this.name,
-    this.gymId,
-  });
+  UserPartialResponse({required this.name, this.gymId});
 
   factory UserPartialResponse.fromJson(Map<String, dynamic> json) {
     return UserPartialResponse(
@@ -16,10 +13,7 @@ class UserPartialResponse {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'gymId': gymId,
-    };
+    return {'name': name, 'gymId': gymId};
   }
 }
 
@@ -30,28 +24,21 @@ class WorkoutObject {
   final String? name;
   final DateTime? createdAt;
 
-  WorkoutObject({
-    this.id,
-    this.name,
-    this.createdAt,
-  });
+  WorkoutObject({this.id, this.name, this.createdAt});
 
   factory WorkoutObject.fromJson(Map<String, dynamic> json) {
     return WorkoutObject(
       id: json['id'] as String?,
       name: json['name'] as String?,
-      createdAt: json['createdAt'] != null 
-          ? DateTime.tryParse(json['createdAt']) 
-          : null,
+      createdAt:
+          json['createdAt'] != null
+              ? DateTime.tryParse(json['createdAt'])
+              : null,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'createdAt': createdAt?.toIso8601String(),
-    };
+    return {'id': id, 'name': name, 'createdAt': createdAt?.toIso8601String()};
   }
 }
 
@@ -80,9 +67,10 @@ class UserFullResponse {
       email: json['email'] as String,
       name: json['name'] as String,
       gymId: json['gymId'] as String?,
-      workouts: json['workouts'] != null 
-          ? WorkoutObject.fromJson(json['workouts'] as Map<String, dynamic>)
-          : null,
+      workouts:
+          json['workouts'] != null
+              ? WorkoutObject.fromJson(json['workouts'] as Map<String, dynamic>)
+              : null,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       lastLoggedIn: DateTime.parse(json['lastLoggedIn'] as String),
@@ -107,10 +95,7 @@ class UserUpdateRequest {
   final String? name;
   final String? gymId;
 
-  UserUpdateRequest({
-    this.name,
-    this.gymId,
-  });
+  UserUpdateRequest({this.name, this.gymId});
 
   factory UserUpdateRequest.fromJson(Map<String, dynamic> json) {
     return UserUpdateRequest(

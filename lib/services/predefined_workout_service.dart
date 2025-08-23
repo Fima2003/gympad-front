@@ -4,7 +4,8 @@ import '../models/custom_workout.dart';
 import 'logger_service.dart';
 
 class PredefinedWorkoutService {
-  static final PredefinedWorkoutService _instance = PredefinedWorkoutService._internal();
+  static final PredefinedWorkoutService _instance =
+      PredefinedWorkoutService._internal();
   factory PredefinedWorkoutService() => _instance;
   PredefinedWorkoutService._internal();
 
@@ -17,11 +18,13 @@ class PredefinedWorkoutService {
     }
 
     try {
-      final String jsonString = await rootBundle.loadString('assets/mock_data/workouts.json');
+      final String jsonString = await rootBundle.loadString(
+        'assets/mock_data/workouts.json',
+      );
       final Map<String, dynamic> jsonMap = json.decode(jsonString);
-      
+
       final List<CustomWorkout> workouts = [];
-      
+
       jsonMap.forEach((key, value) {
         try {
           workouts.add(CustomWorkout.fromJson(key, value));

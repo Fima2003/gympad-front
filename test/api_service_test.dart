@@ -8,7 +8,7 @@ void main() {
     setUpAll(() async {
       // Initialize Firebase for testing (you'll need to configure this)
       // await Firebase.initializeApp();
-      
+
       // Initialize API service
       ApiService().initialize();
       userApiService = UserApiService();
@@ -18,7 +18,7 @@ void main() {
       test('should return user partial data when authenticated', () async {
         // Note: This test requires a real authenticated user
         // In a real test, you'd mock the API responses
-        
+
         // Mock test - replace with actual test logic
         expect(userApiService, isA<UserApiService>());
       });
@@ -34,7 +34,7 @@ void main() {
       test('should validate input parameters', () async {
         // Test validation logic
         final response = await userApiService.userUpdate();
-        
+
         expect(response.success, false);
         expect(response.error, 'Validation error');
         expect(response.message, contains('At least one parameter'));
@@ -61,10 +61,7 @@ void main() {
 
   group('API Response Model Tests', () {
     test('UserPartialResponse should parse JSON correctly', () {
-      final json = {
-        'name': 'John Doe',
-        'gymId': 'gym123',
-      };
+      final json = {'name': 'John Doe', 'gymId': 'gym123'};
 
       final response = UserPartialResponse.fromJson(json);
 
@@ -73,10 +70,7 @@ void main() {
     });
 
     test('UserPartialResponse should handle null gymId', () {
-      final json = {
-        'name': 'John Doe',
-        'gymId': null,
-      };
+      final json = {'name': 'John Doe', 'gymId': null};
 
       final response = UserPartialResponse.fromJson(json);
 
@@ -94,7 +88,10 @@ void main() {
       expect(validRequest2.isValid(), true);
 
       // Valid request with both
-      final validRequest3 = UserUpdateRequest(name: 'New Name', gymId: 'gym123');
+      final validRequest3 = UserUpdateRequest(
+        name: 'New Name',
+        gymId: 'gym123',
+      );
       expect(validRequest3.isValid(), true);
 
       // Invalid request with neither

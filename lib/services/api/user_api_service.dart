@@ -10,19 +10,20 @@ class UserApiService {
   final ApiService _apiService = ApiService();
 
   /// Get partial user information (name and gymId)
-  /// 
+  ///
   /// Returns user's name and optional gym ID
   /// Requires authentication
   Future<ApiResponse<UserPartialResponse>> userPartialRead() async {
     return await _apiService.get<void, UserPartialResponse>(
       'userPartialRead',
       auth: true,
-      parser: (data) => UserPartialResponse.fromJson(data as Map<String, dynamic>),
+      parser:
+          (data) => UserPartialResponse.fromJson(data as Map<String, dynamic>),
     );
   }
 
   /// Get full user information
-  /// 
+  ///
   /// Returns complete user profile including email, name, gymId, workouts,
   /// and timestamp information
   /// Requires authentication
@@ -35,17 +36,14 @@ class UserApiService {
   }
 
   /// Update user information
-  /// 
+  ///
   /// Updates user's name and/or gymId
   /// At least one parameter must be provided
   /// Returns success message on completion
   /// Requires authentication
-  Future<ApiResponse<void>> userUpdate({
-    String? name,
-    String? gymId,
-  }) async {
+  Future<ApiResponse<void>> userUpdate({String? name, String? gymId}) async {
     final request = UserUpdateRequest(name: name, gymId: gymId);
-    
+
     // Validate that at least one parameter is provided
     if (!request.isValid()) {
       return ApiResponse.failure(
@@ -63,15 +61,12 @@ class UserApiService {
   }
 
   /// Delete user account
-  /// 
+  ///
   /// Permanently deletes the user account
   /// Returns success message on completion
   /// Requires authentication
   Future<ApiResponse<void>> userDelete() async {
-    return await _apiService.delete<void, void>(
-      'userDelete',
-      auth: true,
-    );
+    return await _apiService.delete<void, void>('userDelete', auth: true);
   }
 
   // Convenience methods for easier usage

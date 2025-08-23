@@ -27,7 +27,7 @@ class FreeWorkoutScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  state is WorkoutInProgress 
+                  state is WorkoutInProgress
                       ? 'You have a workout in progress!'
                       : 'Ready to start your workout?',
                   style: AppTextStyles.bodyLarge.copyWith(
@@ -69,9 +69,9 @@ class FreeWorkoutScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                
+
                 // Start Workout Button
-                if (state is! WorkoutInProgress) 
+                if (state is! WorkoutInProgress)
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(horizontal: 20),

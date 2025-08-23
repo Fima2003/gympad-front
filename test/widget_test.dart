@@ -10,25 +10,29 @@ import 'package:gympad/main.dart';
 
 void main() {
   group('GymPad App Tests', () {
-    testWidgets('App should display splash screen initially', (WidgetTester tester) async {
+    testWidgets('App should display splash screen initially', (
+      WidgetTester tester,
+    ) async {
       // Build our app and trigger a frame
       await tester.pumpWidget(const MyApp());
-      
+
       // Wait for the loading to complete
       await tester.pump();
-      
+
       // Verify that the app title appears
       expect(find.text('GymPad'), findsOneWidget);
       expect(find.text('Loading gym data...'), findsOneWidget);
     });
 
-    testWidgets('App should show ready state after loading', (WidgetTester tester) async {
+    testWidgets('App should show ready state after loading', (
+      WidgetTester tester,
+    ) async {
       // Build our app and trigger a frame
       await tester.pumpWidget(const MyApp());
-      
+
       // Wait for the loading to complete
       await tester.pumpAndSettle(const Duration(seconds: 3));
-      
+
       // Verify that the ready state appears
       expect(find.text('GymPad'), findsOneWidget);
       expect(find.text('Scan an NFC tag to get started!'), findsOneWidget);

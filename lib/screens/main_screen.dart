@@ -17,7 +17,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final AuthService _authService = AuthService();
-  int _currentIndex = 0;
   bool _isSigningOut = false;
 
   final List<Widget> _screens = [
@@ -46,7 +45,10 @@ class _MainScreenState extends State<MainScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to sign out: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Failed to sign out: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -56,106 +58,143 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        BlocListener<WorkoutBloc, WorkoutState>(
-          listener: (context, state) {
-            if (state is WorkoutError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
-          child: Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: AppBar(
-              title: Text('GymPad', style: AppTextStyles.appBarTitle),
+    return DefaultTabController(
+      length: 3,
+      child: Stack(
+        children: [
+          BlocListener<WorkoutBloc, WorkoutState>(
+            listener: (context, state) {
+              if (state is WorkoutError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: Scaffold(
               backgroundColor: AppColors.background,
-              elevation: 0,
-              actions: [
-                IconButton(
-                  onPressed: _signOut,
-                  icon: Icon(Icons.logout, color: AppColors.primary),
-                ),
-              ],
-            ),
-            body: IndexedStack(
-              index: _currentIndex,
-              children: _screens,
-            ),
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              backgroundColor: AppColors.white,
-              selectedItemColor: AppColors.primary,
-              unselectedItemColor: AppColors.textSecondary,
-              type: BottomNavigationBarType.fixed,
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.fitness_center),
-                  label: 'Free Workout',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.list_alt),
-                  label: 'Custom Workout',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: 'Personal',
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (_isSigningOut) ...[
-          const ModalBarrier(dismissible: false, color: Colors.black26),
-          Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
+              appBar: AppBar(
+                title: Text('GymPad', style: AppTextStyles.appBarTitle),
+                backgroundColor: AppColors.background,
+                elevation: 0,
+                actions: [
+                  IconButton(
+                    onPressed: _signOut,
+                    icon: Icon(Icons.logout, color: AppColors.primary),
                   ),
                 ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                    ),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(56),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: _TopTabSlider(),
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Signing you out…',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+                ),
               ),
+              body: TabBarView(children: _screens),
+              // bottomNavigationBar: BottomNavigationBar(
+              //   currentIndex: 0,
+              //   onTap: (_) {},
+              //   backgroundColor: AppColors.white,
+              //   selectedItemColor: AppColors.primary,
+              //   unselectedItemColor: AppColors.textSecondary,
+              //   type: BottomNavigationBarType.fixed,
+              //   items: const [
+              //     BottomNavigationBarItem(
+              //       icon: Icon(Icons.dashboard_customize),
+              //       label: 'Workouts',
+              //     ),
+              //   ],
+              // ),
             ),
           ),
+          if (_isSigningOut) ...[
+            const ModalBarrier(dismissible: false, color: Colors.black26),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.accent.withValues(alpha: 0.4),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Signing you out…',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
+    );
+  }
+}
+
+class _TopTabSlider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.accent),
+      ),
+      child: TabBar(
+        dividerColor: Colors.transparent,
+        dividerHeight: 0,
+        indicator: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelColor: Colors.white,
+        unselectedLabelColor: AppColors.primary,
+        labelStyle: AppTextStyles.bodyMedium.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: AppTextStyles.bodyMedium,
+        tabs: const [
+          Tab(text: 'Free'),
+          Tab(text: 'Custom'),
+          Tab(text: 'Personal'),
+        ],
+      ),
     );
   }
 }

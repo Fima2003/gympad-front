@@ -9,17 +9,13 @@ import 'free_workout_screens/save_workout_screen.dart';
 class WellDoneWorkoutScreen extends StatefulWidget {
   final Workout workout;
 
-  const WellDoneWorkoutScreen({
-    super.key,
-    required this.workout,
-  });
+  const WellDoneWorkoutScreen({super.key, required this.workout});
 
   @override
   State<WellDoneWorkoutScreen> createState() => _WellDoneWorkoutScreenState();
 }
 
 class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -34,7 +30,8 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
     const phoneNumber = '+972548946639';
     const message =
         'Hi! I just used your GymPad app and wanted to share my feedback about my workout.';
-    final uri = Uri.parse( 'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}',
+    final uri = Uri.parse(
+      'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}',
     );
 
     if (await canLaunchUrl(uri)) {
@@ -46,7 +43,7 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    
+
     if (duration.inHours > 0) {
       return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
     } else {
@@ -80,11 +77,7 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
               ),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.celebration,
-                    size: 64,
-                    color: AppColors.primary,
-                  ),
+                  Icon(Icons.celebration, size: 64, color: AppColors.primary),
                   const SizedBox(height: 16),
                   Text(
                     'Well Done!',
@@ -109,15 +102,14 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
               decoration: BoxDecoration(
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Workout Summary',
-                    style: AppTextStyles.titleMedium,
-                  ),
+                  Text('Workout Summary', style: AppTextStyles.titleMedium),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -158,7 +150,10 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                    onPressed:
+                        () => Navigator.of(
+                          context,
+                        ).popUntil((route) => route.isFirst),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.white,
@@ -208,7 +203,9 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => SaveWorkoutScreen(workout: widget.workout),
+                        builder:
+                            (context) =>
+                                SaveWorkoutScreen(workout: widget.workout),
                       ),
                     );
                   },
@@ -247,14 +244,8 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
           child: Icon(icon, color: AppColors.primary, size: 24),
         ),
         const SizedBox(height: 8),
-        Text(
-          value,
-          style: AppTextStyles.titleMedium.copyWith(fontSize: 18),
-        ),
-        Text(
-          title,
-          style: AppTextStyles.bodySmall,
-        ),
+        Text(value, style: AppTextStyles.titleMedium.copyWith(fontSize: 18)),
+        Text(title, style: AppTextStyles.bodySmall),
       ],
     );
   }

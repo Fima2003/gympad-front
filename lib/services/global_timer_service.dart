@@ -10,7 +10,8 @@ class GlobalTimerService {
   Duration _elapsedTime = Duration.zero;
   bool _isRunning = false;
 
-  final StreamController<Duration> _timerController = StreamController.broadcast();
+  final StreamController<Duration> _timerController =
+      StreamController.broadcast();
   Stream<Duration> get timerStream => _timerController.stream;
 
   bool get isRunning => _isRunning;
@@ -19,10 +20,10 @@ class GlobalTimerService {
 
   void start() {
     if (_isRunning) return;
-    
+
     _startTime ??= DateTime.now();
     _isRunning = true;
-    
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_startTime != null) {
         _elapsedTime = DateTime.now().difference(_startTime!);
@@ -33,7 +34,7 @@ class GlobalTimerService {
 
   void stop() {
     if (!_isRunning) return;
-    
+
     _isRunning = false;
     _timer?.cancel();
     _timer = null;

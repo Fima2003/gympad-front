@@ -7,10 +7,7 @@ import '../../services/data_service.dart';
 class PredefinedWorkoutDetailScreen extends StatelessWidget {
   final CustomWorkout workout;
 
-  const PredefinedWorkoutDetailScreen({
-    super.key,
-    required this.workout,
-  });
+  const PredefinedWorkoutDetailScreen({super.key, required this.workout});
 
   Color _getDifficultyColor(String difficulty) {
     switch (difficulty.toLowerCase()) {
@@ -36,10 +33,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
           icon: Icon(Icons.arrow_back, color: AppColors.primary),
         ),
-        title: Text(
-          workout.name,
-          style: AppTextStyles.appBarTitle,
-        ),
+        title: Text(workout.name, style: AppTextStyles.appBarTitle),
       ),
       body: Column(
         children: [
@@ -179,7 +173,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
               itemCount: workout.exercises.length,
               itemBuilder: (context, index) {
                 final exercise = workout.exercises[index];
-                
+
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(16),
@@ -216,9 +210,10 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                (DataService().getExercise(exercise.id)?.name ?? exercise.id)
-                  .replaceAll('_', ' ')
-                  .toUpperCase(),
+                              (DataService().getExercise(exercise.id)?.name ??
+                                      exercise.id)
+                                  .replaceAll('_', ' ')
+                                  .toUpperCase(),
                               style: AppTextStyles.titleSmall.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -283,9 +278,8 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => PrepareToStartWorkoutScreen(
-                  workout: workout,
-                ),
+                builder:
+                    (context) => PrepareToStartWorkoutScreen(workout: workout),
               ),
             );
           },
@@ -315,11 +309,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 14,
-            color: AppColors.primary,
-          ),
+          Icon(icon, size: 14, color: AppColors.primary),
           const SizedBox(width: 4),
           Text(
             text,

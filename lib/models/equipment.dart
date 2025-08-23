@@ -3,11 +3,7 @@ class Equipment {
   final String type;
   final dynamic data;
 
-  Equipment({
-    required this.id,
-    required this.type,
-    required this.data,
-  });
+  Equipment({required this.id, required this.type, required this.data});
 
   factory Equipment.fromJson(String id, Map<String, dynamic> json) {
     return Equipment(

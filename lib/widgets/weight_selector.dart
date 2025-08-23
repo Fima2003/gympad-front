@@ -25,11 +25,11 @@ class _WeightSelectorState extends State<WeightSelector> {
   @override
   void initState() {
     super.initState();
-  // Convert double weight to int index (2.5kg = 1, 5.0kg = 2, etc.)
-  final rawIndex =
-    ((widget.initialWeight - _minWeight) / _increment).round() + 1;
-  // Clamp to valid range to satisfy NumberPicker assertion
-  _currentWeightInt = rawIndex.clamp(_minValue, _maxValue);
+    // Convert double weight to int index (2.5kg = 1, 5.0kg = 2, etc.)
+    final rawIndex =
+        ((widget.initialWeight - _minWeight) / _increment).round() + 1;
+    // Clamp to valid range to satisfy NumberPicker assertion
+    _currentWeightInt = rawIndex.clamp(_minValue, _maxValue);
   }
 
   double get _currentWeight =>
@@ -76,7 +76,10 @@ class _WeightSelectorState extends State<WeightSelector> {
             axis: Axis.horizontal,
             itemHeight: 80,
             itemWidth: 65,
-            itemCount: ((MediaQuery.of(context).size.width / 85).floor() / 2).floor() * 2 + 1,
+            itemCount:
+                ((MediaQuery.of(context).size.width / 85).floor() / 2).floor() *
+                    2 +
+                1,
             step: 1,
             haptics: true,
             onChanged: _onWeightChanged,

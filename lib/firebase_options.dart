@@ -70,9 +70,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '29559896656',
     projectId: 'gympad-e44fc',
     storageBucket: 'gympad-e44fc.firebasestorage.app',
-    androidClientId: '29559896656-53rd7l0smrnlm73q3ej9obeadbgfr3sl.apps.googleusercontent.com',
-    iosClientId: '29559896656-khbnite9chiu6cq5bbd69j34a5hm09ei.apps.googleusercontent.com',
+    androidClientId:
+        '29559896656-53rd7l0smrnlm73q3ej9obeadbgfr3sl.apps.googleusercontent.com',
+    iosClientId:
+        '29559896656-khbnite9chiu6cq5bbd69j34a5hm09ei.apps.googleusercontent.com',
     iosBundleId: 'com.gympad.gympad',
   );
-
 }

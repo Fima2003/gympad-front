@@ -49,9 +49,11 @@ class WorkoutExercise {
       name: json['name'] ?? '',
       equipmentId: json['equipmentId'],
       muscleGroup: json['muscleGroup'] ?? '',
-      sets: (json['sets'] as List?)
-          ?.map((setJson) => WorkoutSet.fromJson(setJson))
-          .toList() ?? [],
+      sets:
+          (json['sets'] as List?)
+              ?.map((setJson) => WorkoutSet.fromJson(setJson))
+              .toList() ??
+          [],
       startTime: DateTime.parse(json['startTime']),
       endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
     );

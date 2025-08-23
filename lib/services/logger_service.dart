@@ -7,14 +7,14 @@ class AppLogger {
   AppLogger._internal();
 
   late final Logger _logger;
-  
+
   static const String _loggerName = 'GymPad';
 
   /// Initialize the logger with the specified level
   void initialize({Level level = Level.INFO}) {
     // Enable hierarchical logging
     hierarchicalLoggingEnabled = true;
-    
+
     _logger = Logger(_loggerName);
     _logger.level = level;
 
@@ -25,13 +25,13 @@ class AppLogger {
       final level = record.level.name.padRight(7);
       final loggerName = record.loggerName.padRight(10);
       final message = record.message;
-      
+
       print('[$time] [$level] [$loggerName] $message');
-      
+
       if (record.error != null) {
         print('  Error: ${record.error}');
       }
-      
+
       if (record.stackTrace != null) {
         print('  Stack trace: ${record.stackTrace}');
       }

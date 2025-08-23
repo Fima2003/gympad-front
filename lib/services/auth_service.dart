@@ -147,7 +147,9 @@ class AuthService {
 
       // If unauthorized/forbidden, refresh and retry once
       if (res.status == 401 || res.status == 403) {
-        _logger.info('Token likely expired. Refreshing and retrying userPartialRead.');
+        _logger.info(
+          'Token likely expired. Refreshing and retrying userPartialRead.',
+        );
         final user = _auth.currentUser;
         if (user == null) return false;
         final fresh = await user.getIdToken(true);
@@ -166,7 +168,9 @@ class AuthService {
         }
       }
 
-      _logger.warning('fetchUserOnAppStartWithRetry failed: status=${res.status}, error=${res.error}, message=${res.message}');
+      _logger.warning(
+        'fetchUserOnAppStartWithRetry failed: status=${res.status}, error=${res.error}, message=${res.message}',
+      );
       return false;
     } catch (e, st) {
       _logger.error('fetchUserOnAppStartWithRetry error', e, st);

@@ -15,26 +15,30 @@ import 'screens/main_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize logger
   AppLogger().initialize();
   final logger = AppLogger();
-  
+
   // Global Flutter error handler
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     // Log to console
-    logger.error('FlutterError: ${details.exception}', details.exception, details.stack);
+    logger.error(
+      'FlutterError: ${details.exception}',
+      details.exception,
+      details.stack,
+    );
   };
-  
+
   ApiService().initialize();
-  
+
   // Catch all uncaught errors
   PlatformDispatcher.instance.onError = (error, stack) {
     logger.error('Uncaught Dart error', error, stack);
     return true; // Prevent default handling
   };
-  
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
@@ -55,7 +59,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           scaffoldBackgroundColor: AppColors.background,
         ),
-  home: const SplashScreen(),
+        home: const SplashScreen(),
         routes: {
           '/main': (context) => const MainScreen(),
           '/login': (context) => const LoginScreen(),
@@ -82,13 +86,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-  // Perform startup flow: load data, then navigate to main/login
-  _startupFlow();
+    // Perform startup flow: load data, then navigate to main/login
+    _startupFlow();
   }
 
   Future<void> _startupFlow() async {
     _logger.info('Splash: startupFlow begin');
-  // Load local data required for navigation
+    // Load local data required for navigation
     await _dataService.loadData();
     _logger.debug('Splash: data loaded');
 
@@ -104,7 +108,9 @@ class _SplashScreenState extends State<SplashScreen> {
     if (_authService.isSignedIn) {
       try {
         final ok = await _authService.fetchUserOnAppStartWithRetry();
-        _logger.info('Splash: backend user fetch ${ok ? 'succeeded' : 'failed'}');
+        _logger.info(
+          'Splash: backend user fetch ${ok ? 'succeeded' : 'failed'}',
+        );
       } catch (e, st) {
         _logger.warning('Splash: backend user fetch failed', e, st);
       }
@@ -117,7 +123,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-  // Proceed to Main/Login
+    // Proceed to Main/Login
     setState(() => _isLoading = false);
     if (_navigated || !mounted) return;
     _navigated = true;

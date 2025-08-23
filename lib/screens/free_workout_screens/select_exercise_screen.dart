@@ -6,7 +6,7 @@ import 'exercise_screen.dart';
 
 class SelectExerciseScreen extends StatefulWidget {
   final String? selectedMuscleGroup;
-  
+
   const SelectExerciseScreen({super.key, this.selectedMuscleGroup});
 
   @override
@@ -16,7 +16,7 @@ class SelectExerciseScreen extends StatefulWidget {
 class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
   final DataService _dataService = DataService();
   final TextEditingController _searchController = TextEditingController();
-  
+
   String? _selectedGroup;
   List<Exercise> _filteredExercises = [];
   String _searchQuery = '';
@@ -30,20 +30,26 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
 
   void _updateFilteredExercises() {
     final allExercises = _dataService.getAllExercises();
-    
+
     if (_searchQuery.isNotEmpty) {
-      _filteredExercises = allExercises.where((exercise) {
-        return exercise.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-               exercise.muscleGroup.toLowerCase().contains(_searchQuery.toLowerCase());
-      }).toList();
+      _filteredExercises =
+          allExercises.where((exercise) {
+            return exercise.name.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ||
+                exercise.muscleGroup.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                );
+          }).toList();
     } else if (_selectedGroup != null) {
-      _filteredExercises = allExercises.where((exercise) {
-        return exercise.muscleGroup == _selectedGroup;
-      }).toList();
+      _filteredExercises =
+          allExercises.where((exercise) {
+            return exercise.muscleGroup == _selectedGroup;
+          }).toList();
     } else {
       _filteredExercises = [];
     }
-    
+
     setState(() {});
   }
 
@@ -79,10 +85,9 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
     // Workout will be created when user presses "Start Set"
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ExerciseScreen(
-          exercise: exercise,
-          isPartOfWorkout: true,
-        ),
+        builder:
+            (context) =>
+                ExerciseScreen(exercise: exercise, isPartOfWorkout: true),
       ),
     );
   }
@@ -96,31 +101,33 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: _selectedGroup != null
-            ? TextButton(
-                onPressed: _goBack,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'GROUPS',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 6,
-                    fontWeight: FontWeight.w600,
+        leading:
+            _selectedGroup != null
+                ? TextButton(
+                  onPressed: _goBack,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
+                  child: Text(
+                    'GROUPS',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 6,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+                : IconButton(
+                  icon: Icon(Icons.arrow_back, color: AppColors.primary),
+                  onPressed: _goBack,
+                  tooltip: 'Back',
                 ),
-                
-              )
-            : IconButton(
-                icon: Icon(Icons.arrow_back, color: AppColors.primary),
-                onPressed: _goBack,
-                tooltip: 'Back',
-              ),
         title: Text(
-          _selectedGroup != null ? _selectedGroup!.toUpperCase() : 'SELECT EXERCISE',
+          _selectedGroup != null
+              ? _selectedGroup!.toUpperCase()
+              : 'SELECT EXERCISE',
           style: AppTextStyles.appBarTitle,
         ),
       ),
@@ -134,11 +141,15 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
                 hintText: 'Search exercises or muscle groups...',
-                hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                hintStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
                 prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
+                  borderSide: BorderSide(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -149,10 +160,8 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
               ),
             ),
           ),
-          
-          Expanded(
-            child: _buildContent(muscleGroups),
-          ),
+
+          Expanded(child: _buildContent(muscleGroups)),
         ],
       ),
     );
@@ -181,8 +190,9 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
         itemCount: muscleGroups.length,
         itemBuilder: (context, index) {
           final group = muscleGroups[index];
-          final exerciseCount = _dataService.getExercisesForMuscleGroup(group).length;
-          
+          final exerciseCount =
+              _dataService.getExercisesForMuscleGroup(group).length;
+
           return _buildMuscleGroupCard(group, exerciseCount);
         },
       ),
@@ -253,12 +263,16 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
             const SizedBox(height: 16),
             Text(
               'No exercises found',
-              style: AppTextStyles.titleMedium.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.titleMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Try a different search term',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -321,7 +335,9 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
               const SizedBox(height: 12),
               Text(
                 exercise.name,
-                style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
