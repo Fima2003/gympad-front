@@ -6,7 +6,7 @@ import '../../models/exercise.dart';
 import '../../models/workout.dart';
 import '../../models/workout_exercise.dart';
 import '../../models/workout_set.dart';
-import '../../blocs/workout_bloc.dart';
+import '../../blocs/workout/workout_bloc.dart';
 import '../../services/global_timer_service.dart';
 import '../well_done_workout_screen.dart';
 import '../../widgets/exercise_chip.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_styles.dart';
-import '../services/auth_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../blocs/auth/auth_bloc.dart';
 import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -11,38 +12,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final AuthService _authService = AuthService();
-  bool _isLoading = false;
-
-  Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final result = await _authService.signInWithGoogle();
-
-      if (result != null && result['success'] == true) {
-        // Navigate to main screen
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const MainScreen()),
-          );
-        }
-      } else if (result != null && result['success'] == false) {
-        // Show error
-        if (mounted) {
-          _showErrorDialog(result['error'] ?? 'Unknown error occurred');
-        }
-      }
-      // If result is null, user canceled the sign-in
-    } catch (e) {
-      if (mounted) {
-        _showErrorDialog('An unexpected error occurred: $e');
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+  void _signInWithGoogle() {
+    context.read<AuthBloc>().add(AuthSignInRequested());
   }
 
   void _showErrorDialog(String message) {
@@ -64,9 +35,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+  final authState = context.watch<AuthBloc>().state;
+  return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthAuthenticated) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const MainScreen()),
+            );
+          } else if (state is AuthError) {
+            _showErrorDialog(state.message);
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.all(40),
           child: Column(
@@ -111,8 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 60),
 
-              // Sign In with Google button
-              if (_isLoading)
+              // Sign In with Google button / progress
+              if (authState is AuthLoading) ...[
                 Column(
                   children: [
                     CircularProgressIndicator(color: AppColors.primary),
@@ -125,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 )
-              else
+              ] else ...[
                 Container(
                   width: double.infinity,
                   height: 56,
@@ -150,6 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
+              ],
 
               const SizedBox(height: 40),
 

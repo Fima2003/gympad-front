@@ -5,7 +5,7 @@ import '../../models/gym.dart';
 import '../../models/exercise.dart';
 import '../../models/workout_set.dart';
 import '../../services/global_timer_service.dart';
-import '../../blocs/workout_bloc.dart';
+import '../../blocs/workout/workout_bloc.dart';
 import '../../services/workout_service.dart';
 import '../../widgets/velocity_weight_selector.dart';
 import 'dart:async';

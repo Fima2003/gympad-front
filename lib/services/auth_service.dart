@@ -92,8 +92,7 @@ class AuthService {
           'user': user,
         };
       }
-      throw Exception(
-        'Registration failed. Try again later.');
+      throw Exception('Registration failed. Try again later.');
     } on GoogleSignInException catch (e) {
       // User canceled or other sign-in error
       if (e.code == GoogleSignInExceptionCode.canceled) return null;

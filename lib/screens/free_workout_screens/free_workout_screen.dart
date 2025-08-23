@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/workout_bloc.dart';
+import '../../blocs/workout/workout_bloc.dart';
 import '../../constants/app_styles.dart';
 import 'select_exercise_screen.dart';
 

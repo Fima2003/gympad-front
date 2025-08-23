@@ -4,7 +4,7 @@ import '../../constants/app_styles.dart';
 import '../../models/personal_workout.dart';
 import '../../services/hive/personal_workout_lss.dart';
 import '../../services/data_service.dart';
-import '../../blocs/workout_bloc.dart';
+import '../../blocs/workout/workout_bloc.dart';
 import 'personal_workout_detail_screen.dart';
 
 class PersonalWorkoutsScreen extends StatefulWidget {

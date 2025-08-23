@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../../models/workout.dart';
 import '../../models/workout_exercise.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/workout_bloc.dart';
+import '../../blocs/workout/workout_bloc.dart';
 import '../../models/workout_set.dart';
 import '../../services/api/workout_api_service.dart';
 import '../../services/api/models/workout_models.dart';

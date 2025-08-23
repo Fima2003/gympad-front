@@ -6,11 +6,11 @@ import 'package:gympad/firebase_options.dart';
 import 'package:gympad/services/api/api.dart';
 import 'services/hive/hive_initializer.dart';
 import 'services/analytics_service.dart';
-import 'services/auth_service.dart';
 import 'services/logger_service.dart';
 import 'constants/app_styles.dart';
 import 'services/data_service.dart';
-import 'blocs/workout_bloc.dart';
+import 'blocs/workout/workout_bloc.dart';
+import 'blocs/auth/auth_bloc.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
 
@@ -53,8 +53,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<WorkoutBloc>(
-      create: (context) => WorkoutBloc()..add(WorkoutLoaded()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<WorkoutBloc>(
+          create: (context) => WorkoutBloc()..add(WorkoutLoaded()),
+        ),
+        BlocProvider<AuthBloc>(
+          create: (context) => AuthBloc(),
+        ),
+      ],
       child: MaterialApp(
         title: 'GymPad',
         debugShowCheckedModeBanner: false,
@@ -82,7 +89,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   final DataService _dataService = DataService();
-  final AuthService _authService = AuthService();
   final AppLogger _logger = AppLogger();
   bool _isLoading = true;
   bool _navigated = false; // prevent double navigation
@@ -109,45 +115,36 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     // If signed in, fetch user from backend (refresh token and retry if needed)
-    if (_authService.isSignedIn) {
-      try {
-        final ok = await _authService.fetchUserOnAppStartWithRetry();
-        _logger.info(
-          'Splash: backend user fetch ${ok ? 'succeeded' : 'failed'}',
-        );
-      } catch (e, st) {
-        _logger.warning('Splash: backend user fetch failed', e, st);
-      }
-    }
-
-    // Check local user auth state (fallback navigation)
-    final localUserData = await _authService.getLocalUserData();
-    final userId = localUserData['userId'];
-    _logger.info('Splash: local userId=$userId');
-
-    if (!mounted) return;
-
-    // Proceed to Main/Login
-    setState(() => _isLoading = false);
-    if (_navigated || !mounted) return;
-    _navigated = true;
-    if (userId != null) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainScreen()),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    }
+  if (!mounted) return;
+  // Kick off auth determination after data work
+  context.read<AuthBloc>().add(AuthAppStarted());
+  setState(() => _isLoading = false);
   }
 
   // No deep-link error dialogs needed; keeping UI clean.
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (_navigated) return;
+        if (state is AuthAuthenticated) {
+          _navigated = true;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainScreen()),
+          );
+        } else if (state is AuthUnauthenticated) {
+          _navigated = true;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+          );
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Scaffold(
         backgroundColor: AppColors.background,
         body: Center(
           child: Column(
@@ -161,81 +158,16 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              CircularProgressIndicator(color: AppColors.primary),
+              if (_isLoading || context.watch<AuthBloc>().state is AuthLoading)
+                CircularProgressIndicator(color: AppColors.primary)
+              else
+                Icon(Icons.nfc, size: 64, color: AppColors.primary),
               const SizedBox(height: 16),
               Text(
-                'Loading gym data...',
+                _isLoading ? 'Loading gym data...' : 'Initializing...',
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textSecondary,
                 ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'GymPad',
-                style: AppTextStyles.titleLarge.copyWith(
-                  fontSize: 48,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Scan an NFC tag to get started!',
-                style: AppTextStyles.titleMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 40),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.accent, width: 2),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.nfc, size: 64, color: AppColors.primary),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Ready to scan',
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 60),
-
-              // Development Mode Button
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-              ),
-
-              const SizedBox(height: 20),
-
-              Text(
-                'This is a test application.\nAll data is saved locally on your device.',
-                style: AppTextStyles.bodySmall.copyWith(
-                  fontStyle: FontStyle.italic,
-                ),
-                textAlign: TextAlign.center,
               ),
             ],
           ),

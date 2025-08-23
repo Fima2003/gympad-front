@@ -15,11 +15,11 @@ class ApiResponse<T> {
   });
 
   factory ApiResponse.success({required T data}) {
-    return ApiResponse(success: true, data: data);
+    return ApiResponse(success: true, status: 200, data: data);
   }
 
   factory ApiResponse.successEmpty() {
-    return ApiResponse(success: true);
+    return ApiResponse(success: true, status: 200);
   }
 
   factory ApiResponse.failure({

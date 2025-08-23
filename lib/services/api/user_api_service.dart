@@ -16,6 +16,9 @@ class UserApiService {
 
   IApiService _api = ApiService();
 
+  // Exposed for testing / inspection
+  IApiService get exposedApi => _api;
+
   /// Get partial user information (name and gymId)
   ///
   /// Returns user's name and optional gym ID
@@ -52,11 +55,12 @@ class UserApiService {
     final request = UserUpdateRequest(name: name, gymId: gymId);
 
     // Validate that at least one parameter is provided
-    if (!request.isValid()) {
+    final validity = request.isValid();
+    if (validity != "Success") {
       return ApiResponse.failure(
         status: 400,
         error: 'Validation error',
-        message: 'At least one parameter (name or gymId) must be provided',
+        message: validity,
       );
     }
 

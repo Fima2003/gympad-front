@@ -5,7 +5,7 @@ import 'dart:async';
 import '../../constants/app_styles.dart';
 import '../../models/custom_workout.dart';
 import '../../services/data_service.dart';
-import '../../blocs/workout_bloc.dart';
+import '../../blocs/workout/workout_bloc.dart';
 import '../../services/global_timer_service.dart';
 import '../well_done_workout_screen.dart';
 import '../../widgets/exercise_chip.dart';
@@ -197,76 +197,141 @@ class _PredefinedWorkoutBreakScreenState
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 4),
-                  // Rest title
-                  Text(
-                    'REST TIME',
-                    style: AppTextStyles.titleLarge.copyWith(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // Countdown timer with circular progress
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        width: 200,
-                        height: 200,
-                        child: CircularProgressIndicator(
-                          value: (_totalTime - _remainingTime) / _totalTime,
-                          strokeWidth: 8,
-                          backgroundColor: Colors.white.withValues(alpha: 0.2),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.accent,
-                          ),
+                      // Rest title
+                      Text(
+                        'REST TIME',
+                        style: AppTextStyles.titleLarge.copyWith(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                      Column(
+
+                      const SizedBox(height: 40),
+
+                      // Countdown timer with circular progress
+                      Stack(
+                        alignment: Alignment.center,
                         children: [
-                          Text(
-                            _formatTime(_remainingTime),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
+                          SizedBox(
+                            width: 200,
+                            height: 200,
+                            child: CircularProgressIndicator(
+                              value: (_totalTime - _remainingTime) / _totalTime,
+                              strokeWidth: 8,
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.2,
+                              ),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.accent,
+                              ),
                             ),
                           ),
-                          Text(
-                            'remaining',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: Colors.white70,
-                            ),
+                          Column(
+                            children: [
+                              Text(
+                                _formatTime(_remainingTime),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'remaining',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
 
-                  const SizedBox(height: 40),
+                      const SizedBox(height: 40),
 
-                  // Next exercise info (optional)
-                  if (widget.nextExercise != null)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1),
+                      // Next exercise info (optional)
+                      if (widget.nextExercise != null)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              // Explicit NEXT label
+                              Text(
+                                'NEXT:',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                (DataService()
+                                            .getExercise(
+                                              widget.nextExercise!.id,
+                                            )
+                                            ?.name ??
+                                        widget.nextExercise!.id)
+                                    .replaceAll('_', ' ')
+                                    .toUpperCase(),
+                                style: AppTextStyles.titleMedium.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Set ${widget.currentSetIndex + 1} of ${widget.totalSets}',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      child: Column(
+
+                      const SizedBox(height: 24),
+
+                      // Visual chips: previous (check), future (clock). Current is the Next box above.
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Explicit NEXT label
+                          if (previous.isNotEmpty) ...[
+                            _PredefinedExerciseChipsRow(
+                              items: previous,
+                              variant: ExerciseChipVariant.previous,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          if (future.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            _PredefinedExerciseChipsRow(
+                              items: future,
+                              variant: ExerciseChipVariant.future,
+                            ),
+                          ],
+                        ],
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      // Workout progress bar
+                      Column(
+                        children: [
                           Text(
-                            'NEXT:',
+                            'WORKOUT PROGRESS',
                             style: AppTextStyles.bodyMedium.copyWith(
                               color: Colors.white70,
                               fontWeight: FontWeight.w600,
@@ -274,153 +339,94 @@ class _PredefinedWorkoutBreakScreenState
                             ),
                           ),
                           const SizedBox(height: 12),
-                          Text(
-                            (DataService()
-                                        .getExercise(widget.nextExercise!.id)
-                                        ?.name ??
-                                    widget.nextExercise!.id)
-                                .replaceAll('_', ' ')
-                                .toUpperCase(),
-                            style: AppTextStyles.titleMedium.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                          Container(
+                            width: double.infinity,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
                             ),
-                            textAlign: TextAlign.center,
+                            child: FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor: widget.workoutProgress,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.accent,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Set ${widget.currentSetIndex + 1} of ${widget.totalSets}',
-                            style: AppTextStyles.bodyMedium.copyWith(
+                            '${(widget.workoutProgress * 100).toInt()}% Complete',
+                            style: AppTextStyles.bodySmall.copyWith(
                               color: Colors.white70,
                             ),
                           ),
                         ],
                       ),
-                    ),
 
-                  const SizedBox(height: 24),
+                      const SizedBox(height: 50),
 
-                  // Visual chips: previous (check), future (clock). Current is the Next box above.
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (previous.isNotEmpty) ...[
-                        _PredefinedExerciseChipsRow(
-                          items: previous,
-                          variant: ExerciseChipVariant.previous,
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      if (future.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        _PredefinedExerciseChipsRow(
-                          items: future,
-                          variant: ExerciseChipVariant.future,
-                        ),
-                      ],
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // Workout progress bar
-                  Column(
-                    children: [
-                      Text(
-                        'WORKOUT PROGRESS',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        width: double.infinity,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: FractionallySizedBox(
-                          alignment: Alignment.centerLeft,
-                          widthFactor: widget.workoutProgress,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.accent,
-                              borderRadius: BorderRadius.circular(4),
+                      // Action buttons
+                      Row(
+                        children: [
+                          // Add minute button - circular design
+                          SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: OutlinedButton(
+                              onPressed: _addMinute,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                                padding: EdgeInsets.zero,
+                                shape: const CircleBorder(),
+                              ),
+                              child: Text(
+                                '+1\'',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${(widget.workoutProgress * 100).toInt()}% Complete',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
 
-                  const SizedBox(height: 50),
+                          const SizedBox(width: 16),
 
-                  // Action buttons
-                  Row(
-                    children: [
-                      // Add minute button - circular design
-                      SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: OutlinedButton(
-                          onPressed: _addMinute,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: const BorderSide(
-                              color: Colors.white,
-                              width: 2,
-                            ),
-                            padding: EdgeInsets.zero,
-                            shape: const CircleBorder(),
-                          ),
-                          child: Text(
-                            '+1\'',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                          // Skip break button
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: _skipBreak,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: const Color(0xFF1a1a1a),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                elevation: 4,
+                              ),
+                              child: Text(
+                                'SKIP BREAK',
+                                style: AppTextStyles.button.copyWith(
+                                  color: const Color(0xFF1a1a1a),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-
-                      const SizedBox(width: 16),
-
-                      // Skip break button
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _skipBreak,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF1a1a1a),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 4,
-                          ),
-                          child: Text(
-                            'SKIP BREAK',
-                            style: AppTextStyles.button.copyWith(
-                              color: const Color(0xFF1a1a1a),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ],

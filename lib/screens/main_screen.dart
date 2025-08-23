@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../constants/app_styles.dart';
-import '../services/auth_service.dart';
-import '../blocs/workout_bloc.dart';
+import '../blocs/auth/auth_bloc.dart';
+import '../blocs/workout/workout_bloc.dart';
 import 'free_workout_screens/free_workout_screen.dart';
 import 'login_screen.dart';
 import 'custom_workout_screens/custom_workouts_screen.dart';
@@ -16,8 +16,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final AuthService _authService = AuthService();
-  bool _isSigningOut = false;
+  bool _isSigningOut = false; // controlled via bloc listener
 
   final List<Widget> _screens = [
     const FreeWorkoutScreen(),
@@ -34,26 +33,8 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  Future<void> _signOut() async {
-    setState(() => _isSigningOut = true);
-    try {
-      await _authService.signOut();
-      if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to sign out: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSigningOut = false);
-    }
+  void _signOut() {
+    context.read<AuthBloc>().add(AuthSignOutRequested());
   }
 
   @override
@@ -62,7 +43,9 @@ class _MainScreenState extends State<MainScreen> {
       length: 3,
       child: Stack(
         children: [
-          BlocListener<WorkoutBloc, WorkoutState>(
+          MultiBlocListener(
+            listeners: [
+              BlocListener<WorkoutBloc, WorkoutState>(
             listener: (context, state) {
               if (state is WorkoutError) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -72,7 +55,34 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 );
               }
-            },
+                },
+              ),
+              BlocListener<AuthBloc, AuthState>(
+                listener: (context, state) {
+                  if (state is AuthSigningOut) {
+                    setState(() => _isSigningOut = true);
+                  } else if (state is AuthUnauthenticated) {
+                    if (mounted) {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (_) => const LoginScreen(),
+                        ),
+                      );
+                    }
+                  } else if (state is AuthError) {
+                    setState(() => _isSigningOut = false);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } else if (state is AuthAuthenticated) {
+                    setState(() => _isSigningOut = false);
+                  }
+                },
+              ),
+            ],
             child: Scaffold(
               backgroundColor: AppColors.background,
               appBar: AppBar(

@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../models/personal_workout.dart';
-import '../models/workout.dart';
-import '../services/workout_service.dart';
-import '../services/global_timer_service.dart';
-import '../services/logger_service.dart';
-import '../services/api/workout_api_service.dart';
-import '../services/hive/personal_workout_lss.dart';
+import '../../models/personal_workout.dart';
+import '../../models/workout.dart';
+import '../../services/workout_service.dart';
+import '../../services/global_timer_service.dart';
+import '../../services/logger_service.dart';
+import '../../services/api/workout_api_service.dart';
+import '../../services/hive/personal_workout_lss.dart';
 
 part 'workout_events.dart';
 part 'workout_state.dart';

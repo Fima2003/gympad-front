@@ -71,9 +71,9 @@ class UserFullResponse {
           json['workouts'] != null
               ? WorkoutObject.fromJson(json['workouts'] as Map<String, dynamic>)
               : null,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      lastLoggedIn: DateTime.parse(json['lastLoggedIn'] as String),
+      createdAt: DateTime.tryParse(json['createdAt']) ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt']) ?? DateTime.now(),
+      lastLoggedIn: DateTime.tryParse(json['lastLoggedIn']) ?? DateTime.now(),
     );
   }
 
@@ -112,7 +112,37 @@ class UserUpdateRequest {
   }
 
   /// Validation to ensure at least one parameter is provided
-  bool isValid() {
-    return name != null || gymId != null;
+  String isValid() {
+    final atLeastOnePresent = name != null || gymId != null;
+    if (!atLeastOnePresent) {
+      return "At least one parameter (name or gymId) must be provided";
+    }
+
+    // Validate name if provided
+    if (name != null) {
+      final trimmedName = name!.trim();
+      if (trimmedName.isEmpty) return "Name cannot be empty";
+      if (trimmedName.length < 2 || trimmedName.length > 50) {
+        return "Name must be between 2 and 50 characters";
+      }
+    }
+
+    // Validate gymId if provided
+    if (gymId != null) {
+      if (gymId!.length > 50) {
+        return "Gym ID must be at most 50 characters";
+      }
+    }
+
+    // Character validation (only for provided fields)
+    final validChars = RegExp(r'^[a-zA-Z0-9 ]+$');
+    if (name != null && !validChars.hasMatch(name!)) {
+      return "Name contains invalid characters";
+    }
+    if (gymId != null && gymId != "" && !validChars.hasMatch(gymId!)) {
+      return "Gym ID contains invalid characters";
+    }
+
+    return "Success";
   }
 }
