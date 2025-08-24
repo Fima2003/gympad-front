@@ -71,6 +71,43 @@ class CustomWorkout {
       });
     }
 
+    // estimated_calories in the JSON is inconsistent: sometimes an int, sometimes a
+    // list like ["300-350 kcal"]. We normalize to an approximate integer (average
+    // of numbers found) or null if unparseable.
+    int? parsedCalories;
+    final dynamic rawCalories = json['estimated_calories'];
+    if (rawCalories is int) {
+      parsedCalories = rawCalories;
+    } else if (rawCalories is String) {
+      final nums =
+          RegExp(r'(\d+)')
+              .allMatches(rawCalories)
+              .map((m) => int.tryParse(m.group(1)!))
+              .whereType<int>()
+              .toList();
+      if (nums.isNotEmpty) {
+        parsedCalories = (nums.reduce((a, b) => a + b) / nums.length).round();
+      }
+    } else if (rawCalories is List) {
+      if (rawCalories.isNotEmpty) {
+        final first = rawCalories.first;
+        if (first is int) {
+          parsedCalories = first;
+        } else if (first is String) {
+          final nums =
+              RegExp(r'(\d+)')
+                  .allMatches(first)
+                  .map((m) => int.tryParse(m.group(1)!))
+                  .whereType<int>()
+                  .toList();
+          if (nums.isNotEmpty) {
+            parsedCalories =
+                (nums.reduce((a, b) => a + b) / nums.length).round();
+          }
+        }
+      }
+    }
+
     return CustomWorkout(
       id: id,
       name: json['name'] ?? id.replaceAll('_', ' '),
@@ -80,7 +117,7 @@ class CustomWorkout {
           (json['muscle_groups'] as List<dynamic>?)?.cast<String>() ?? [],
       imageUrl: json['image_url'],
       exercises: exercisesList,
-      estimatedCalories: json['estimated_calories'],
+      estimatedCalories: parsedCalories,
     );
   }
 

@@ -3,81 +3,293 @@
         "name": "Upper Body Strength",
         "description": "This workout targets your upper body muscles including chest, shoulders, and arms",
         "difficulty": "Intermediate",
-        "muscle_groups": ["Chest", "Shoulders", "Arms"],
+        "muscle_groups": [
+            "Chest",
+            "Shoulders",
+            "Arms"
+        ],
         "estimated_calories": 350,
         "exercises": [
-            {"id": "bench_press", "sets_amount": 4, "weight": 60, "suggested_reps": 8, "rest_time": 120},
-            {"id": "overhead_press", "sets_amount": 3, "weight": 25, "suggested_reps": 10, "rest_time": 90},
-            {"id": "cable_chest_flyes", "sets_amount": 3, "weight": 30, "suggested_reps": 10, "rest_time": 90}
+            {
+                "id": "barbell_bench_press",
+                "sets_amount": 4,
+                "weight": 60,
+                "suggested_reps": 8,
+                "rest_time": 120
+            },
+            {
+                "id": "overhead_press",
+                "sets_amount": 3,
+                "weight": 25,
+                "suggested_reps": 10,
+                "rest_time": 90
+            },
+            {
+                "id": "cable_chest_flyes",
+                "sets_amount": 3,
+                "weight": 30,
+                "suggested_reps": 10,
+                "rest_time": 90
+            }
+        ]
+    },
+    "chest_triceps_strength": {
+        "name": "Chest & Triceps Strength Builder",
+        "description": "A classic push workout focused on building size and strength in the chest and triceps with compound and isolation lifts.",
+        "difficulty": "Intermediate",
+        "muscle_groups": [
+            "chest",
+            "arms",
+            "shoulders"
+        ],
+        "estimated_calories": 280,
+        "exercises": [
+            {
+                "id": "dumbbell_bench_press",
+                "sets_amount": 4,
+                "weight": 70,
+                "suggested_reps": 6,
+                "rest_time": 120
+            },
+            {
+                "id": "incline_dumbbell_bench_press",
+                "sets_amount": 3,
+                "weight": 25,
+                "suggested_reps": 10,
+                "rest_time": 90
+            },
+            {
+                "id": "dumbbell_fly",
+                "sets_amount": 3,
+                "weight": 12,
+                "suggested_reps": 12,
+                "rest_time": 60
+            },
+            {
+                "id": "cable_tricep_pushdowns",
+                "sets_amount": 3,
+                "weight": 25,
+                "suggested_reps": 12,
+                "rest_time": 60
+            },
+            {
+                "id": "tricep_extensions",
+                "sets_amount": 3,
+                "weight": 15,
+                "suggested_reps": 12,
+                "rest_time": 60
+            }
+        ]
+    },
+    "push_endurance": {
+        "name": "Push Endurance & Volume",
+        "description": "A higher-volume workout using bodyweight and machine exercises to build muscular endurance and definition.",
+        "difficulty": "Intermediate",
+        "muscle_groups": [
+            "chest",
+            "arms",
+            "shoulders"
+        ],
+        "estimated_calories": 300,
+        "exercises": [
+            {
+                "id": "push_ups",
+                "sets_amount": 4,
+                "weight": 0,
+                "suggested_reps": 15,
+                "rest_time": 60
+            },
+            {
+                "id": "dips",
+                "sets_amount": 3,
+                "weight": 0,
+                "suggested_reps": 10,
+                "rest_time": 90
+            },
+            {
+                "id": "machine_chest_press",
+                "sets_amount": 3,
+                "weight": 40,
+                "suggested_reps": 12,
+                "rest_time": 60
+            },
+            {
+                "id": "cable_chest_flyes",
+                "sets_amount": 3,
+                "weight": 20,
+                "suggested_reps": 15,
+                "rest_time": 45
+            },
+            {
+                "id": "dumbbell_pullover",
+                "sets_amount": 2,
+                "weight": 15,
+                "suggested_reps": 15,
+                "rest_time": 60
+            }
         ]
     },
     "leg_day_blast": {
         "name": "Leg Day Blast",
         "description": "Intensive leg workout targeting quads, hamstrings, and glutes",
         "difficulty": "Advanced",
-        "muscle_groups": ["Legs", "Glutes"],
+        "muscle_groups": [
+            "Legs",
+            "Glutes"
+        ],
         "estimated_calories": 450,
         "exercises": [
-            {"id": "squats", "sets_amount": 4, "weight": 80, "suggested_reps": 12, "rest_time": 120},
-            {"id": "cable_kickbacks", "sets_amount": 3, "weight": 20, "suggested_reps": 10, "rest_time": 90},
-            {"id": "leg_press", "sets_amount": 3, "weight": 100, "suggested_reps": 15, "rest_time": 90}
+            {
+                "id": "squats",
+                "sets_amount": 4,
+                "weight": 80,
+                "suggested_reps": 12,
+                "rest_time": 120
+            },
+            {
+                "id": "cable_kickbacks",
+                "sets_amount": 3,
+                "weight": 20,
+                "suggested_reps": 10,
+                "rest_time": 90
+            },
+            {
+                "id": "leg_press",
+                "sets_amount": 3,
+                "weight": 100,
+                "suggested_reps": 15,
+                "rest_time": 90
+            }
         ]
     },
     "strength_training": {
         "name": "Strength Training",
         "description": "Complete strength training workout with compound movements",
         "difficulty": "Intermediate",
-        "muscle_groups": ["Full Body"],
+        "muscle_groups": [
+            "Full Body"
+        ],
         "estimated_calories": 300,
         "exercises": [
-            {"id": "deadlifts", "sets_amount": 4, "weight": 70, "suggested_reps": 8, "rest_time": 150},
-            {"id": "rows", "sets_amount": 3, "weight": 50, "suggested_reps": 10, "rest_time": 120},
-            {"id": "overhead_press", "sets_amount": 3, "weight": 40, "suggested_reps": 8, "rest_time": 120}
+            {
+                "id": "deadlifts",
+                "sets_amount": 4,
+                "weight": 70,
+                "suggested_reps": 8,
+                "rest_time": 150
+            },
+            {
+                "id": "rows",
+                "sets_amount": 3,
+                "weight": 50,
+                "suggested_reps": 10,
+                "rest_time": 120
+            },
+            {
+                "id": "overhead_press",
+                "sets_amount": 3,
+                "weight": 40,
+                "suggested_reps": 8,
+                "rest_time": 120
+            }
         ]
     },
     "arms_focus": {
         "name": "Arms Focus",
         "description": "Targeted arm workout for biceps and triceps",
         "difficulty": "Beginner",
-        "muscle_groups": ["Arms"],
+        "muscle_groups": [
+            "Arms"
+        ],
         "estimated_calories": 200,
         "exercises": [
-            {"id": "bicep_curls", "sets_amount": 3, "weight": 15, "suggested_reps": 12, "rest_time": 60},
-            {"id": "tricep_extensions", "sets_amount": 3, "weight": 12, "suggested_reps": 12, "rest_time": 60},
-            {"id": "cable_bicep_curls", "sets_amount": 2, "weight": 12, "suggested_reps": 10, "rest_time": 60}
+            {
+                "id": "bicep_curls",
+                "sets_amount": 3,
+                "weight": 15,
+                "suggested_reps": 12,
+                "rest_time": 60
+            },
+            {
+                "id": "tricep_extensions",
+                "sets_amount": 3,
+                "weight": 12,
+                "suggested_reps": 12,
+                "rest_time": 60
+            },
+            {
+                "id": "cable_bicep_curls",
+                "sets_amount": 2,
+                "weight": 12,
+                "suggested_reps": 10,
+                "rest_time": 60
+            }
         ]
     },
     "cardio_hiit": {
         "name": "HIIT Cardio Blast",
         "description": "High-intensity interval training for maximum calorie burn",
         "difficulty": "Advanced",
-        "muscle_groups": ["Cardio"],
+        "muscle_groups": [
+            "Cardio"
+        ],
         "estimated_calories": 400,
         "exercises": [
-            {"id": "rope_waves", "sets_amount": 4, "weight": 0, "suggested_reps": 15, "rest_time": 60},
-            {"id": "rope_slams", "sets_amount": 3, "weight": 0, "suggested_reps": 12, "rest_time": 45},
-            {"id": "rope_spirals", "sets_amount": 3, "weight": 0, "suggested_reps": 8, "rest_time": 60}
+            {
+                "id": "rope_waves",
+                "sets_amount": 4,
+                "weight": 0,
+                "suggested_reps": 15,
+                "rest_time": 60
+            },
+            {
+                "id": "rope_slams",
+                "sets_amount": 3,
+                "weight": 0,
+                "suggested_reps": 12,
+                "rest_time": 45
+            },
+            {
+                "id": "rope_spirals",
+                "sets_amount": 3,
+                "weight": 0,
+                "suggested_reps": 8,
+                "rest_time": 60
+            }
         ]
     },
-
     "shoulders_burner": {
         "name": "Shoulders Burner",
         "description": "Try lifting up your bag after. I'll bet you can't",
         "difficulty": "Intermediate",
-        "muscle_groups": ["Shoulders"],
+        "muscle_groups": [
+            "Shoulders"
+        ],
         "estimated_calories": 500,
         "exercises": [
             {
-                "id": "seated_shoulder_press", "sets_amount": 5, "weight": 16, "suggested_reps": 8
+                "id": "seated_shoulder_press",
+                "sets_amount": 5,
+                "weight": 16,
+                "suggested_reps": 8
             },
             {
-                "id": "lateral_raises", "sets_amount": 5, "weight": 6, "suggested_reps": 30
+                "id": "lateral_raises",
+                "sets_amount": 5,
+                "weight": 6,
+                "suggested_reps": 30
             },
             {
-                "id": "shoulder_shrugs", "sets_amount": 5, "weight": 14, "suggested_reps": 15
+                "id": "shoulder_shrugs",
+                "sets_amount": 5,
+                "weight": 14,
+                "suggested_reps": 15
             },
             {
-                "id": "reverse_cable_crossover", "sets_amount": 5, "weight": 12, "suggested_reps": 12
+                "id": "reverse_cable_crossover",
+                "sets_amount": 5,
+                "weight": 12,
+                "suggested_reps": 12
             }
         ]
     }

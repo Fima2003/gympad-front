@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gympad/widgets/velocity_weight_selector.dart';
 import 'dart:async';
 import '../../constants/app_styles.dart';
 import '../../models/custom_workout.dart';
@@ -7,7 +8,6 @@ import '../../models/workout_set.dart';
 import '../../blocs/workout/workout_bloc.dart';
 import '../../services/global_timer_service.dart';
 import '../../services/workout_service.dart';
-import '../../widgets/weight_selector.dart';
 import '../../widgets/reps_selector.dart';
 import 'custom_workout_break_screen.dart';
 import '../well_done_workout_screen.dart';
@@ -367,7 +367,7 @@ class _PredefinedWorkoutsRunScreenState
 
                     // Weight selector
                     Center(
-                      child: WeightSelector(
+                      child: WeightSelectorVelocity(
                         initialWeight: _selectedWeight,
                         onWeightChanged: (weight) {
                           setState(() {

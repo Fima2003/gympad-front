@@ -4,6 +4,7 @@ import '../../constants/app_styles.dart';
 import '../../models/custom_workout.dart';
 import 'custom_workout_run_screen.dart';
 import '../../services/data_service.dart';
+import '../../services/audio_service.dart';
 
 class PrepareToStartWorkoutScreen extends StatefulWidget {
   final CustomWorkout workout;
@@ -22,6 +23,7 @@ class _PrepareToStartWorkoutScreenState
   Timer? _timer;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
+  final AudioService _audio = AudioService();
 
   @override
   void initState() {
@@ -43,9 +45,17 @@ class _PrepareToStartWorkoutScreenState
       setState(() {
         if (_countdown > 1) {
           _countdown--;
-          _animationController.reset();
-          _animationController.forward();
+          // Play tick for the last 2 seconds (when showing 2 and 1)
+          if (_countdown <= 3 && _countdown > 1) {
+            // fire and forget
+            _audio.playTick();
+          }
+          _animationController
+            ..reset()
+            ..forward();
         } else {
+          // Final start beep
+          _audio.playStart();
           _timer?.cancel();
           _navigateToWorkout();
         }

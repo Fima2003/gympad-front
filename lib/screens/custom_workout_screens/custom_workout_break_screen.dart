@@ -95,6 +95,7 @@ class _PredefinedWorkoutBreakScreenState
   // Sound playback is handled via AudioService for easy future swaps
 
   void _showFinishDialog() {
+    print("Finishing");
     showDialog(
       context: context,
       builder:
@@ -182,16 +183,6 @@ class _PredefinedWorkoutBreakScreenState
               padding: const EdgeInsets.all(20),
               child: Stack(
                 children: [
-                  // Finish flag button (was in AppBar)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: IconButton(
-                      tooltip: 'Finish workout',
-                      icon: const Icon(Icons.flag, color: Colors.white),
-                      onPressed: _showFinishDialog,
-                    ),
-                  ),
                   // Main scrollable content
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -428,6 +419,15 @@ class _PredefinedWorkoutBreakScreenState
                       ),
                       const SizedBox(height: 20),
                     ],
+                  ),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: IconButton(
+                      tooltip: 'Finish workout',
+                      icon: const Icon(Icons.flag, color: Colors.white),
+                      onPressed: _showFinishDialog,
+                    ),
                   ),
                 ],
               ),

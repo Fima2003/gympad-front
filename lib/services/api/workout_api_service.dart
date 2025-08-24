@@ -1,5 +1,4 @@
-import 'package:gympad/services/api/i_api_service.dart';
-
+import 'i_api_service.dart';
 import 'api_service.dart';
 import 'models/workout_models.dart';
 

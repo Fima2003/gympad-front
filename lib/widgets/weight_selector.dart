@@ -18,8 +18,8 @@ class WeightSelector extends StatefulWidget {
 
 class _WeightSelectorState extends State<WeightSelector> {
   late int _currentWeightInt; // NumberPicker works with int, so we'll convert
-  final double _increment = 2.5;
-  final double _minWeight = 2.5;
+  final double _increment = 0.5;
+  final double _minWeight = 0;
   final double _maxWeight = 200.0;
 
   @override

@@ -35,8 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-  final authState = context.watch<AuthBloc>().state;
-  return Scaffold(
+    final authState = context.watch<AuthBloc>().state;
+    return Scaffold(
       backgroundColor: AppColors.background,
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ],
-                )
+                ),
               ] else ...[
                 Container(
                   width: double.infinity,

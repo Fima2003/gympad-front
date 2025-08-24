@@ -105,6 +105,37 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
     }
   }
 
+  void _showFinishDialog() {
+    if (_isFinishingWorkout) return;
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Finish workout?'),
+            content: const Text(
+              'Are you sure you want to finish this workout now?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('No'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _finishWorkout();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Yes'),
+              ),
+            ],
+          ),
+    );
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -148,196 +179,226 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
               children: [
-                // Rest title
-                Text(
-                  'REST TIME',
-                  style: AppTextStyles.titleLarge.copyWith(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                const SizedBox(height: 40),
-
-                // Timer with circular progress background
-                Stack(
-                  alignment: Alignment.center,
+                // Main content
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      width: 200,
-                      height: 200,
-                      child: CircularProgressIndicator(
-                        value:
-                            null, // Indeterminate progress since we're counting up
-                        strokeWidth: 8,
-                        backgroundColor: Colors.white.withValues(alpha: 0.2),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.accent,
-                        ),
+                    // Rest title
+                    Text(
+                      'REST TIME',
+                      style: AppTextStyles.titleLarge.copyWith(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    Column(
+
+                    const SizedBox(height: 40),
+
+                    // Timer with circular progress background
+                    Stack(
+                      alignment: Alignment.center,
                       children: [
-                        Text(
-                          _formatTime(_elapsedTime),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
+                        SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: CircularProgressIndicator(
+                            value:
+                                null, // Indeterminate progress since we're counting up
+                            strokeWidth: 8,
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.2,
+                            ),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.accent,
+                            ),
                           ),
                         ),
-                        Text(
-                          'elapsed',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: Colors.white70,
-                          ),
+                        Column(
+                          children: [
+                            Text(
+                              _formatTime(_elapsedTime),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'elapsed',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
 
-                const SizedBox(height: 50),
+                    const SizedBox(height: 50),
 
-                // Current exercise info
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'CURRENT EXERCISE',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1,
+                    // Current exercise info
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        widget.currentExercise.name.toUpperCase(),
-                        style: AppTextStyles.titleMedium.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          widget.currentExercise.muscleGroup.toUpperCase(),
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.accent,
-                            fontWeight: FontWeight.w600,
+                      child: Column(
+                        children: [
+                          Text(
+                            'CURRENT EXERCISE',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                          Text(
+                            widget.currentExercise.name.toUpperCase(),
+                            style: AppTextStyles.titleMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.accent.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              widget.currentExercise.muscleGroup.toUpperCase(),
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Previous exercises (visual only) — show only in workout mode
+                    if (widget.isPartOfWorkout) ...[
+                      const SizedBox(height: 16),
+                      BlocBuilder<WorkoutBloc, WorkoutState>(
+                        builder: (context, state) {
+                          if (state is! WorkoutInProgress)
+                            return const SizedBox.shrink();
+                          final list = state.workout.exercises;
+                          if (list.length <= 1) return const SizedBox.shrink();
+                          final previous = list.take(list.length - 1).toList();
+                          return _PreviousExercisesRow(items: previous);
+                        },
                       ),
                     ],
-                  ),
-                ),
 
-                // Previous exercises (visual only) — show only in workout mode
-                if (widget.isPartOfWorkout) ...[
-                  const SizedBox(height: 16),
-                  BlocBuilder<WorkoutBloc, WorkoutState>(
-                    builder: (context, state) {
-                      if (state is! WorkoutInProgress)
-                        return const SizedBox.shrink();
-                      final list = state.workout.exercises;
-                      if (list.length <= 1) return const SizedBox.shrink();
-                      final previous = list.take(list.length - 1).toList();
-                      return _PreviousExercisesRow(items: previous);
-                    },
-                  ),
-                ],
+                    const SizedBox(height: 80),
 
-                const SizedBox(height: 80),
-
-                // Action buttons
-                if (widget.isPartOfWorkout) ...[
-                  // Three buttons layout for workout
-                  Column(
-                    children: [
-                      // First row: New Set
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: widget.onNewSet,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF1a1a1a),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 4,
-                          ),
-                          child: Text(
-                            'NEW SET',
-                            style: AppTextStyles.button.copyWith(
-                              color: const Color(0xFF1a1a1a),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                    // Action buttons
+                    if (widget.isPartOfWorkout) ...[
+                      // Buttons layout for workout (New Set / New Exercise) - finish moved to flag icon
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: widget.onNewSet,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: const Color(0xFF1a1a1a),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                elevation: 4,
+                              ),
+                              child: Text(
+                                'NEW SET',
+                                style: AppTextStyles.button.copyWith(
+                                  color: const Color(0xFF1a1a1a),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: OutlinedButton(
+                              onPressed: widget.onNewExercise,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                'NEW EXERCISE',
+                                style: AppTextStyles.button.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      // Second row: New Exercise and Finish Workout
+                    ] else ...[
+                      // Two buttons layout for standalone exercise
                       Row(
                         children: [
                           Expanded(
                             child: SizedBox(
-                              height: 50,
-                              child: OutlinedButton(
-                                onPressed: widget.onNewExercise,
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  side: const BorderSide(
-                                    color: Colors.white,
-                                    width: 2,
-                                  ),
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: widget.onNewSet,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: const Color(0xFF1a1a1a),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
+                                  elevation: 4,
                                 ),
                                 child: Text(
-                                  'NEW EXERCISE',
+                                  'START NEW SET',
                                   style: AppTextStyles.button.copyWith(
-                                    color: Colors.white,
+                                    color: const Color(0xFF1a1a1a),
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 16),
                           Expanded(
                             child: SizedBox(
-                              height: 50,
+                              height: 56,
                               child: OutlinedButton(
                                 onPressed:
                                     _isFinishingWorkout ? null : _finishWorkout,
@@ -365,11 +426,10 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
                                           ),
                                         )
                                         : Text(
-                                          'FINISH WORKOUT',
+                                          'FINISH EXERCISE',
                                           style: AppTextStyles.button.copyWith(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 14,
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
@@ -379,79 +439,31 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
                         ],
                       ),
                     ],
+                  ],
+                ),
+                // Finish workout flag icon (only for workout mode)
+                if (widget.isPartOfWorkout)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child:
+                        _isFinishingWorkout
+                            ? const SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                            : IconButton(
+                              tooltip: 'Finish workout',
+                              icon: const Icon(Icons.flag, color: Colors.white),
+                              onPressed: _showFinishDialog,
+                            ),
                   ),
-                ] else ...[
-                  // Two buttons layout for standalone exercise
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 56,
-                          child: ElevatedButton(
-                            onPressed: widget.onNewSet,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF1a1a1a),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              elevation: 4,
-                            ),
-                            child: Text(
-                              'START NEW SET',
-                              style: AppTextStyles.button.copyWith(
-                                color: const Color(0xFF1a1a1a),
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: SizedBox(
-                          height: 56,
-                          child: OutlinedButton(
-                            onPressed:
-                                _isFinishingWorkout ? null : _finishWorkout,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(
-                                color: Colors.white,
-                                width: 2,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child:
-                                _isFinishingWorkout
-                                    ? SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
-                                      ),
-                                    )
-                                    : Text(
-                                      'FINISH EXERCISE',
-                                      style: AppTextStyles.button.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ],
             ),
           ),

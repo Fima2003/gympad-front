@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gympad/services/api/user_api_service.dart';
 import 'dart:async';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
-import 'package:gympad/services/logger_service.dart';
+
+import 'logger_service.dart';
 import 'hive/user_auth_lss.dart';
+import './api/user_api_service.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();

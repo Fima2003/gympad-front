@@ -48,15 +48,108 @@
             "image": "https://example.com/images/reverse_cable_crossover.gif",
             "muscleGroup": "shoulders"
         },
-
+        "barbell_bench_press": {
+            "name": "Barbell Bench Press",
+            "description": "Targets chest, shoulders, triceps. Lower barbell to mid-chest, then push up.",
+            "image": "https://example.com/images/bench_press_full.gif",
+            "muscleGroup": "chest"
+        },
+        "incline_barbell_bench_press": {
+            "name": "Incline Barbell Bench Press",
+            "description": "Targets upper chest, shoulders, triceps. Press barbell up on an incline bench.",
+            "image": "https://example.com/images/incline_barbell_bench_press_full.gif",
+            "muscleGroup": "chest"
+        },
+        "smith_bench_press": {
+            "name": "Smith Machine Bench Press",
+            "description": "Targets chest, shoulders, triceps. Lower Smith Machine to mid-chest, then push up.",
+            "image": "https://example.com/images/bench_press_full.gif",
+            "muscleGroup": "chest"
+        },
+        "incline_smith_bench_press": {
+            "name": "Incline Smith Machine Bench Press",
+            "description": "Targets upper chest, shoulders, triceps. Press Smith Machine up on an incline bench.",
+            "image": "https://example.com/images/incline_smith_bench_press_full.gif",
+            "muscleGroup": "chest"
+        },
+        "dumbbell_bench_press": {
+            "name": "Dumbbell Bench Press",
+            "description": "Targets chest, shoulders, triceps. Lower dumbbells to mid-chest, then push up.",
+            "image": "https://example.com/images/dumbbell_bench_press_full.gif",
+            "muscleGroup": "chest"
+        },
+        "incline_dumbbell_bench_press": {
+            "name": "Incline Dumbbell Bench Press",
+            "description": "Targets upper chest, shoulders, triceps. Press dumbbells up on an incline bench.",
+            "image": "https://example.com/images/incline_dumbbell_bench_press_full.gif",
+            "muscleGroup": "chest"
+        },
+        "dumbbell_pullover": {
+            "name": "Dumbbell Pullover",
+            "description": "Targets chest and lats. Lie on a bench, hold a dumbbell with both hands above chest, lower it back over your head.",
+            "image": "https://example.com/images/dumbbell_pullover_full.gif",
+            "muscleGroup": "chest"
+        },
+        "machine_chest_press": {
+            "name": "Machine Chest Press",
+            "description": "Targets chest, shoulders, triceps. Press the handles forward while seated.",
+            "image": "https://example.com/images/machine_chest_press_full.gif",
+            "muscleGroup": "chest"
+        },
+        "cable_chest_flyes": {
+            "name": "Cable Chest Flyes",
+            "description": "Targets chest. Stand in center of cable machine, bring handles together in a 'hugging' motion.",
+            "image": "https://example.com/images/cable_chest_flyes_full.gif",
+            "muscleGroup": "chest"
+        },
+        "dips": {
+            "name": "Dips",
+            "description": "Targets chest, shoulders, triceps. Lower body by bending elbows, then push back up.",
+            "image": "https://example.com/images/dips_full.gif",
+            "muscleGroup": "chest"
+        },
+        "push_ups": {
+            "name": "Push-Ups",
+            "description": "Targets chest, shoulders, triceps. Lower body to the ground, then push back up.",
+            "image": "https://example.com/images/pushups_full.gif",
+            "muscleGroup": "chest"
+        },
+        "guillotine_barbell_press": {
+            "name": "Guillotine Barbell Press",
+            "description": "Targets upper chest. Lie on a bench, press barbell down towards neck.",
+            "image": "https://example.com/images/guillotine_press_full.gif",
+            "muscleGroup": "chest"
+        },
+        "guillotine_dumbbell_press": {
+            "name": "Guillotine Dumbbell Press",
+            "description": "Targets upper chest. Lie on a bench, press dumbbells down towards neck.",
+            "image": "https://example.com/images/guillotine_press_full.gif",
+            "muscleGroup": "chest"
+        },
+        "cable_crossover": {
+            "name": "Cable Crossover",
+            "description": "Targets chest. Stand in the center of a cable machine, grab handles, and bring them together in a 'hugging' motion.",
+            "image": "https://example.com/images/cable_crossover_full.gif",
+            "muscleGroup": "chest"
+        },
+        "seated_cable_pec_fly": {
+            "name": "Seated Cable Pec Fly",
+            "description": "Targets chest. Sit on a bench with back support, grab cable handles, and bring them together in front of you.",
+            "image": "https://example.com/images/seated_cable_pec_fly_full.gif",
+            "muscleGroup": "chest"
+        },
+        "dumbbell_fly": {
+            "name": "Dumbbell Fly",
+            "description": "Targets chest. Lie on a flat bench with a dumbbell in each hand, arms extended above chest. Lower weights out to sides, then bring back together.",
+            "image": "https://example.com/images/dumbbell_fly_full.gif",
+            "muscleGroup": "chest"
+        },
         "shoulder_shrugs": {
             "name": "Shoulder Shrugs",
             "description": "Shoulder Shrugs is an exercise where you lift your shoulders straight up towards your ears, holding a weight in each hand.",
             "image": "https://example.com/images/shoulder_shrugs.gif",
             "muscleGroup": "back"
         },
-        
-
         "leg_press": {
             "name": "Leg Press",
             "description": "Targets quadriceps and glutes. Push the platform away from you.",
@@ -81,7 +174,6 @@
             "image": "https://example.com/images/tricep_extensions_full.gif",
             "muscleGroup": "arms"
         },
-        
         "crunches": {
             "name": "Crunches",
             "description": "Targets upper abs. Lift shoulders off the floor, engaging core.",
@@ -93,12 +185,6 @@
             "description": "Core stability exercise. Maintain a straight line from head to heels.",
             "image": "https://example.com/images/plank_full.gif",
             "muscleGroup": "abs"
-        },
-        "bench_press": {
-            "name": "Barbell Bench Press",
-            "description": "Targets chest, shoulders, triceps. Lower barbell to mid-chest, then push up.",
-            "image": "https://example.com/images/bench_press_full.gif",
-            "muscleGroup": "chest"
         },
         "deadlifts": {
             "name": "Barbell Deadlifts",
@@ -135,12 +221,6 @@
             "description": "Targets obliques and core. Stand sideways to cable, pull handle across body in a chopping motion.",
             "image": "https://example.com/images/cable_wood_chops_full.gif",
             "muscleGroup": "abs"
-        },
-        "cable_chest_flyes": {
-            "name": "Cable Chest Flyes",
-            "description": "Targets chest. Stand in center of cable machine, bring handles together in a 'hugging' motion.",
-            "image": "https://example.com/images/cable_chest_flyes_full.gif",
-            "muscleGroup": "chest"
         },
         "cable_tricep_pushdowns": {
             "name": "Cable Tricep Pushdowns",
