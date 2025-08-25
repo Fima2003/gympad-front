@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_styles.dart';
 import '../../models/exercise.dart';
-import '../../services/data_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../blocs/data/data_bloc.dart';
 import 'exercise_screen.dart';
 
 class SelectExerciseScreen extends StatefulWidget {
@@ -14,7 +15,6 @@ class SelectExerciseScreen extends StatefulWidget {
 }
 
 class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
-  final DataService _dataService = DataService();
   final TextEditingController _searchController = TextEditingController();
 
   String? _selectedGroup;
@@ -29,11 +29,17 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
   }
 
   void _updateFilteredExercises() {
-    final allExercises = _dataService.getAllExercises();
+    final dataState = BlocProvider.of<DataBloc>(context).state;
+    if (dataState is! DataReady) {
+      _filteredExercises = [];
+      setState(() {});
+      return;
+    }
+    final allExercises = dataState.exercises.values.toList();
 
     if (_searchQuery.isNotEmpty) {
       _filteredExercises =
-          allExercises.where((exercise) {
+          allExercises.where((Exercise exercise) {
             return exercise.name.toLowerCase().contains(
                   _searchQuery.toLowerCase(),
                 ) ||
@@ -43,13 +49,12 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
           }).toList();
     } else if (_selectedGroup != null) {
       _filteredExercises =
-          allExercises.where((exercise) {
+          allExercises.where((Exercise exercise) {
             return exercise.muscleGroup == _selectedGroup;
           }).toList();
     } else {
       _filteredExercises = [];
     }
-
     setState(() {});
   }
 
@@ -94,7 +99,14 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final muscleGroups = _dataService.getAllMuscleGroups();
+    final dataState = BlocProvider.of<DataBloc>(context).state;
+    Set<String> muscleGroups = {};
+    if (dataState is DataReady) {
+      muscleGroups =
+          dataState.exercises.values
+              .map<String>((Exercise e) => e.muscleGroup)
+              .toSet();
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -167,7 +179,7 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
     );
   }
 
-  Widget _buildContent(List<String> muscleGroups) {
+  Widget _buildContent(Set<String> muscleGroups) {
     if (_searchQuery.isNotEmpty) {
       return _buildExerciseGrid(_filteredExercises);
     } else if (_selectedGroup != null) {
@@ -177,7 +189,12 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
     }
   }
 
-  Widget _buildMuscleGroupGrid(List<String> muscleGroups) {
+  Widget _buildMuscleGroupGrid(Set<String> muscleGroups) {
+    final dataState = BlocProvider.of<DataBloc>(context).state;
+    List<Exercise> allExercises = [];
+    if (dataState is DataReady) {
+      allExercises = dataState.exercises.values.toList();
+    }
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: GridView.builder(
@@ -189,10 +206,9 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
         ),
         itemCount: muscleGroups.length,
         itemBuilder: (context, index) {
-          final group = muscleGroups[index];
+          final group = muscleGroups.elementAt(index);
           final exerciseCount =
-              _dataService.getExercisesForMuscleGroup(group).length;
-
+              allExercises.where((e) => e.muscleGroup == group).length;
           return _buildMuscleGroupCard(group, exerciseCount);
         },
       ),

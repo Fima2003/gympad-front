@@ -14,6 +14,16 @@ class DataService {
   Map<String, Exercise>? _exercises;
   Map<String, Equipment>? _equipment;
 
+  // Read-only access for BLoC
+  Map<String, Exercise> get exercisesMap => _exercises ?? const {};
+  Map<String, Equipment> get equipmentMap => _equipment ?? const {};
+
+  Future<void> forceReload() async {
+    _exercises = null;
+    _equipment = null;
+    await loadData();
+  }
+
   Future<void> loadData() async {
     if (_exercises == null) {
       await _loadExercises();
@@ -104,11 +114,9 @@ class DataService {
   }
 
   List<String>? getMuscleGroupForExercise(String exerciseId) {
-    if (!(exerciseId == '' &&
-        _exercises != null &&
-        _exercises![exerciseId] == null)) {
-      return null;
-    }
-    return [_exercises![exerciseId]!.muscleGroup];
+    if (_exercises == null) return null;
+    final ex = _exercises![exerciseId];
+    if (ex == null) return null;
+    return [ex.muscleGroup];
   }
 }

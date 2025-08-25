@@ -1,5 +1,3 @@
-import 'package:gympad/models/personal_workout.dart';
-
 class CustomWorkout {
   final String id;
   final String name;
@@ -20,28 +18,6 @@ class CustomWorkout {
     required this.exercises,
     this.estimatedCalories,
   });
-
-  factory CustomWorkout.fromPersonalWorkout(PersonalWorkout workout) {
-    return CustomWorkout(
-      id: workout.name.toLowerCase().replaceAll(' ', '_'),
-      name: workout.name,
-      description: workout.description ?? "",
-      difficulty: 'none',
-      muscleGroups: workout.getMuscleGroups(),
-      imageUrl: '',
-      exercises:
-          workout.exercises.map((e) {
-            return CustomWorkoutExercise(
-              id: e.exerciseId,
-              setsAmount: e.sets,
-              suggestedWeight: e.weight,
-              restTime: e.restTime,
-              suggestedReps: e.reps,
-            );
-          }).toList(),
-      estimatedCalories: 0,
-    );
-  }
 
   factory CustomWorkout.fromJson(String id, Map<String, dynamic> json) {
     List<CustomWorkoutExercise> exercisesList = [];

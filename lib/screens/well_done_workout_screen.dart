@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gympad/services/analytics_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gympad/blocs/analytics/analytics_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_styles.dart';
 import '../models/workout.dart';
@@ -23,7 +24,7 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
   }
 
   Future<void> _sendAnalyticsEvent() async {
-    await AnalyticsService.instance.incrementExerciseComplete();
+    context.read<AnalyticsBloc>().add(ACompletedWorkout());
   }
 
   Future<void> _sendReview() async {

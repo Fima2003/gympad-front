@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gympad/blocs/analytics/analytics_bloc.dart';
 import 'package:gympad/firebase_options.dart';
 import 'package:gympad/services/api/api.dart';
 import 'services/hive/hive_initializer.dart';
-import 'services/analytics_service.dart';
 import 'services/logger_service.dart';
 import 'constants/app_styles.dart';
-import 'services/data_service.dart';
+import 'blocs/data/data_bloc.dart';
 import 'blocs/workout/workout_bloc.dart';
 import 'blocs/auth/auth_bloc.dart';
 import 'screens/login_screen.dart';
@@ -55,12 +55,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<DataBloc>(
+          create: (_) => DataBloc()..add(const DataLoadRequested()),
+        ),
         BlocProvider<WorkoutBloc>(
           create: (context) => WorkoutBloc()..add(WorkoutLoaded()),
         ),
-        BlocProvider<AuthBloc>(
-          create: (context) => AuthBloc(),
-        ),
+        BlocProvider<AuthBloc>(create: (context) => AuthBloc()),
+        BlocProvider<AnalyticsBloc>(create: (context) => AnalyticsBloc()),
       ],
       child: MaterialApp(
         title: 'GymPad',
@@ -88,88 +90,93 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final DataService _dataService = DataService();
   final AppLogger _logger = AppLogger();
   bool _isLoading = true;
-  bool _navigated = false; // prevent double navigation
+  bool _navigated = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // Perform startup flow: load data, then navigate to main/login
-    _startupFlow();
-  }
-
-  Future<void> _startupFlow() async {
-    _logger.info('Splash: startupFlow begin');
-    // Load local data required for navigation
-    await _dataService.loadData();
-    _logger.debug('Splash: data loaded');
-
-    // Track app open in Firestore (safely)
-    try {
-      await AnalyticsService.instance.incrementAppOpen();
-      _logger.debug('Splash: analytics app open incremented');
-    } catch (e, st) {
-      _logger.warning('AnalyticsService.incrementAppOpen failed', e, st);
+  void _maybeKickAuth(DataState dataState) {
+    if (dataState is DataReady) {
+      if (_isLoading) {
+        _logger.debug('Splash: data ready, triggering auth');
+        context.read<AuthBloc>().add(AuthAppStarted());
+        setState(() => _isLoading = false);
+      }
+    } else if (dataState is DataError) {
+      setState(() => _isLoading = false);
     }
-
-    // If signed in, fetch user from backend (refresh token and retry if needed)
-  if (!mounted) return;
-  // Kick off auth determination after data work
-  context.read<AuthBloc>().add(AuthAppStarted());
-  setState(() => _isLoading = false);
   }
 
   // No deep-link error dialogs needed; keeping UI clean.
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (_navigated) return;
-        if (state is AuthAuthenticated) {
-          _navigated = true;
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const MainScreen()),
-          );
-        } else if (state is AuthUnauthenticated) {
-          _navigated = true;
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-          );
-        } else if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<DataBloc, DataState>(
+          listener: (context, dataState) {
+            _maybeKickAuth(dataState);
+          },
+        ),
+        BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (_navigated) return;
+            if (state is AuthAuthenticated) {
+              _navigated = true;
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const MainScreen()),
+              );
+            } else if (state is AuthUnauthenticated) {
+              _navigated = true;
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            } else if (state is AuthError) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'GymPad',
-                style: AppTextStyles.titleLarge.copyWith(
-                  fontSize: 48,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              const SizedBox(height: 32),
-              if (_isLoading || context.watch<AuthBloc>().state is AuthLoading)
-                CircularProgressIndicator(color: AppColors.primary)
-              else
-                Icon(Icons.nfc, size: 64, color: AppColors.primary),
-              const SizedBox(height: 16),
-              Text(
-                _isLoading ? 'Loading gym data...' : 'Initializing...',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
+          child: BlocBuilder<DataBloc, DataState>(
+            builder: (context, dataState) {
+              final authState = context.watch<AuthBloc>().state;
+              final loading =
+                  dataState is! DataReady ||
+                  authState is AuthLoading ||
+                  _isLoading;
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'GymPad',
+                    style: AppTextStyles.titleLarge.copyWith(
+                      fontSize: 48,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  if (loading)
+                    CircularProgressIndicator(color: AppColors.primary)
+                  else
+                    Icon(Icons.nfc, size: 64, color: AppColors.primary),
+                  const SizedBox(height: 16),
+                  Text(
+                    dataState is DataError
+                        ? 'Failed to load data'
+                        : loading
+                        ? 'Loading gym data...'
+                        : 'Initializing...',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

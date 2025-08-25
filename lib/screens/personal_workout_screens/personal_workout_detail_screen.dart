@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:gympad/models/custom_workout.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../blocs/data/data_bloc.dart';
 import '../../constants/app_styles.dart';
 import '../../models/personal_workout.dart';
-import '../../services/data_service.dart';
 import '../custom_workout_screens/prepare_to_start_workout_screen.dart';
 
 class PersonalWorkoutDetailScreen extends StatelessWidget {
@@ -10,19 +10,22 @@ class PersonalWorkoutDetailScreen extends StatelessWidget {
 
   const PersonalWorkoutDetailScreen({super.key, required this.workout});
 
-  List<String> _collectMuscleGroups() {
-    final data = DataService();
+  List<String> _collectMuscleGroups(BuildContext context) {
+    final dataState = BlocProvider.of<DataBloc>(context).state;
     final set = <String>{};
-    for (final ex in workout.exercises) {
-      final m = data.getExercise(ex.exerciseId)?.muscleGroup;
-      if (m != null && m.isNotEmpty) set.add(m);
+    if (dataState is DataReady) {
+      for (final ex in workout.exercises) {
+        final meta = dataState.exercises[ex.exerciseId];
+        final m = meta?.muscleGroup;
+        if (m != null && m.isNotEmpty) set.add(m);
+      }
     }
     return set.isEmpty ? const [] : set.toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final muscleGroups = _collectMuscleGroups();
+    final muscleGroups = _collectMuscleGroups(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -69,8 +72,8 @@ class PersonalWorkoutDetailScreen extends StatelessWidget {
                         color: AppColors.textSecondary,
                       ),
                     ),
+                    const SizedBox(height: 16),
                   ],
-                  const SizedBox(height: 16),
                   if (muscleGroups.isNotEmpty)
                     Row(
                       children: [
@@ -132,7 +135,11 @@ class PersonalWorkoutDetailScreen extends StatelessWidget {
               itemCount: workout.exercises.length,
               itemBuilder: (context, index) {
                 final ex = workout.exercises[index];
-                final meta = DataService().getExercise(ex.exerciseId);
+                final dataState = BlocProvider.of<DataBloc>(context).state;
+                final meta =
+                    (dataState is DataReady)
+                        ? dataState.exercises[ex.exerciseId]
+                        : null;
                 final displayName =
                     (meta?.name ?? ex.name).replaceAll('_', ' ').toUpperCase();
                 return Container(
@@ -224,7 +231,11 @@ class PersonalWorkoutDetailScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder:
                     (context) => PrepareToStartWorkoutScreen(
-                      workout: CustomWorkout.fromPersonalWorkout(workout),
+                      workout: workout.toCustomWorkout(
+                        context.read<DataBloc>().state is DataReady
+                            ? context.read<DataBloc>().state as DataReady
+                            : null,
+                      ),
                     ),
               ),
             );

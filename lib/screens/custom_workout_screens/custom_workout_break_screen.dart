@@ -4,7 +4,7 @@ import '../../services/audio_service.dart';
 import 'dart:async';
 import '../../constants/app_styles.dart';
 import '../../models/custom_workout.dart';
-import '../../services/data_service.dart';
+import '../../blocs/data/data_bloc.dart';
 import '../../blocs/workout/workout_bloc.dart';
 import '../../services/global_timer_service.dart';
 import '../well_done_workout_screen.dart';
@@ -268,14 +268,22 @@ class _PredefinedWorkoutBreakScreenState
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                (DataService()
-                                            .getExercise(
-                                              widget.nextExercise!.id,
-                                            )
-                                            ?.name ??
-                                        widget.nextExercise!.id)
-                                    .replaceAll('_', ' ')
-                                    .toUpperCase(),
+                                (() {
+                                  final dataState =
+                                      context.read<DataBloc>().state;
+                                  if (dataState is! DataReady) {
+                                    return widget.nextExercise!.id
+                                        .replaceAll('_', ' ')
+                                        .toUpperCase();
+                                  }
+                                  final ex =
+                                      dataState.exercises[widget
+                                          .nextExercise!
+                                          .id];
+                                  return (ex?.name ?? widget.nextExercise!.id)
+                                      .replaceAll('_', ' ')
+                                      .toUpperCase();
+                                })(),
                                 style: AppTextStyles.titleMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -455,9 +463,14 @@ class _PredefinedExerciseChipsRow extends StatelessWidget {
       child: Row(
         children:
             items.map((e) {
-              final meta = DataService().getExercise(e.id);
-              final name =
-                  (meta?.name ?? e.id).replaceAll('_', ' ').toUpperCase();
+              final dataState = context.read<DataBloc>().state;
+              String name;
+              if (dataState is DataReady) {
+                final ex = dataState.exercises[e.id];
+                name = (ex?.name ?? e.id).replaceAll('_', ' ').toUpperCase();
+              } else {
+                name = e.id.replaceAll('_', ' ').toUpperCase();
+              }
               return ExerciseChip(
                 title: name,
                 setsCount: e.setsAmount,

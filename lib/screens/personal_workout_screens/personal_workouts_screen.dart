@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../constants/app_styles.dart';
 import '../../models/personal_workout.dart';
 import '../../services/hive/personal_workout_lss.dart';
-import '../../services/data_service.dart';
+import '../../blocs/data/data_bloc.dart';
 import '../../blocs/workout/workout_bloc.dart';
 import 'personal_workout_detail_screen.dart';
 
@@ -16,7 +16,6 @@ class PersonalWorkoutsScreen extends StatefulWidget {
 
 class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
   final PersonalWorkoutLocalService _local = PersonalWorkoutLocalService();
-  final DataService _data = DataService();
 
   List<PersonalWorkout> _workouts = [];
   bool _loading = true;
@@ -32,7 +31,6 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
   }
 
   Future<void> _init() async {
-    await _data.loadData();
     final items = await _local.loadAll();
     if (!mounted) return;
     setState(() {
@@ -42,10 +40,12 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
   }
 
   String _inferMuscleGroup(PersonalWorkout w) {
-    if (w.exercises.isEmpty) return '';
-    final first = w.exercises.first;
-    final ex = _data.getExercise(first.exerciseId);
-    return ex?.muscleGroup ?? '';
+  final dataState = context.read<DataBloc>().state;
+  if (dataState is! DataReady) return '';
+  if (w.exercises.isEmpty) return '';
+  final first = w.exercises.first;
+  final ex = dataState.exercises[first.exerciseId];
+  return ex?.muscleGroup ?? '';
   }
 
   @override
@@ -75,16 +75,28 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
             )
             : _list();
 
-    return BlocListener<WorkoutBloc, WorkoutState>(
-      listenWhen: (prev, curr) => curr is PersonalWorkoutsLoaded,
-      listener: (context, state) {
-        if (state is PersonalWorkoutsLoaded) {
-          setState(() {
-            _workouts = state.workouts;
-            _loading = false;
-          });
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<WorkoutBloc, WorkoutState>(
+          listenWhen: (prev, curr) => curr is PersonalWorkoutsLoaded,
+          listener: (context, state) {
+            if (state is PersonalWorkoutsLoaded) {
+              setState(() {
+                _workouts = state.workouts;
+                _loading = false;
+              });
+            }
+          },
+        ),
+        BlocListener<DataBloc, DataState>(
+          listener: (context, state) {
+            if (state is DataReady && mounted && _loading) {
+              // Data became ready after screen opened; recompute groups via setState
+              setState(() {});
+            }
+          },
+        ),
+      ],
       child: content,
     );
   }

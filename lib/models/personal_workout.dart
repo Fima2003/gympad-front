@@ -1,5 +1,7 @@
+import 'package:gympad/models/custom_workout.dart';
 import 'package:gympad/services/api/models/workout_models.dart';
-import 'package:gympad/services/data_service.dart';
+import '../blocs/data/data_bloc.dart';
+import 'exercise.dart';
 
 class PersonalWorkout {
   final String name;
@@ -12,14 +14,50 @@ class PersonalWorkout {
     required this.exercises,
   });
 
-  List<String> getMuscleGroups() {
-    Set<String> muscleGroups = <String>{};
-
-    for (var exercise in exercises) {
-      muscleGroups.addAll(exercise.getMuscleGroups());
+  // Derive muscle groups from associated exercises (exercise metadata is now resolved externally)
+  List<String> getMuscleGroups(DataState? state) {
+    if (state is! DataReady) return [];
+    final set = <String>{};
+    for (final exercise in exercises) {
+      final mg =
+          state.exercises.values
+              .firstWhere(
+                (Exercise e) => e.id == exercise.exerciseId,
+                orElse:
+                    () => Exercise(
+                      id: '',
+                      name: '',
+                      description: '',
+                      muscleGroup: '',
+                      image: '',
+                    ),
+              )
+              .muscleGroup;
+      if (mg.isNotEmpty) set.add(mg);
     }
+    return set.toList();
+  }
 
-    return muscleGroups.toList();
+  CustomWorkout toCustomWorkout(DataReady? state) {
+    return CustomWorkout(
+      id: name.toLowerCase().replaceAll(' ', '_'),
+      name: name,
+      description: description ?? "",
+      difficulty: 'none',
+      muscleGroups: getMuscleGroups(state),
+      imageUrl: '',
+      exercises:
+          exercises.map((e) {
+            return CustomWorkoutExercise(
+              id: e.exerciseId,
+              setsAmount: e.sets,
+              suggestedWeight: e.weight,
+              restTime: e.restTime,
+              suggestedReps: e.reps,
+            );
+          }).toList(),
+      estimatedCalories: 0,
+    );
   }
 
   factory PersonalWorkout.fromJson(Map<String, dynamic> json) {
@@ -53,7 +91,6 @@ class PersonalWorkout {
 }
 
 class PersonalWorkoutExercise {
-  final _dataService = DataService();
   final String exerciseId;
   final String name;
   final int sets;
@@ -70,9 +107,7 @@ class PersonalWorkoutExercise {
     required this.restTime,
   });
 
-  List<String> getMuscleGroups() {
-    return _dataService.getMuscleGroupForExercise(exerciseId) ?? [];
-  }
+  // Muscle group lookups handled via DataBloc outside of model.
 
   factory PersonalWorkoutExercise.fromJson(Map<String, dynamic> json) {
     return PersonalWorkoutExercise(

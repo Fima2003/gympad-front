@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gympad/blocs/analytics/analytics_bloc.dart';
 import 'package:gympad/widgets/velocity_weight_selector.dart';
 import 'dart:async';
 import '../../constants/app_styles.dart';
@@ -11,7 +12,7 @@ import '../../services/workout_service.dart';
 import '../../widgets/reps_selector.dart';
 import 'custom_workout_break_screen.dart';
 import '../well_done_workout_screen.dart';
-import '../../services/data_service.dart';
+import '../../blocs/data/data_bloc.dart';
 
 class PredefinedWorkoutsRunScreen extends StatefulWidget {
   final CustomWorkout workout;
@@ -47,6 +48,7 @@ class _PredefinedWorkoutsRunScreenState
     context.read<WorkoutBloc>().add(
       WorkoutStarted(WorkoutType.custom, name: widget.workout.name),
     );
+    context.read<AnalyticsBloc>().add(AStartedWorkout());
     GlobalTimerService().start();
 
     // Set initial weight and reps
@@ -134,7 +136,11 @@ class _PredefinedWorkoutsRunScreenState
 
     // If this is the first set of the exercise, add the exercise to the workout
     if (_currentSetIndex == 0) {
-      final exerciseMeta = DataService().getExercise(_currentExercise.id);
+      final dataState = BlocProvider.of<DataBloc>(context).state;
+      final exerciseMeta =
+          (dataState is DataReady)
+              ? dataState.exercises[_currentExercise.id]
+              : null;
       context.read<WorkoutBloc>().add(
         ExerciseAdded(
           exerciseId: _currentExercise.id,
@@ -317,10 +323,17 @@ class _PredefinedWorkoutsRunScreenState
                   children: [
                     // Exercise name
                     Text(
-                      (DataService().getExercise(_currentExercise.id)?.name ??
-                              _currentExercise.id)
-                          .replaceAll('_', ' ')
-                          .toUpperCase(),
+                      (() {
+                        final dataState =
+                            BlocProvider.of<DataBloc>(context).state;
+                        final ex =
+                            (dataState is DataReady)
+                                ? dataState.exercises[_currentExercise.id]
+                                : null;
+                        return (ex?.name ?? _currentExercise.id)
+                            .replaceAll('_', ' ')
+                            .toUpperCase();
+                      })(),
                       style: AppTextStyles.titleLarge.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,

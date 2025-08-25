@@ -1,9 +1,10 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../constants/app_styles.dart';
 import '../../models/custom_workout.dart';
 import 'custom_workout_run_screen.dart';
-import '../../services/data_service.dart';
+import '../../blocs/data/data_bloc.dart';
 import '../../services/audio_service.dart';
 
 class PrepareToStartWorkoutScreen extends StatefulWidget {
@@ -125,12 +126,20 @@ class _PrepareToStartWorkoutScreenState
             const SizedBox(height: 8),
             Text(
               widget.workout.exercises.isNotEmpty
-                  ? (DataService()
-                              .getExercise(widget.workout.exercises.first.id)
-                              ?.name ??
-                          widget.workout.exercises.first.id)
-                      .replaceAll('_', ' ')
-                      .toUpperCase()
+                  ? (() {
+                    final dataState = BlocProvider.of<DataBloc>(context).state;
+                    final ex =
+                        (dataState is DataReady)
+                            ? dataState.exercises[widget
+                                .workout
+                                .exercises
+                                .first
+                                .id]
+                            : null;
+                    return (ex?.name ?? widget.workout.exercises.first.id)
+                        .replaceAll('_', ' ')
+                        .toUpperCase();
+                  })()
                   : 'Exercise',
               style: AppTextStyles.titleMedium.copyWith(
                 color: Colors.white,

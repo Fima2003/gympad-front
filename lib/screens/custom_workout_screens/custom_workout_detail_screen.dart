@@ -1,8 +1,9 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import '../../constants/app_styles.dart';
 import '../../models/custom_workout.dart';
 import 'prepare_to_start_workout_screen.dart';
-import '../../services/data_service.dart';
+import '../../blocs/data/data_bloc.dart';
 
 class PredefinedWorkoutDetailScreen extends StatelessWidget {
   final CustomWorkout workout;
@@ -210,10 +211,19 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              (DataService().getExercise(exercise.id)?.name ??
-                                      exercise.id)
-                                  .replaceAll('_', ' ')
-                                  .toUpperCase(),
+                              (() {
+                                final dataState =
+                                    BlocProvider.of<DataBloc>(context).state;
+                                if (dataState is! DataReady) {
+                                  return exercise.id
+                                      .replaceAll('_', ' ')
+                                      .toUpperCase();
+                                }
+                                final ex = dataState.exercises[exercise.id];
+                                return (ex?.name ?? exercise.id)
+                                    .replaceAll('_', ' ')
+                                    .toUpperCase();
+                              })(),
                               style: AppTextStyles.titleSmall.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -268,7 +278,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
           ),
 
           // Bottom padding for floating action button
-          const SizedBox(height: 80),
+          const SizedBox(height: 116),
         ],
       ),
       floatingActionButton: Container(
