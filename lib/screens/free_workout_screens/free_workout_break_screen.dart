@@ -7,7 +7,6 @@ import '../../models/workout.dart';
 import '../../models/workout_exercise.dart';
 import '../../models/workout_set.dart';
 import '../../blocs/workout/workout_bloc.dart';
-import '../../services/global_timer_service.dart';
 import '../well_done_workout_screen.dart';
 import '../../widgets/exercise_chip.dart';
 
@@ -35,7 +34,6 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
   int _elapsedTime = 0; // Time in seconds
   Timer? _timer;
   bool _isFinishingWorkout = false;
-  final GlobalTimerService _globalTimerService = GlobalTimerService();
 
   @override
   void initState() {
@@ -66,8 +64,6 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
       // Finish current exercise and workout
       context.read<WorkoutBloc>().add(ExerciseFinished());
       context.read<WorkoutBloc>().add(WorkoutFinished());
-      _globalTimerService.stop();
-      _globalTimerService.reset();
 
       // Don't navigate here - let the BlocListener handle navigation
       // when WorkoutCompleted state is received

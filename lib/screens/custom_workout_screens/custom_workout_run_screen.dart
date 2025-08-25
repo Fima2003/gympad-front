@@ -7,7 +7,6 @@ import '../../constants/app_styles.dart';
 import '../../models/custom_workout.dart';
 import '../../models/workout_set.dart';
 import '../../blocs/workout/workout_bloc.dart';
-import '../../services/global_timer_service.dart';
 import '../../services/workout_service.dart';
 import '../../widgets/reps_selector.dart';
 import 'custom_workout_break_screen.dart';
@@ -49,7 +48,6 @@ class _PredefinedWorkoutsRunScreenState
       WorkoutStarted(WorkoutType.custom, name: widget.workout.name),
     );
     context.read<AnalyticsBloc>().add(AStartedWorkout());
-    GlobalTimerService().start();
 
     // Set initial weight and reps
     final firstExercise = widget.workout.exercises[_currentExerciseIndex];
@@ -247,8 +245,6 @@ class _PredefinedWorkoutsRunScreenState
 
     // Finish the workout
     context.read<WorkoutBloc>().add(WorkoutFinished());
-
-    GlobalTimerService().stop();
   }
 
   double _calculateProgress() {

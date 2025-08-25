@@ -6,7 +6,6 @@ import '../../constants/app_styles.dart';
 import '../../models/custom_workout.dart';
 import '../../blocs/data/data_bloc.dart';
 import '../../blocs/workout/workout_bloc.dart';
-import '../../services/global_timer_service.dart';
 import '../well_done_workout_screen.dart';
 import '../../widgets/exercise_chip.dart';
 
@@ -132,9 +131,8 @@ class _PredefinedWorkoutBreakScreenState
     if (_finishing) return;
     setState(() => _finishing = true);
     _timer?.cancel();
-    GlobalTimerService().stop();
-    context.read<WorkoutBloc>().add(ExerciseFinished());
-    context.read<WorkoutBloc>().add(WorkoutFinished());
+    BlocProvider.of<WorkoutBloc>(context).add(ExerciseFinished());
+    BlocProvider.of<WorkoutBloc>(context).add(WorkoutFinished());
   }
 
   String _formatTime(int seconds) {

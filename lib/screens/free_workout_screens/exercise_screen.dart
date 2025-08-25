@@ -4,7 +4,6 @@ import '../../constants/app_styles.dart';
 import '../../models/gym.dart';
 import '../../models/exercise.dart';
 import '../../models/workout_set.dart';
-import '../../services/global_timer_service.dart';
 import '../../blocs/workout/workout_bloc.dart';
 import '../../services/workout_service.dart';
 import '../../widgets/velocity_weight_selector.dart';
@@ -30,8 +29,6 @@ class ExerciseScreen extends StatefulWidget {
 }
 
 class _ExerciseScreenState extends State<ExerciseScreen> {
-  final GlobalTimerService _globalTimerService = GlobalTimerService();
-
   bool _isTimerRunning = false;
   double _selectedWeight = 15.0;
   Duration _setDuration = Duration.zero;
@@ -61,13 +58,14 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     // Create workout and add exercise only when starting the first set
     if (widget.isPartOfWorkout && !_hasCompletedSets) {
       // Start global timer if not already started
-      if (!_globalTimerService.isRunning) {
-        context.read<WorkoutBloc>().add(WorkoutStarted(WorkoutType.free));
-        _globalTimerService.start();
+      if (BlocProvider.of<WorkoutBloc>(context).state is! WorkoutInProgress) {
+        BlocProvider.of<WorkoutBloc>(
+          context,
+        ).add(WorkoutStarted(WorkoutType.free));
       }
 
       // Add exercise to workout
-      context.read<WorkoutBloc>().add(
+      BlocProvider.of<WorkoutBloc>(context).add(
         ExerciseAdded(
           exerciseId: widget.exercise.id,
           name: widget.exercise.name,

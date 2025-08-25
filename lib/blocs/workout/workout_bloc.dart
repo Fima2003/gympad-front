@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 import '../../models/personal_workout.dart';
 import '../../models/workout.dart';
 import '../../services/workout_service.dart';
-import '../../services/global_timer_service.dart';
 import '../../services/logger_service.dart';
 import '../../services/api/workout_api_service.dart';
 import '../../services/hive/personal_workout_lss.dart';
@@ -15,7 +14,6 @@ part 'workout_state.dart';
 
 class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
   final WorkoutService _workoutService = WorkoutService();
-  final GlobalTimerService _timerService = GlobalTimerService();
   final AppLogger _logger = AppLogger();
   final WorkoutApiService _workoutApi = WorkoutApiService();
   final PersonalWorkoutLocalService _personalLocal =
@@ -59,7 +57,6 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
   ) async {
     try {
       await _workoutService.startWorkout(event.type, name: event.name);
-      _timerService.start();
 
       final currentWorkout = _workoutService.currentWorkout;
       if (currentWorkout != null) {
@@ -79,7 +76,6 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       final currentWorkout = _workoutService.currentWorkout;
       if (currentWorkout != null) {
         await _workoutService.finishWorkout();
-        _timerService.stop();
 
         emit(WorkoutCompleted(currentWorkout));
       }
