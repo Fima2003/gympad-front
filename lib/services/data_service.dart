@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import '../models/custom_workout.dart';
 import '../models/gym.dart';
 import '../models/exercise.dart';
 import '../models/equipment.dart';
@@ -13,20 +14,27 @@ class DataService {
   Map<String, Gym>? _gyms;
   Map<String, Exercise>? _exercises;
   Map<String, Equipment>? _equipment;
+  Map<String, CustomWorkout>? _customWorkouts;
 
   // Read-only access for BLoC
   Map<String, Exercise> get exercisesMap => _exercises ?? const {};
   Map<String, Equipment> get equipmentMap => _equipment ?? const {};
+  Map<String, CustomWorkout> get customWorkoutsMap =>
+      _customWorkouts ?? const {};
 
   Future<void> forceReload() async {
     _exercises = null;
     _equipment = null;
+    _customWorkouts = null;
     await loadData();
   }
 
   Future<void> loadData() async {
     if (_exercises == null) {
       await _loadExercises();
+    }
+    if (_customWorkouts == null) {
+      await _loadCustomWorkouts();
     }
     if (_equipment == null) {
       unawaited(_loadEquipment());
@@ -54,6 +62,18 @@ class DataService {
     _equipment = {};
     jsonData['equipment'].forEach((key, value) {
       _equipment![key] = Equipment.fromJson(key, value);
+    });
+  }
+
+  Future<void> _loadCustomWorkouts() async {
+    final String jsonString = await rootBundle.loadString(
+      'assets/mock_data/custom_workouts.json',
+    );
+    final Map<String, dynamic> jsonData = json.decode(jsonString);
+
+    _customWorkouts = {};
+    jsonData['custom_workouts'].forEach((key, value) {
+      _customWorkouts![key] = CustomWorkout.fromJson(key, value);
     });
   }
 

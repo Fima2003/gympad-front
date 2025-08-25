@@ -150,6 +150,78 @@
             "image": "https://example.com/images/shoulder_shrugs.gif",
             "muscleGroup": "back"
         },
+        "deadlifts": {
+            "name": "Barbell Deadlifts",
+            "description": "Full body exercise. Lift barbell from the floor, keeping back straight, and stand up.",
+            "image": "https://example.com/images/deadlifts_full.gif",
+            "muscleGroup": "back"
+        },
+        "rows": {
+            "name": "Bent-Over Rows",
+            "description": "Targets back. Bend at hips, pull barbell towards lower chest, squeezing shoulder blades.",
+            "image": "https://example.com/images/rows_full.gif",
+            "muscleGroup": "back"
+        },
+        "cable_seated_rows": {
+            "name": "Cable Seated Rows",
+            "description": "Targets back. Sit on bench, pull handle towards lower abdomen, squeezing shoulder blades.",
+            "image": "https://example.com/images/cable_seated_rows_full.gif",
+            "muscleGroup": "back"
+        },
+        "wide_grip_cable_rows": {
+            "name": "Wide Grip Cable Rows",
+            "description": "Targets back. Sit on bench, pull handle towards lower abdomen, squeezing shoulder blades.",
+            "image": "https://example.com/images/wide_grip_cable_rows_full.gif",
+            "muscleGroup": "back"
+        },
+        "wide_grip_cable_lat_pulldowns": {
+            "name": "Wide Grip Cable Lat Pulldowns",
+            "description": "Targets lats. Sit on bench, pull bar down to upper chest, squeezing shoulder blades.",
+            "image": "https://example.com/images/wide_grip_cable_lat_pulldowns_full.gif",
+            "muscleGroup": "back"
+        },
+        "neutral_grip_cable_lat_pulldowns": {
+            "name": "Neutral Grip Cable Lat Pulldowns",
+            "description": "Targets lats. Sit on bench, pull bar down to upper chest, squeezing shoulder blades.",
+            "image": "https://example.com/images/neutral_grip_cable_lat_pulldowns_full.gif",
+            "muscleGroup": "back"
+        },
+        "one_arm_lat_pulldown": {
+            "name": "One Arm Lat Pulldown",
+            "description": "Targets lats. Stand next to a cable machine, grab the handle with one hand, and pull down to your side.",
+            "image": "https://example.com/images/one_arm_lat_pulldown_full.gif",
+            "muscleGroup": "back"
+        },
+        "cross_body_lat_pulldown": {
+            "name": "Crossbody Lat Pulldown",
+            "description": "Targets lats. Sit on bench, pull bar down to upper chest, squeezing shoulder blades.",
+            "image": "https://example.com/images/cross_body_lat_pulldown_full.gif",
+            "muscleGroup": "back"
+        },
+        "meadow_rows": {
+            "name": "Meadow Rows",
+            "description": "Targets lats. Sit on bench, pull bar down to upper chest, squeezing shoulder blades.",
+            "image": "https://example.com/images/meadow_rows.gif",
+            "muscleGroup": "back"
+        },
+        "wide_grip_pull_up": {
+            "name": "Wide Grip Pull-Ups",
+            "description": "Targets upper back and lats. Hang from a bar with a wide grip, pull body up until chin is above bar.",
+            "image": "https://example.com/images/wide_grip_pull_up_full.gif",
+            "muscleGroup": "back"
+        },
+        "neutral_grip_pull_up": {
+            "name": "Neutral Grip Pull-Ups",
+            "description": "Targets upper back and lats. Hang from a bar with a neutral grip, pull body up until chin is above bar.",
+            "image": "https://example.com/images/neutral_grip_pull_up_full.gif",
+            "muscleGroup": "back"
+        },
+        "chin_ups": {
+            "name": "Chin-Ups",
+            "description": "Targets upper back and biceps. Hang from a bar with an underhand grip, pull body up until chin is above bar.",
+            "image": "https://example.com/images/chin_ups_full.gif",
+            "muscleGroup": "back"
+        },
         "leg_press": {
             "name": "Leg Press",
             "description": "Targets quadriceps and glutes. Push the platform away from you.",
@@ -186,18 +258,6 @@
             "image": "https://example.com/images/plank_full.gif",
             "muscleGroup": "abs"
         },
-        "deadlifts": {
-            "name": "Barbell Deadlifts",
-            "description": "Full body exercise. Lift barbell from the floor, keeping back straight, and stand up.",
-            "image": "https://example.com/images/deadlifts_full.gif",
-            "muscleGroup": "back"
-        },
-        "rows": {
-            "name": "Bent-Over Rows",
-            "description": "Targets back. Bend at hips, pull barbell towards lower chest, squeezing shoulder blades.",
-            "image": "https://example.com/images/rows_full.gif",
-            "muscleGroup": "back"
-        },
         "cable_kickbacks": {
             "name": "Cable Kickbacks",
             "description": "Targets glutes and hamstrings. Attach ankle strap to cable, kick leg back and up, squeezing glutes.",
@@ -233,18 +293,6 @@
             "description": "Targets biceps. Stand facing cable, curl bar towards shoulders, squeezing biceps.",
             "image": "https://example.com/images/cable_bicep_curls_full.gif",
             "muscleGroup": "arms"
-        },
-        "cable_seated_rows": {
-            "name": "Cable Seated Rows",
-            "description": "Targets back. Sit on bench, pull handle towards lower abdomen, squeezing shoulder blades.",
-            "image": "https://example.com/images/cable_seated_rows_full.gif",
-            "muscleGroup": "back"
-        },
-        "cable_lat_pulldowns": {
-            "name": "Cable Lat Pulldowns",
-            "description": "Targets lats. Sit on bench, pull bar down to upper chest, squeezing shoulder blades.",
-            "image": "https://example.com/images/cable_lat_pulldowns_full.gif",
-            "muscleGroup": "back"
         },
         "rope_waves": {
             "name": "Rope Waves",
