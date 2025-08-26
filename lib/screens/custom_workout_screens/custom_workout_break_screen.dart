@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../services/audio_service.dart';
+import '../../blocs/audio/audio_bloc.dart';
 import 'dart:async';
 import '../../constants/app_styles.dart';
 import '../../models/custom_workout.dart';
@@ -59,12 +59,12 @@ class _PredefinedWorkoutBreakScreenState
           final next = _remainingTime - 1;
           // Play a tick when 5 seconds or less remain (5,4,3,2,1)
           if (next <= 5 && next >= 1) {
-            AudioService().playTick();
+            context.read<AudioBloc>().add(PlayTickSound());
           }
           _remainingTime = next;
         } else {
           // Countdown finished: play start sound then complete break
-          AudioService().playStart();
+          context.read<AudioBloc>().add(PlayStartSound());
           _timer?.cancel();
           widget.onBreakComplete();
         }
