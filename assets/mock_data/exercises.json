@@ -4,313 +4,365 @@
             "name": "Standing Dumbbell Shoulder Press",
             "description": "Targets shoulders. Push dumbbells overhead in a controlled motion.",
             "image": "https://example.com/images/standing_shoulder_press_full.gif",
-            "muscleGroup": "shoulders"
+            "muscleGroup": "shoulders",
+            "equipmentId": "dumbbells"
         },
         "overhead_press": {
             "name": "Barbell Overhead Press",
             "description": "Targets shoulders. Press barbell overhead, keeping core tight.",
             "image": "https://example.com/images/overhead_press_full.gif",
-            "muscleGroup": "shoulders"
+            "muscleGroup": "shoulders",
+            "equipmentId": "barbell"
         },
         "lateral_raises": {
             "name": "Lateral Raises",
             "description": "Targets shoulders. Raise dumbbells out to the sides until parallel to the ground.",
             "image": "https://example.com/images/lateral_raises_full.gif",
-            "muscleGroup": "shoulders"
+            "muscleGroup": "shoulders",
+            "equipmentId": "dumbbells"
         },
         "cable_face_pulls": {
             "name": "Cable Face Pulls",
             "description": "Targets rear delts and upper back. Pull rope towards face, keeping elbows high.",
             "image": "https://example.com/images/face_pulls_full.gif",
-            "muscleGroup": "shoulders"
+            "muscleGroup": "shoulders",
+            "equipmentId": "cable_machine"
         },
         "reverse_fly": {
             "name": "Bent Over Dumbbell Reverse Fly",
             "description": "Strengthening the rear delts by using the bent over rear delt fly can lead to improved posture and a greater level of strength on other lifts.",
             "image": "https://example.com/images/reverse_fly_full.gif",
-            "muscleGroup": "shoulders"
+            "muscleGroup": "shoulders",
+            "equipmentId": "dumbbells"
         },
         "seated_shoulder_press": {
             "name": "Seated Dumbbell Press",
             "description": "Utilizing dumbbells as opposed to performing with a barbell will allow the individual to strengthen each side of the muscle equally.",
             "image": "https://example.com/images/seated_shoulder_press_full.gif",
-            "muscleGroup": "shoulders"
+            "muscleGroup": "shoulders",
+            "equipmentId": "dumbbells"
         },
         "seated_arnold_press": {
             "name": "Seated Arnold Press",
             "description": "The seated Arnold press is a variation of the seated dumbbell press and an exercise utilized to build shoulder muscle size and strength.",
             "image": "https://example.com/images/seated_arnold_press.gif",
-            "muscleGroup": "shoulders"
+            "muscleGroup": "shoulders",
+            "equipmentId": "dumbbells"
         },
         "reverse_cable_crossover": {
             "name": "Reverse Cable Crossover",
             "description": "Cross your hands in front with cables. pull them all the way to the bottom.",
             "image": "https://example.com/images/reverse_cable_crossover.gif",
-            "muscleGroup": "shoulders"
+            "muscleGroup": "shoulders",
+            "equipmentId": "cable_machine"
         },
         "barbell_bench_press": {
             "name": "Barbell Bench Press",
             "description": "Targets chest, shoulders, triceps. Lower barbell to mid-chest, then push up.",
             "image": "https://example.com/images/bench_press_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "barbell"
         },
         "incline_barbell_bench_press": {
             "name": "Incline Barbell Bench Press",
             "description": "Targets upper chest, shoulders, triceps. Press barbell up on an incline bench.",
             "image": "https://example.com/images/incline_barbell_bench_press_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "barbell"
         },
         "smith_bench_press": {
             "name": "Smith Machine Bench Press",
             "description": "Targets chest, shoulders, triceps. Lower Smith Machine to mid-chest, then push up.",
             "image": "https://example.com/images/bench_press_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "smith_machine"
         },
         "incline_smith_bench_press": {
             "name": "Incline Smith Machine Bench Press",
             "description": "Targets upper chest, shoulders, triceps. Press Smith Machine up on an incline bench.",
             "image": "https://example.com/images/incline_smith_bench_press_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "smith_machine"
         },
         "dumbbell_bench_press": {
             "name": "Dumbbell Bench Press",
             "description": "Targets chest, shoulders, triceps. Lower dumbbells to mid-chest, then push up.",
             "image": "https://example.com/images/dumbbell_bench_press_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "dumbbells"
         },
         "incline_dumbbell_bench_press": {
             "name": "Incline Dumbbell Bench Press",
             "description": "Targets upper chest, shoulders, triceps. Press dumbbells up on an incline bench.",
             "image": "https://example.com/images/incline_dumbbell_bench_press_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "dumbbells"
         },
         "dumbbell_pullover": {
             "name": "Dumbbell Pullover",
             "description": "Targets chest and lats. Lie on a bench, hold a dumbbell with both hands above chest, lower it back over your head.",
             "image": "https://example.com/images/dumbbell_pullover_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "dumbbells"
         },
         "machine_chest_press": {
             "name": "Machine Chest Press",
             "description": "Targets chest, shoulders, triceps. Press the handles forward while seated.",
             "image": "https://example.com/images/machine_chest_press_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "chest_press_machine"
         },
         "cable_chest_flyes": {
             "name": "Cable Chest Flyes",
             "description": "Targets chest. Stand in center of cable machine, bring handles together in a 'hugging' motion.",
             "image": "https://example.com/images/cable_chest_flyes_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "cable_machine"
         },
         "dips": {
             "name": "Dips",
             "description": "Targets chest, shoulders, triceps. Lower body by bending elbows, then push back up.",
             "image": "https://example.com/images/dips_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "bodyweight"
         },
         "push_ups": {
             "name": "Push-Ups",
             "description": "Targets chest, shoulders, triceps. Lower body to the ground, then push back up.",
             "image": "https://example.com/images/pushups_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "bodyweight"
         },
         "guillotine_barbell_press": {
             "name": "Guillotine Barbell Press",
             "description": "Targets upper chest. Lie on a bench, press barbell down towards neck.",
             "image": "https://example.com/images/guillotine_press_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "barbell"
         },
         "guillotine_dumbbell_press": {
             "name": "Guillotine Dumbbell Press",
             "description": "Targets upper chest. Lie on a bench, press dumbbells down towards neck.",
             "image": "https://example.com/images/guillotine_press_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "dumbbells"
         },
         "cable_crossover": {
             "name": "Cable Crossover",
             "description": "Targets chest. Stand in the center of a cable machine, grab handles, and bring them together in a 'hugging' motion.",
             "image": "https://example.com/images/cable_crossover_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "cable_machine"
         },
         "seated_cable_pec_fly": {
             "name": "Seated Cable Pec Fly",
             "description": "Targets chest. Sit on a bench with back support, grab cable handles, and bring them together in front of you.",
             "image": "https://example.com/images/seated_cable_pec_fly_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "cable_machine"
         },
         "dumbbell_fly": {
             "name": "Dumbbell Fly",
             "description": "Targets chest. Lie on a flat bench with a dumbbell in each hand, arms extended above chest. Lower weights out to sides, then bring back together.",
             "image": "https://example.com/images/dumbbell_fly_full.gif",
-            "muscleGroup": "chest"
+            "muscleGroup": "chest",
+            "equipmentId": "dumbbells"
         },
         "shoulder_shrugs": {
             "name": "Shoulder Shrugs",
             "description": "Shoulder Shrugs is an exercise where you lift your shoulders straight up towards your ears, holding a weight in each hand.",
             "image": "https://example.com/images/shoulder_shrugs.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "dumbbells"
         },
         "deadlifts": {
             "name": "Barbell Deadlifts",
             "description": "Full body exercise. Lift barbell from the floor, keeping back straight, and stand up.",
             "image": "https://example.com/images/deadlifts_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "barbell"
         },
         "rows": {
             "name": "Bent-Over Rows",
             "description": "Targets back. Bend at hips, pull barbell towards lower chest, squeezing shoulder blades.",
             "image": "https://example.com/images/rows_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "dumbbells"
         },
         "cable_seated_rows": {
             "name": "Cable Seated Rows",
             "description": "Targets back. Sit on bench, pull handle towards lower abdomen, squeezing shoulder blades.",
             "image": "https://example.com/images/cable_seated_rows_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "seated_cable_row_machine"
         },
         "wide_grip_cable_rows": {
             "name": "Wide Grip Cable Rows",
             "description": "Targets back. Sit on bench, pull handle towards lower abdomen, squeezing shoulder blades.",
             "image": "https://example.com/images/wide_grip_cable_rows_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "seated_cable_row_machine"
         },
         "wide_grip_cable_lat_pulldowns": {
             "name": "Wide Grip Cable Lat Pulldowns",
             "description": "Targets lats. Sit on bench, pull bar down to upper chest, squeezing shoulder blades.",
             "image": "https://example.com/images/wide_grip_cable_lat_pulldowns_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "lat_pulldown_machine"
         },
         "neutral_grip_cable_lat_pulldowns": {
             "name": "Neutral Grip Cable Lat Pulldowns",
             "description": "Targets lats. Sit on bench, pull bar down to upper chest, squeezing shoulder blades.",
             "image": "https://example.com/images/neutral_grip_cable_lat_pulldowns_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "lat_pulldown_machine"
         },
         "one_arm_lat_pulldown": {
             "name": "One Arm Lat Pulldown",
             "description": "Targets lats. Stand next to a cable machine, grab the handle with one hand, and pull down to your side.",
             "image": "https://example.com/images/one_arm_lat_pulldown_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "lat_pulldown_machine"
         },
         "cross_body_lat_pulldown": {
             "name": "Crossbody Lat Pulldown",
             "description": "Targets lats. Sit on bench, pull bar down to upper chest, squeezing shoulder blades.",
             "image": "https://example.com/images/cross_body_lat_pulldown_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "cable_machine"
         },
         "meadow_rows": {
             "name": "Meadow Rows",
             "description": "Targets lats. Sit on bench, pull bar down to upper chest, squeezing shoulder blades.",
             "image": "https://example.com/images/meadow_rows.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "barbell"
         },
         "wide_grip_pull_up": {
             "name": "Wide Grip Pull-Ups",
             "description": "Targets upper back and lats. Hang from a bar with a wide grip, pull body up until chin is above bar.",
             "image": "https://example.com/images/wide_grip_pull_up_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "bodyweight"
         },
         "neutral_grip_pull_up": {
             "name": "Neutral Grip Pull-Ups",
             "description": "Targets upper back and lats. Hang from a bar with a neutral grip, pull body up until chin is above bar.",
             "image": "https://example.com/images/neutral_grip_pull_up_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "bodyweight"
         },
         "chin_ups": {
             "name": "Chin-Ups",
             "description": "Targets upper back and biceps. Hang from a bar with an underhand grip, pull body up until chin is above bar.",
             "image": "https://example.com/images/chin_ups_full.gif",
-            "muscleGroup": "back"
+            "muscleGroup": "back",
+            "equipmentId": "bodyweight"
         },
         "leg_press": {
             "name": "Leg Press",
             "description": "Targets quadriceps and glutes. Push the platform away from you.",
             "image": "https://example.com/images/leg_press_full.gif",
-            "muscleGroup": "legs"
+            "muscleGroup": "legs",
+            "equipmentId": "leg_press_machine"
         },
         "squats": {
             "name": "Barbell Squats",
             "description": "Compound exercise for lower body. Keep your back straight, descend until thighs are parallel to the floor.",
             "image": "https://example.com/images/squats_full.gif",
-            "muscleGroup": "legs"
+            "muscleGroup": "legs",
+            "equipmentId": "barbell"
         },
         "bicep_curls": {
             "name": "Dumbbell Bicep Curls",
             "description": "Isolate the biceps. Keep elbows tucked in and curl dumbbells towards shoulders.",
             "image": "https://example.com/images/bicep_curls_full.gif",
-            "muscleGroup": "arms"
+            "muscleGroup": "arms",
+            "equipmentId": "dumbbells"
         },
         "tricep_extensions": {
             "name": "Overhead Tricep Extensions",
             "description": "Targets triceps. Extend dumbbells overhead, keeping elbows close to head.",
             "image": "https://example.com/images/tricep_extensions_full.gif",
-            "muscleGroup": "arms"
+            "muscleGroup": "arms",
+            "equipmentId": "dumbbells"
         },
         "crunches": {
             "name": "Crunches",
             "description": "Targets upper abs. Lift shoulders off the floor, engaging core.",
             "image": "https://example.com/images/crunches_full.gif",
-            "muscleGroup": "abs"
+            "muscleGroup": "abs",
+            "equipmentId": "bodyweight"
         },
         "plank": {
             "name": "Plank",
             "description": "Core stability exercise. Maintain a straight line from head to heels.",
             "image": "https://example.com/images/plank_full.gif",
-            "muscleGroup": "abs"
+            "muscleGroup": "abs",
+            "equipmentId": "bodyweight"
         },
         "cable_kickbacks": {
             "name": "Cable Kickbacks",
             "description": "Targets glutes and hamstrings. Attach ankle strap to cable, kick leg back and up, squeezing glutes.",
             "image": "https://example.com/images/cable_kickbacks_full.gif",
-            "muscleGroup": "legs"
+            "muscleGroup": "legs",
+            "equipmentId": "cable_machine"
         },
         "cable_pull_throughs": {
             "name": "Cable Pull-Throughs",
             "description": "Targets glutes and hamstrings. Stand facing away from cable, pull handle between legs, driving hips forward.",
             "image": "https://example.com/images/cable_pull_throughs_full.gif",
-            "muscleGroup": "legs"
+            "muscleGroup": "legs",
+            "equipmentId": "cable_machine"
         },
         "cable_crunches": {
             "name": "Cable Crunches",
             "description": "Targets abs. Kneel facing cable, hold rope behind head, crunch down, engaging core.",
             "image": "https://example.com/images/cable_crunches_full.gif",
-            "muscleGroup": "abs"
+            "muscleGroup": "abs",
+            "equipmentId": "cable_machine"
         },
         "cable_wood_chops": {
             "name": "Cable Wood Chops",
             "description": "Targets obliques and core. Stand sideways to cable, pull handle across body in a chopping motion.",
             "image": "https://example.com/images/cable_wood_chops_full.gif",
-            "muscleGroup": "abs"
+            "muscleGroup": "abs",
+            "equipmentId": "cable_machine"
         },
         "cable_tricep_pushdowns": {
             "name": "Cable Tricep Pushdowns",
             "description": "Targets triceps. Stand facing cable, push bar down towards thighs, fully extending arms.",
             "image": "https://example.com/images/cable_tricep_pushdowns_full.gif",
-            "muscleGroup": "arms"
+            "muscleGroup": "arms",
+            "equipmentId": "cable_machine"
         },
         "cable_bicep_curls": {
             "name": "Cable Bicep Curls",
             "description": "Targets biceps. Stand facing cable, curl bar towards shoulders, squeezing biceps.",
             "image": "https://example.com/images/cable_bicep_curls_full.gif",
-            "muscleGroup": "arms"
+            "muscleGroup": "arms",
+            "equipmentId": "cable_machine"
         },
         "rope_waves": {
             "name": "Rope Waves",
             "description": "Full body cardio exercise with battle ropes. Create alternating waves with both arms.",
             "image": "https://example.com/images/rope_waves_full.gif",
-            "muscleGroup": "cardio"
+            "muscleGroup": "cardio",
+            "equipmentId": "battle_ropes"
         },
         "rope_slams": {
             "name": "Rope Slams",
             "description": "Explosive movement with battle ropes. Slam both ropes down simultaneously.",
             "image": "https://example.com/images/rope_slams_full.gif",
-            "muscleGroup": "cardio"
+            "muscleGroup": "cardio",
+            "equipmentId": "battle_ropes"
         },
         "rope_spirals": {
             "name": "Rope Spirals",
             "description": "Core-focused battle rope exercise. Create spiral motions with alternating arms.",
             "image": "https://example.com/images/rope_spirals_full.gif",
-            "muscleGroup": "abs"
+            "muscleGroup": "abs",
+            "equipmentId": "battle_ropes"
         }
     }
 }

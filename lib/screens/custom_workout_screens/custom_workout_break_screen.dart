@@ -83,8 +83,8 @@ class _PredefinedWorkoutBreakScreenState
 
     // Add 60 seconds to remaining time and total time
     setState(() {
-      _remainingTime += 60;
-      _totalTime += 60;
+      _remainingTime += 30;
+      _totalTime += 30;
     });
 
     // Restart the countdown timer
@@ -269,18 +269,30 @@ class _PredefinedWorkoutBreakScreenState
                                 (() {
                                   final dataState =
                                       context.read<DataBloc>().state;
+                                  final weight =
+                                      widget.nextExercise!.suggestedWeight;
+                                  final showWeight =
+                                      (weight != null && weight > 0);
                                   if (dataState is! DataReady) {
-                                    return widget.nextExercise!.id
-                                        .replaceAll('_', ' ')
-                                        .toUpperCase();
+                                    final name =
+                                        widget.nextExercise!.id
+                                            .replaceAll('_', ' ')
+                                            .toUpperCase();
+                                    return showWeight
+                                        ? "$name: ${weight}kg"
+                                        : name;
                                   }
                                   final ex =
                                       dataState.exercises[widget
                                           .nextExercise!
                                           .id];
-                                  return (ex?.name ?? widget.nextExercise!.id)
-                                      .replaceAll('_', ' ')
-                                      .toUpperCase();
+                                  final name =
+                                      (ex?.name ?? widget.nextExercise!.id)
+                                          .replaceAll('_', ' ')
+                                          .toUpperCase();
+                                  return showWeight
+                                      ? "$name: ${weight}kg"
+                                      : name;
                                 })(),
                                 style: AppTextStyles.titleMedium.copyWith(
                                   color: Colors.white,
@@ -385,7 +397,7 @@ class _PredefinedWorkoutBreakScreenState
                                 shape: const CircleBorder(),
                               ),
                               child: Text(
-                                '+1\'',
+                                '+30\'\'',
                                 style: AppTextStyles.bodySmall.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,

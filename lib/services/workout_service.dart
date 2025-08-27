@@ -221,6 +221,15 @@ class WorkoutService {
 
   Future<void> _uploadWorkout(Workout workout) async {
     try {
+      // Convert all times to UTC+0
+      final startTimeUtc = workout.startTime.toUtc();
+      final endTimeUtc = (workout.endTime ?? DateTime.now()).toUtc();
+
+      _logger.info("StartTime:");
+      _logger.info(startTimeUtc.toString());
+      _logger.info("EndTime:");
+      _logger.info(endTimeUtc.toString());
+
       // Build DTO request from domain model
       final request = WorkoutCreateRequest(
         id: workout.id,
@@ -231,7 +240,6 @@ class WorkoutService {
                   (e) => WorkoutExerciseDto(
                     exerciseId: e.exerciseId,
                     name: e.name,
-                    equipmentId: e.equipmentId,
                     muscleGroup: e.muscleGroup,
                     sets:
                         e.sets
@@ -244,13 +252,13 @@ class WorkoutService {
                               ),
                             )
                             .toList(),
-                    startTime: e.startTime,
-                    endTime: e.endTime,
+                    startTime: e.startTime.toUtc(),
+                    endTime: e.endTime?.toUtc(),
                   ),
                 )
                 .toList(),
-        startTime: workout.startTime,
-        endTime: workout.endTime ?? DateTime.now(),
+        startTime: startTimeUtc,
+        endTime: endTimeUtc,
       );
 
       final response = await _workoutApiService.createWorkout(request);

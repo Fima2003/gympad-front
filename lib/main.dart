@@ -11,6 +11,7 @@ import 'constants/app_styles.dart';
 import 'blocs/data/data_bloc.dart';
 import 'blocs/workout/workout_bloc.dart';
 import 'blocs/auth/auth_bloc.dart';
+import 'blocs/audio/audio_bloc.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
 
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<AuthBloc>(create: (context) => AuthBloc()),
         BlocProvider<AnalyticsBloc>(create: (context) => AnalyticsBloc()),
+        BlocProvider<AudioBloc>(create: (context) => AudioBloc()),
       ],
       child: MaterialApp(
         title: 'GymPad',

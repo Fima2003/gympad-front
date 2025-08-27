@@ -30,6 +30,7 @@ class PersonalWorkout {
                       description: '',
                       muscleGroup: '',
                       image: '',
+                      equipmentId: '',
                     ),
               )
               .muscleGroup;

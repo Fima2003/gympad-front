@@ -95,7 +95,6 @@ class PersonalWorkoutExerciseDto {
 class WorkoutExerciseDto {
   final String exerciseId;
   final String name;
-  final String? equipmentId;
   final String muscleGroup;
   final List<WorkoutSetDto> sets;
   final DateTime startTime;
@@ -104,7 +103,6 @@ class WorkoutExerciseDto {
   WorkoutExerciseDto({
     required this.exerciseId,
     required this.name,
-    this.equipmentId,
     required this.muscleGroup,
     required this.sets,
     required this.startTime,
@@ -115,7 +113,6 @@ class WorkoutExerciseDto {
     return WorkoutExerciseDto(
       exerciseId: json['exerciseId'] as String,
       name: json['name'] as String,
-      equipmentId: json['equipmentId'] as String?,
       muscleGroup: json['muscleGroup'] as String,
       sets:
           (json['sets'] as List<dynamic>? ?? const [])
@@ -135,7 +132,6 @@ class WorkoutExerciseDto {
   Map<String, dynamic> toJson() => {
     'exerciseId': exerciseId,
     'name': name,
-    'equipmentId': equipmentId,
     'muscleGroup': muscleGroup,
     'sets': sets.map((e) => e.toJson()).toList(),
     'startTime': startTime.toIso8601String(),

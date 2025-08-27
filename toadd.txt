@@ -1,6 +1,0 @@
-To exercises with cables add where to place cables
-Add more precise muscle groups. For example, 
-"muscleGroups": {
-    "most": ["Anterior Head"],
-    "sub": ["Core", "Lateral Head"]
-}

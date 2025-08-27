@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:audio_session/audio_session.dart';
 
 /// Centralized audio service to play UI sounds.
 ///
@@ -11,15 +13,47 @@ class AudioService {
   factory AudioService() => _instance;
   AudioService._internal();
 
+  final AudioPlayer _tickPlayer = AudioPlayer();
+  final AudioPlayer _startPlayer = AudioPlayer();
+  bool _sessionConfigured = false;
+
+  Future<void> _setupAudioSession() async {
+    if (_sessionConfigured) return;
+    try {
+      final session = await AudioSession.instance;
+      await session.configure(AudioSessionConfiguration.music());
+      _sessionConfigured = true;
+    } catch (e, st) {
+      debugPrint('AudioSession setup error: $e\n$st');
+    }
+  }
+
   Future<void> playTick() async {
-    if (kIsWeb) return; // No-op on web for now
-    // Subtle click for countdown ticks
-    await SystemSound.play(SystemSoundType.click);
+    print("World");
+    // if (kIsWeb) return;
+    // await _setupAudioSession();
+    // try {
+    //   await _tickPlayer.setAsset('assets/sounds/tick.wav');
+    //   await _tickPlayer.play();
+    // } catch (e, st) {
+    //   debugPrint('playTick error: $e\n$st');
+    // }
   }
 
   Future<void> playStart() async {
-    if (kIsWeb) return; // No-op on web for now
-    // Alert to indicate start/end events
-    await SystemSound.play(SystemSoundType.alert);
+    print("Hello");
+    //   if (kIsWeb) return;
+    //   await _setupAudioSession();
+    //   try {
+    //     await _startPlayer.setAsset('assets/sounds/start.wav');
+    //     await _startPlayer.play();
+    //   } catch (e, st) {
+    // debugPrint('playStart error: $e\n$st');
+    //   }
+  }
+
+  Future<void> dispose() async {
+    await _tickPlayer.dispose();
+    await _startPlayer.dispose();
   }
 }

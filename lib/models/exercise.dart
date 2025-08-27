@@ -4,6 +4,7 @@ class Exercise {
   final String description;
   final String image;
   final String muscleGroup;
+  final String equipmentId;
 
   Exercise({
     required this.id,
@@ -11,6 +12,7 @@ class Exercise {
     required this.description,
     required this.image,
     required this.muscleGroup,
+    required this.equipmentId,
   });
 
   factory Exercise.fromJson(String id, Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Exercise {
       description: json['description'] ?? '',
       image: json['image'] ?? '',
       muscleGroup: json['muscleGroup'] ?? 'general',
+      equipmentId: json['equipmentId'] ?? '',
     );
   }
 

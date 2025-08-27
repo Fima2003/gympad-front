@@ -1,74 +1,44 @@
 {
     "equipment": {
-        "40938": {
-            "type": "muscle_group_selector",
-            "data": {
-                "legs": [
-                    {
-                        "id": "cable_kickbacks",
-                        "name": "Cable Kickbacks",
-                        "image": "https://example.com/images/cable_kickbacks_preview.png"
-                    },
-                    {
-                        "id": "cable_pull_throughs",
-                        "name": "Cable Pull-Throughs",
-                        "image": "https://example.com/images/cable_pull_throughs_preview.png"
-                    }
-                ],
-                "abs": [
-                    {
-                        "id": "cable_crunches",
-                        "name": "Cable Crunches",
-                        "image": "https://example.com/images/cable_crunches_preview.png"
-                    },
-                    {
-                        "id": "cable_wood_chops",
-                        "name": "Cable Wood Chops",
-                        "image": "https://example.com/images/cable_wood_chops_preview.png"
-                    }
-                ],
-                "upper_body": [
-                    {
-                        "id": "cable_chest_flyes",
-                        "name": "Cable Chest Flyes",
-                        "image": "https://example.com/images/cable_chest_flyes_preview.png"
-                    },
-                    {
-                        "id": "cable_tricep_pushdowns",
-                        "name": "Cable Tricep Pushdowns",
-                        "image": "https://example.com/images/cable_tricep_pushdowns_preview.png"
-                    },
-                    {
-                        "id": "cable_bicep_curls",
-                        "name": "Cable Bicep Curls",
-                        "image": "https://example.com/images/cable_bicep_curls_preview.png"
-                    }
-                ],
-                "back": [
-                    {
-                        "id": "cable_seated_rows",
-                        "name": "Cable Seated Rows",
-                        "image": "https://example.com/images/cable_seated_rows_preview.png"
-                    },
-                    {
-                        "id": "cable_lat_pulldowns",
-                        "name": "Cable Lat Pulldowns",
-                        "image": "https://example.com/images/cable_lat_pulldowns_preview.png"
-                    }
-                ]
-            }
+        "bicep_curls_machine": {
+            "name": "Bicep Curls",
+            "image": "https://example.com/images/bicep_curls_machine.png"
         },
-        "123": {
-            "type": "direct_exercise",
-            "exerciseId": "bicep_curls"
+        "shoulder_press_machine": {
+            "name": "Shoulder Press Machine",
+            "image": "https://example.com/images/shoulder_press_machine.png"
         },
-        "456": {
-            "type": "direct_exercise",
-            "exerciseId": "tricep_extensions"
+        "bench": {
+            "name": "Bench",
+            "image": "https://example.com/images/bench.png"
         },
-        "789": {
-            "type": "direct_exercise",
-            "exerciseId": "shoulder_press_machine"
+        "bodyweight": {
+            "name": "Bodyweight",
+            "image": "https://example.com/images/bodyweight.png"
+        },
+        "battle_ropes": {
+            "name": "Battle Ropes",
+            "image": "https://example.com/images/battle_ropes.png"
+        },
+        "cable_machine": {
+            "name": "Cable Machine",
+            "image": "https://example.com/images/cable_machine.png"
+        },
+        "barbell": {
+            "name": "Barbell",
+            "image": "https://example.com/images/barbell.png"
+        },
+        "dumbbells": {
+            "name": "Dumbbells",
+            "image": "https://example.com/images/dumbbells.png"
+        },
+        "chest_press_machine": {
+            "name": "Chest Press Machine",
+            "image": "https://example.com/images/chest_press_machine.png"
+        },
+        "leg_press_machine": {
+            "name": "Leg Press Machine",
+            "image": "https://example.com/images/leg_press_machine.png"
         }
     }
 }
