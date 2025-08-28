@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../models/custom_workout.dart';
 import '../models/workout.dart';
 import '../models/workout_exercise.dart';
 import '../models/workout_set.dart';
@@ -21,10 +22,16 @@ class WorkoutService {
   Workout? _currentWorkout;
   Workout? get currentWorkout => _currentWorkout;
 
+  CustomWorkout? _workoutToFollow;
+  CustomWorkout? get workoutToFollow => _workoutToFollow;
+
   final _currentWorkoutStorage = CurrentWorkoutLocalStorageService();
   final _historyStorage = WorkoutHistoryLocalStorageService();
 
-  Future<void> startWorkout(WorkoutType type, {String? name}) async {
+  Future<void> startWorkout(
+    WorkoutType type, {
+    CustomWorkout? workoutToFollow,
+  }) async {
     if (_currentWorkout != null && _currentWorkout!.isOngoing) {
       _logger.warning('Workout already in progress');
       return;
@@ -33,12 +40,15 @@ class WorkoutService {
     _currentWorkout = Workout(
       id:
           "${type == WorkoutType.free ? 'free' : 'custom'}_${DateTime.now().millisecondsSinceEpoch.toString()}",
-      name: name,
+      name: workoutToFollow?.name,
       exercises: [],
       startTime: DateTime.now(),
     );
 
+    _workoutToFollow = workoutToFollow?.copyWith();
+
     await _saveCurrentWorkout();
+    await _saveWorkoutToFollow();
     _logger.info('New workout started with ID: ${_currentWorkout!.id}');
   }
 
@@ -201,6 +211,8 @@ class WorkoutService {
       _logger.warning('Failed to persist current workout', e, st);
     }
   }
+
+  Future<void> _saveWorkoutToFollow() async {}
 
   Future<void> _saveWorkoutToHistory() async {
     if (_currentWorkout == null) return;

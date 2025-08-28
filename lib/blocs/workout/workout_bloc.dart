@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../models/personal_workout.dart';
+import '../../models/custom_workout.dart';
 import '../../models/workout.dart';
 import '../../services/workout_service.dart';
 import '../../services/logger_service.dart';
-import '../../services/api/workout_api_service.dart';
-import '../../services/hive/personal_workout_lss.dart';
 
 part 'workout_events.dart';
 part 'workout_state.dart';
@@ -15,9 +13,6 @@ part 'workout_state.dart';
 class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
   final WorkoutService _workoutService = WorkoutService();
   final AppLogger _logger = AppLogger();
-  final WorkoutApiService _workoutApi = WorkoutApiService();
-  final PersonalWorkoutLocalService _personalLocal =
-      PersonalWorkoutLocalService();
 
   WorkoutBloc() : super(WorkoutInitial()) {
     on<WorkoutLoaded>(_onWorkoutLoaded);
@@ -27,7 +22,6 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     on<ExerciseFinished>(_onExerciseFinished);
     on<SetAdded>(_onSetAdded);
     on<WorkoutHistoryRequested>(_onWorkoutHistoryRequested);
-    on<PersonalWorkoutsSyncRequested>(_onPersonalWorkoutsSyncRequested);
   }
 
   Future<void> _onWorkoutLoaded(
@@ -56,11 +50,17 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     Emitter<WorkoutState> emit,
   ) async {
     try {
-      await _workoutService.startWorkout(event.type, name: event.name);
+      await _workoutService.startWorkout(
+        event.type,
+        workoutToFollow: event.workoutToFollow,
+      );
 
       final currentWorkout = _workoutService.currentWorkout;
+      final workoutToFollow = _workoutService.workoutToFollow;
       if (currentWorkout != null) {
-        emit(WorkoutInProgress(currentWorkout));
+        emit(
+          WorkoutInProgress(currentWorkout, workoutToFollow: workoutToFollow),
+        );
       }
     } catch (e, st) {
       _logger.error('Failed to start workout', e, st);
@@ -98,8 +98,11 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       );
 
       final currentWorkout = _workoutService.currentWorkout;
+      final workoutToFollow = _workoutService.workoutToFollow;
       if (currentWorkout != null) {
-        emit(WorkoutInProgress(currentWorkout));
+        emit(
+          WorkoutInProgress(currentWorkout, workoutToFollow: workoutToFollow),
+        );
       }
     } catch (e, st) {
       _logger.error('Failed to add exercise', e, st);
@@ -115,8 +118,11 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       await _workoutService.finishCurrentExercise();
 
       final currentWorkout = _workoutService.currentWorkout;
+      final workoutToFollow = _workoutService.workoutToFollow;
       if (currentWorkout != null) {
-        emit(WorkoutInProgress(currentWorkout));
+        emit(
+          WorkoutInProgress(currentWorkout, workoutToFollow: workoutToFollow),
+        );
       }
     } catch (e, st) {
       _logger.error('Failed to finish exercise', e, st);
@@ -133,8 +139,11 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       );
 
       final currentWorkout = _workoutService.currentWorkout;
+      final workoutToFollow = _workoutService.workoutToFollow;
       if (currentWorkout != null) {
-        emit(WorkoutInProgress(currentWorkout));
+        emit(
+          WorkoutInProgress(currentWorkout, workoutToFollow: workoutToFollow),
+        );
       }
     } catch (e, st) {
       _logger.error('Failed to add set', e, st);
@@ -152,32 +161,6 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     } catch (e, st) {
       _logger.error('Failed to load workout history', e, st);
       emit(WorkoutError('Failed to load workout history'));
-    }
-  }
-
-  Future<void> _onPersonalWorkoutsSyncRequested(
-    PersonalWorkoutsSyncRequested event,
-    Emitter<WorkoutState> emit,
-  ) async {
-    try {
-      final resp = await _workoutApi.getPersonalWorkouts();
-      if (resp.success && resp.data != null) {
-        final list = resp.data!;
-        await _personalLocal.saveAll(list);
-        emit(
-          PersonalWorkoutsLoaded(
-            list.map((e) => PersonalWorkout.fromResponse(e)).toList(),
-          ),
-        );
-      } else {
-        // Fallback to local cache on failure
-        final cached = await _personalLocal.loadAll();
-        emit(PersonalWorkoutsLoaded(cached));
-      }
-    } catch (e, st) {
-      _logger.error('Failed to sync personal workouts', e, st);
-      final cached = await _personalLocal.loadAll();
-      emit(PersonalWorkoutsLoaded(cached));
     }
   }
 }

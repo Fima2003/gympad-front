@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../../models/workout.dart';
 import '../../models/workout_exercise.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/workout/workout_bloc.dart';
 import '../../models/workout_set.dart';
 import '../../services/api/workout_api_service.dart';
 import '../../services/api/models/workout_models.dart';
@@ -464,7 +464,7 @@ class _SaveWorkoutScreenState extends State<SaveWorkoutScreen> {
       if (resp.success) {
         // Refresh personal workouts via BLoC
         if (mounted) {
-          context.read<WorkoutBloc>().add(PersonalWorkoutsSyncRequested());
+          context.read<PersonalWorkoutBloc>().add(RequestSync());
         }
         _showToast('Created a custom workout', goHome: true);
       } else {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../../constants/app_styles.dart';
 import '../../models/personal_workout.dart';
 import '../../services/hive/personal_workout_lss.dart';
 import '../../blocs/data/data_bloc.dart';
-import '../../blocs/workout/workout_bloc.dart';
 import 'personal_workout_detail_screen.dart';
 
 class PersonalWorkoutsScreen extends StatefulWidget {
@@ -24,10 +24,6 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
   void initState() {
     super.initState();
     _init();
-    // Trigger a sync via BLoC to update from server if available
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WorkoutBloc>().add(PersonalWorkoutsSyncRequested());
-    });
   }
 
   Future<void> _init() async {
@@ -40,12 +36,12 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
   }
 
   String _inferMuscleGroup(PersonalWorkout w) {
-  final dataState = context.read<DataBloc>().state;
-  if (dataState is! DataReady) return '';
-  if (w.exercises.isEmpty) return '';
-  final first = w.exercises.first;
-  final ex = dataState.exercises[first.exerciseId];
-  return ex?.muscleGroup ?? '';
+    final dataState = context.read<DataBloc>().state;
+    if (dataState is! DataReady) return '';
+    if (w.exercises.isEmpty) return '';
+    final first = w.exercises.first;
+    final ex = dataState.exercises[first.exerciseId];
+    return ex?.muscleGroup ?? '';
   }
 
   @override
@@ -77,7 +73,7 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
 
     return MultiBlocListener(
       listeners: [
-        BlocListener<WorkoutBloc, WorkoutState>(
+        BlocListener<PersonalWorkoutBloc, PersonalWorkoutState>(
           listenWhen: (prev, curr) => curr is PersonalWorkoutsLoaded,
           listener: (context, state) {
             if (state is PersonalWorkoutsLoaded) {

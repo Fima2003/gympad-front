@@ -97,6 +97,28 @@ class CustomWorkout {
     );
   }
 
+  CustomWorkout copyWith({
+    String? id,
+    String? name,
+    String? description,
+    String? difficulty,
+    List<String>? muscleGroups,
+    String? imageUrl,
+    List<CustomWorkoutExercise>? exercises,
+    int? estimatedCalories,
+  }) {
+    return CustomWorkout(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      difficulty: difficulty ?? this.difficulty,
+      muscleGroups: muscleGroups ?? this.muscleGroups,
+      imageUrl: imageUrl ?? this.imageUrl,
+      exercises: exercises ?? this.exercises.map((e) => e.copyWith()).toList(),
+      estimatedCalories: estimatedCalories ?? this.estimatedCalories,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = {
       'name': name,
@@ -135,6 +157,22 @@ class CustomWorkoutExercise {
           json['weight'] == null ? null : (json['weight'] as num).toDouble(),
       restTime: json['rest_time'] ?? 90,
       suggestedReps: json['suggested_reps'],
+    );
+  }
+
+  CustomWorkoutExercise copyWith({
+    String? id,
+    int? setsAmount,
+    double? suggestedWeight,
+    int? restTime,
+    int? suggestedReps,
+  }) {
+    return CustomWorkoutExercise(
+      id: id ?? this.id,
+      setsAmount: setsAmount ?? this.setsAmount,
+      suggestedWeight: suggestedWeight ?? this.suggestedWeight,
+      restTime: restTime ?? this.restTime,
+      suggestedReps: suggestedReps ?? this.suggestedReps,
     );
   }
 

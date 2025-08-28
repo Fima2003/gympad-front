@@ -45,7 +45,7 @@ class _PredefinedWorkoutsRunScreenState
   void _initializeWorkout() {
     // Start the workout through WorkoutBloc with the predefined workout name
     context.read<WorkoutBloc>().add(
-      WorkoutStarted(WorkoutType.custom, name: widget.workout.name),
+      WorkoutStarted(WorkoutType.custom, workoutToFollow: widget.workout),
     );
     context.read<AnalyticsBloc>().add(AStartedWorkout());
 

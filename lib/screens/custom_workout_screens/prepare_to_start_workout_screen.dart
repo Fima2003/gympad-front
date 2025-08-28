@@ -123,28 +123,29 @@ class _PrepareToStartWorkoutScreenState
             ),
             const SizedBox(height: 8),
             Text(
-        widget.workout.exercises.isNotEmpty
-          ? (() {
-            final dataState = BlocProvider.of<DataBloc>(context).state;
-            final ex =
-              (dataState is DataReady)
-                ? dataState.exercises[widget
-                  .workout
-                  .exercises
-                  .first
-                  .id]
-                : null;
-            final weight =
-              (dataState is DataReady)
-                ? widget.workout.exercises.first.suggestedWeight
-                : null;
-            final showWeight = (weight != null && weight > 0);
-            final name = (ex?.name ?? widget.workout.exercises.first.id)
-              .replaceAll('_', ' ')
-              .toUpperCase();
-            return showWeight ? "$name: ${weight}kg" : name;
-          })()
-          : 'Exercise',
+              widget.workout.exercises.isNotEmpty
+                  ? (() {
+                    final dataState = BlocProvider.of<DataBloc>(context).state;
+                    final ex =
+                        (dataState is DataReady)
+                            ? dataState.exercises[widget
+                                .workout
+                                .exercises
+                                .first
+                                .id]
+                            : null;
+                    final weight =
+                        (dataState is DataReady)
+                            ? widget.workout.exercises.first.suggestedWeight
+                            : null;
+                    final showWeight = (weight != null && weight > 0);
+                    final name =
+                        (ex?.name ?? widget.workout.exercises.first.id)
+                            .replaceAll('_', ' ')
+                            .toUpperCase();
+                    return showWeight ? "$name: ${weight}kg" : name;
+                  })()
+                  : 'Exercise',
               style: AppTextStyles.titleMedium.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,

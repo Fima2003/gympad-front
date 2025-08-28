@@ -9,12 +9,12 @@ abstract class WorkoutEvent extends Equatable {
 
 class WorkoutStarted extends WorkoutEvent {
   final WorkoutType type;
-  final String? name;
+  final CustomWorkout? workoutToFollow;
 
-  const WorkoutStarted(this.type, {this.name});
+  const WorkoutStarted(this.type, {this.workoutToFollow});
 
   @override
-  List<Object?> get props => [type, name];
+  List<Object?> get props => [type, workoutToFollow];
 }
 
 class WorkoutFinished extends WorkoutEvent {}
@@ -56,6 +56,3 @@ class SetAdded extends WorkoutEvent {
 class WorkoutLoaded extends WorkoutEvent {}
 
 class WorkoutHistoryRequested extends WorkoutEvent {}
-
-// Personal workouts
-class PersonalWorkoutsSyncRequested extends WorkoutEvent {}

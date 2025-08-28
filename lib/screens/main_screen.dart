@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../constants/app_styles.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/workout/workout_bloc.dart';
@@ -29,7 +30,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     // Let the BLoC handle syncing personal workouts
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WorkoutBloc>().add(PersonalWorkoutsSyncRequested());
+      context.read<PersonalWorkoutBloc>().add(RequestSync());
     });
   }
 
@@ -46,15 +47,15 @@ class _MainScreenState extends State<MainScreen> {
           MultiBlocListener(
             listeners: [
               BlocListener<WorkoutBloc, WorkoutState>(
-            listener: (context, state) {
-              if (state is WorkoutError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
+                listener: (context, state) {
+                  if (state is WorkoutError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
                 },
               ),
               BlocListener<AuthBloc, AuthState>(
@@ -64,9 +65,7 @@ class _MainScreenState extends State<MainScreen> {
                   } else if (state is AuthUnauthenticated) {
                     if (mounted) {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (_) => const LoginScreen(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
                       );
                     }
                   } else if (state is AuthError) {

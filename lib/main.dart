@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gympad/blocs/analytics/analytics_bloc.dart';
 import 'package:gympad/firebase_options.dart';
 import 'package:gympad/services/api/api.dart';
+import 'blocs/personal_workouts/personal_workout_bloc.dart';
 import 'services/hive/hive_initializer.dart';
 import 'services/logger_service.dart';
 import 'constants/app_styles.dart';
@@ -65,6 +66,9 @@ class MyApp extends StatelessWidget {
         BlocProvider<AuthBloc>(create: (context) => AuthBloc()),
         BlocProvider<AnalyticsBloc>(create: (context) => AnalyticsBloc()),
         BlocProvider<AudioBloc>(create: (context) => AudioBloc()),
+        BlocProvider<PersonalWorkoutBloc>(
+          create: (context) => PersonalWorkoutBloc()..add(RequestSync()),
+        ),
       ],
       child: MaterialApp(
         title: 'GymPad',
