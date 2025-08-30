@@ -34,18 +34,17 @@ class ApiService implements IApiService {
       ),
     );
 
-    // Add interceptors for logging
-    _dio.interceptors.add(
-      LogInterceptor(
-        request: true,
-        requestHeader: true,
-        requestBody: true,
-        responseHeader: true,
-        responseBody: true,
-        error: true,
-        logPrint: (object) => _logger.info(object.toString()),
-      ),
-    );
+    // Add interceptors for logging (minimal)
+    // _dio.interceptors.add(
+    //   LogInterceptor(
+    //     request: false,
+    //     requestHeader: false,
+    //     requestBody: false,
+    //     responseHeader: false,
+    //     responseBody: false,
+    //     error: true,
+    //   ),
+    // );
 
     // Add error interceptor
     _dio.interceptors.add(
@@ -139,7 +138,7 @@ class ApiService implements IApiService {
     int retry = 0,
   }) async {
     try {
-      _logInfo('Making $method request to $fName');
+      _logger.info('Making $method request to $fName');
       final options = await _buildRequestOptions(auth);
       final url = _buildFunctionUrl(fName);
 
@@ -217,10 +216,10 @@ class ApiService implements IApiService {
         return false;
       }
       await _userAuthStorage.save(authToken: freshToken.token!);
-      _logInfo('Auth token refreshed and cached');
+      _logger.info('Auth token refreshed and cached');
       return true;
     } catch (e) {
-      _logError('Failed to refresh auth token', e);
+      _logger.error('Failed to refresh auth token', e);
       return false;
     }
   }
@@ -234,9 +233,8 @@ class ApiService implements IApiService {
 
       if (token != null) {
         headers['Authorization'] = 'Bearer $token';
-        _logInfo('Added authorization header');
       } else {
-        _logWarning('Authentication required but no token available');
+        _logger.warning('Authentication required but no token available');
         throw Exception('Authentication required but no token available');
       }
     }
@@ -254,7 +252,6 @@ class ApiService implements IApiService {
       String? cachedToken = hive?.authToken;
 
       if (cachedToken != null) {
-        _logInfo('Retrieved auth token from local storage');
         return cachedToken;
       }
 
@@ -266,11 +263,11 @@ class ApiService implements IApiService {
           // Cache the token in local storage for future use
           if (token != null) {
             await _userAuthStorage.save(authToken: token);
-            _logInfo('Retrieved and cached auth token from Firebase');
+            _logger.info('Retrieved and cached auth token from Firebase');
             return token;
           }
         } catch (e) {
-          _logError('Failed to get auth token from Firebase', e);
+          _logger.error('Failed to get auth token from Firebase', e);
 
           // Try to reload user and get token again
           try {
@@ -280,21 +277,23 @@ class ApiService implements IApiService {
               final token = await reloadedUser.getIdToken();
               if (token != null) {
                 await _userAuthStorage.save(authToken: token);
-                _logInfo('Retrieved and cached auth token after user reload');
+                _logger.info(
+                  'Retrieved and cached auth token after user reload',
+                );
                 return token;
               }
             }
           } catch (reloadError) {
-            _logError('Failed to reload user and get token', reloadError);
+            _logger.error('Failed to reload user and get token', reloadError);
           }
         }
       } else {
-        _logWarning('No authenticated user found');
+        _logger.warning('No authenticated user found');
       }
 
       return null;
     } catch (e) {
-      _logError('Error retrieving auth token', e);
+      _logger.error('Error retrieving auth token', e);
       return null;
     }
   }
@@ -303,9 +302,9 @@ class ApiService implements IApiService {
   Future<void> clearAuthToken() async {
     try {
       await _userAuthStorage.clear();
-      _logInfo('Cleared cached auth token');
+      _logger.info('Cleared cached auth token');
     } catch (e) {
-      _logError('Error clearing auth token', e);
+      _logger.error('Error clearing auth token', e);
     }
   }
 
@@ -314,7 +313,7 @@ class ApiService implements IApiService {
     Response response,
     K Function(dynamic)? parser,
   ) {
-    _logInfo('Response received with status: ${response.statusCode}');
+    _logger.info('Response received with status: ${response.statusCode}');
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final responseData = response.data;
@@ -422,11 +421,6 @@ class ApiService implements IApiService {
       error: 'Unexpected error',
       message: error.toString(),
     );
-  }
-
-  /// Logging methods
-  void _logInfo(String message) {
-    _logger.info(message);
   }
 
   void _logWarning(String message) {

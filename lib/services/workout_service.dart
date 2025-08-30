@@ -33,8 +33,9 @@ class WorkoutService {
     CustomWorkout? workoutToFollow,
   }) async {
     if (_currentWorkout != null && _currentWorkout!.isOngoing) {
-      _logger.warning('Workout already in progress');
-      return;
+      _logger.warning('Workout already in progress. Rewriting');
+      _currentWorkout = null;
+      _workoutToFollow = null;
     }
 
     _currentWorkout = Workout(
@@ -50,6 +51,20 @@ class WorkoutService {
     await _saveCurrentWorkout();
     await _saveWorkoutToFollow();
     _logger.info('New workout started with ID: ${_currentWorkout!.id}');
+  }
+
+  Future<void> cancelWorkout() async {
+    if (_currentWorkout == null) {
+      _logger.error('No current workout to cancel');
+      return;
+    }
+
+    _currentWorkout = null;
+    _workoutToFollow = null;
+
+    await _saveCurrentWorkout();
+    await _saveWorkoutToFollow();
+    _logger.info('Workout cancelled');
   }
 
   Future<void> addExercise(
@@ -74,7 +89,7 @@ class WorkoutService {
       exercises.add(existing);
 
       _currentWorkout = _currentWorkout!.copyWith(exercises: exercises);
-      await _saveCurrentWorkout();
+      unawaited(_saveCurrentWorkout());
       _logger.info('Exercise $name already exists — set as current exercise');
       return;
     }
@@ -119,48 +134,53 @@ class WorkoutService {
     final updatedSets = [...currentExercise.sets, newSet];
     final updatedExercise = currentExercise.copyWith(sets: updatedSets);
 
-    final updatedExercises = [..._currentWorkout!.exercises];
+    List<WorkoutExercise> updatedExercises = [..._currentWorkout!.exercises];
     updatedExercises[currentExerciseIndex] = updatedExercise;
 
     _currentWorkout = _currentWorkout!.copyWith(exercises: updatedExercises);
 
-    await _saveCurrentWorkout();
+    unawaited(_saveCurrentWorkout());
     _logger.info('Added set to exercise ${currentExercise.name}');
   }
 
-  Future<void> finishCurrentExercise() async {
+  Future<void> finishCurrentExercise(
+    int reps,
+    double weight,
+    Duration duration,
+  ) async {
     if (_currentWorkout == null || _currentWorkout!.exercises.isEmpty) {
       _logger.error('No current exercise to finish');
       return;
     }
-
-    final currentExerciseIndex = _currentWorkout!.exercises.length - 1;
-    final currentExercise = _currentWorkout!.exercises[currentExerciseIndex];
+    await addSetToCurrentExercise(reps, weight, duration);
+    final currentExercise = _currentWorkout!.exercises.last;
 
     if (currentExercise.endTime != null) {
       _logger.warning('Exercise already finished');
       return;
     }
 
-    final updatedExercise = currentExercise.copyWith(endTime: DateTime.now());
-    final updatedExercises = [..._currentWorkout!.exercises];
-    updatedExercises[currentExerciseIndex] = updatedExercise;
+    List<WorkoutExercise> updatedExercises = [..._currentWorkout!.exercises];
+    updatedExercises[_currentWorkout!.exercises.length - 1] = currentExercise
+        .copyWith(endTime: DateTime.now());
 
     _currentWorkout = _currentWorkout!.copyWith(exercises: updatedExercises);
 
-    await _saveCurrentWorkout();
+    unawaited(_saveCurrentWorkout());
     _logger.info('Finished exercise ${currentExercise.name}');
   }
 
-  Future<void> finishWorkout() async {
+  Future<void> finishWorkout(
+    int? reps,
+    double? weight,
+    Duration? duration,
+  ) async {
     if (_currentWorkout == null) {
       _logger.error('No current workout to finish');
       return;
     }
-
-    // Finish the last exercise if it hasn't been finished yet
-    if (_currentWorkout!.exercises.isNotEmpty) {
-      await finishCurrentExercise();
+    if (reps != null && weight != null && duration != null) {
+      await finishCurrentExercise(reps, weight, duration);
     }
 
     _currentWorkout = _currentWorkout!.copyWith(
@@ -168,8 +188,8 @@ class WorkoutService {
       isOngoing: false,
     );
 
-    await _saveWorkoutToHistory();
-    await _clearCurrentWorkout();
+    unawaited(_saveWorkoutToHistory());
+    unawaited(_clearCurrentWorkout());
 
     // Try to upload to backend
     unawaited(_uploadWorkout(_currentWorkout!));
@@ -194,6 +214,18 @@ class WorkoutService {
     }
   }
 
+  Future<void> loadWorkoutToFollow() async {
+    // try {
+    //   _currentWorkout = await _currentWorkoutStorage.load();
+    //   if (_currentWorkout != null) {
+    //     _logger.info('Loaded current workout with ID: ${_currentWorkout!.id}');
+    //   }
+    // } catch (e, st) {
+    //   _logger.warning('Failed to load current workout', e, st);
+    //   await _clearCurrentWorkout();
+    // }
+  }
+
   Future<void> uploadPendingWorkouts() async {
     final workouts = await getWorkoutHistory();
     final pendingWorkouts = workouts.where((w) => !w.isUploaded).toList();
@@ -204,7 +236,9 @@ class WorkoutService {
   }
 
   Future<void> _saveCurrentWorkout() async {
-    if (_currentWorkout == null) return;
+    if (_currentWorkout == null) {
+      return _currentWorkoutStorage.clear();
+    }
     try {
       await _currentWorkoutStorage.save(_currentWorkout!);
     } catch (e, st) {
@@ -292,5 +326,56 @@ class WorkoutService {
 
   Future<void> _markWorkoutAsUploaded(String workoutId) async {
     await _historyStorage.markUploaded(workoutId);
+  }
+
+  int getExerciseIdx() {
+    if (_currentWorkout == null || _currentWorkout!.exercises.isEmpty) {
+      return 0;
+    }
+    if (_workoutToFollow == null) {
+      return _currentWorkout!.exercises.length - 1;
+    }
+    //todo if exercise has been finished, then return _currentWorkout!.exercises.length;
+    final totalAmountOfSetsForExercise =
+        _workoutToFollow!
+            .exercises[_currentWorkout!.exercises.length - 1]
+            .setsAmount;
+
+    final setsPerformedForExercise =
+        _currentWorkout!.exercises.last.sets.length;
+    if (totalAmountOfSetsForExercise == setsPerformedForExercise) {
+      return _currentWorkout!.exercises.length;
+    }
+    return _currentWorkout!.exercises.length - 1;
+  }
+
+  int getSetIdx() {
+    if (_currentWorkout == null || // Current Workout does not exist
+        _currentWorkout!
+            .exercises
+            .isEmpty || // Current workout does not have any exercises
+        _currentWorkout!.exercises.length ==
+            getExerciseIdx() // the amount of performed exercises in current workout equals to the current workout idx
+            ) {
+      return 0;
+    }
+    return _currentWorkout!.exercises[getExerciseIdx()].sets.length;
+  }
+
+  double? getPercentageDone() {
+    if (_currentWorkout == null || _workoutToFollow == null) {
+      return null;
+    }
+
+    final totalSets = _workoutToFollow!.exercises.fold<int>(
+      0,
+      (sum, e) => sum + e.setsAmount,
+    );
+    final completedSets = _currentWorkout!.exercises.fold<int>(
+      0,
+      (sum, e) => sum + e.sets.length,
+    );
+
+    return totalSets > 0 ? completedSets / totalSets : 0.0;
   }
 }

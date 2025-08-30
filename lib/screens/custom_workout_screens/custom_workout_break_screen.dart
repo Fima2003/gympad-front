@@ -9,47 +9,44 @@ import '../../blocs/workout/workout_bloc.dart';
 import '../well_done_workout_screen.dart';
 import '../../widgets/exercise_chip.dart';
 
-class PredefinedWorkoutBreakScreen extends StatefulWidget {
-  final int restTime; // in seconds
-  final CustomWorkoutExercise? nextExercise;
-  final List<CustomWorkoutExercise> allExercises;
-  final int currentExerciseIndex;
-  final int currentSetIndex;
-  final int totalSets;
-  final double workoutProgress;
+class CustomWorkoutBreakScreen extends StatefulWidget {
   final VoidCallback onBreakComplete;
 
-  const PredefinedWorkoutBreakScreen({
-    super.key,
-    required this.restTime,
-    required this.nextExercise,
-    required this.allExercises,
-    required this.currentExerciseIndex,
-    required this.currentSetIndex,
-    required this.totalSets,
-    required this.workoutProgress,
-    required this.onBreakComplete,
-  });
+  const CustomWorkoutBreakScreen({super.key, required this.onBreakComplete});
 
   @override
-  State<PredefinedWorkoutBreakScreen> createState() =>
-      _PredefinedWorkoutBreakScreenState();
+  State<CustomWorkoutBreakScreen> createState() =>
+      _CustomWorkoutBreakScreenState();
 }
 
-class _PredefinedWorkoutBreakScreenState
-    extends State<PredefinedWorkoutBreakScreen> {
+class _CustomWorkoutBreakScreenState extends State<CustomWorkoutBreakScreen> {
   late int _remainingTime;
-  late int _totalTime; // Track total time including added minutes
+  late int _totalTime;
   Timer? _timer;
   bool _finishing = false;
+
+  CustomWorkoutExercise get nextExercise =>
+      CustomWorkoutExercise(id: 'id', setsAmount: 1, restTime: 1);
 
   @override
   void initState() {
     super.initState();
-    _remainingTime = widget.restTime;
-    _totalTime = widget.restTime; // Initially same as rest time
+    _remainingTime =
+        state.workoutToFollow!.exercises[state.currentExerciseIdx].restTime;
+    _totalTime = _remainingTime;
 
     _startCountdown();
+  }
+
+  WorkoutInProgress get state {
+    final state = BlocProvider.of<WorkoutBloc>(context).state;
+    if (state is! WorkoutInProgress) {
+      throw StateError('Workout was not initialized properly');
+    }
+    if (state.workoutToFollow == null) {
+      throw StateError('Workout state is not valid');
+    }
+    return state;
   }
 
   void _startCountdown() {
@@ -91,10 +88,7 @@ class _PredefinedWorkoutBreakScreenState
     _startCountdown();
   }
 
-  // Sound playback is handled via AudioService for easy future swaps
-
   void _showFinishDialog() {
-    print("Finishing");
     showDialog(
       context: context,
       builder:
@@ -131,7 +125,6 @@ class _PredefinedWorkoutBreakScreenState
     if (_finishing) return;
     setState(() => _finishing = true);
     _timer?.cancel();
-    BlocProvider.of<WorkoutBloc>(context).add(ExerciseFinished());
     BlocProvider.of<WorkoutBloc>(context).add(WorkoutFinished());
   }
 
@@ -150,8 +143,8 @@ class _PredefinedWorkoutBreakScreenState
   @override
   Widget build(BuildContext context) {
     // Build previous/future lists for visual chips (current is represented by the Next box)
-    final exercises = widget.allExercises;
-    final idx = widget.currentExerciseIndex.clamp(0, exercises.length - 1);
+    final exercises = state.workoutToFollow!.exercises;
+    final idx = state.currentExerciseIdx.clamp(0, exercises.length - 1);
     final previous = exercises.take(idx).toList();
     final future =
         idx + 1 < exercises.length
@@ -242,74 +235,68 @@ class _PredefinedWorkoutBreakScreenState
                       const SizedBox(height: 40),
 
                       // Next exercise info (optional)
-                      if (widget.nextExercise != null)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
+                      // if (nextExercise)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.1),
                           ),
-                          child: Column(
-                            children: [
-                              // Explicit NEXT label
-                              Text(
-                                'NEXT:',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 1,
-                                ),
+                        ),
+                        child: Column(
+                          children: [
+                            // Explicit NEXT label
+                            Text(
+                              'NEXT:',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1,
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                (() {
-                                  final dataState =
-                                      context.read<DataBloc>().state;
-                                  final weight =
-                                      widget.nextExercise!.suggestedWeight;
-                                  final showWeight =
-                                      (weight != null && weight > 0);
-                                  if (dataState is! DataReady) {
-                                    final name =
-                                        widget.nextExercise!.id
-                                            .replaceAll('_', ' ')
-                                            .toUpperCase();
-                                    return showWeight
-                                        ? "$name: ${weight}kg"
-                                        : name;
-                                  }
-                                  final ex =
-                                      dataState.exercises[widget
-                                          .nextExercise!
-                                          .id];
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              (() {
+                                final dataState =
+                                    context.read<DataBloc>().state;
+                                final weight = nextExercise.suggestedWeight;
+                                final showWeight =
+                                    (weight != null && weight > 0);
+                                if (dataState is! DataReady) {
                                   final name =
-                                      (ex?.name ?? widget.nextExercise!.id)
+                                      nextExercise.id
                                           .replaceAll('_', ' ')
                                           .toUpperCase();
                                   return showWeight
                                       ? "$name: ${weight}kg"
                                       : name;
-                                })(),
-                                style: AppTextStyles.titleMedium.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
+                                }
+                                final ex = dataState.exercises[nextExercise.id];
+                                final name =
+                                    (ex?.name ?? nextExercise.id)
+                                        .replaceAll('_', ' ')
+                                        .toUpperCase();
+                                return showWeight ? "$name: ${weight}kg" : name;
+                              })(),
+                              style: AppTextStyles.titleMedium.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Set ${widget.currentSetIndex + 1} of ${widget.totalSets}',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: Colors.white70,
-                                ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Set ${state.currentSetIdx + 1} of ${state.workoutToFollow!.exercises[state.currentExerciseIdx].setsAmount}',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: Colors.white70,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
+                      ),
 
                       const SizedBox(height: 24),
 
@@ -357,7 +344,7 @@ class _PredefinedWorkoutBreakScreenState
                             ),
                             child: FractionallySizedBox(
                               alignment: Alignment.centerLeft,
-                              widthFactor: widget.workoutProgress,
+                              widthFactor: state.progress!,
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: AppColors.accent,
@@ -368,7 +355,7 @@ class _PredefinedWorkoutBreakScreenState
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '${(widget.workoutProgress * 100).toInt()}% Complete',
+                            '${(state.progress! * 100).toInt()}% Complete',
                             style: AppTextStyles.bodySmall.copyWith(
                               color: Colors.white70,
                             ),

@@ -17,7 +17,17 @@ class WorkoutStarted extends WorkoutEvent {
   List<Object?> get props => [type, workoutToFollow];
 }
 
-class WorkoutFinished extends WorkoutEvent {}
+class WorkoutCancelled extends WorkoutEvent {}
+
+class WorkoutFinished extends WorkoutEvent {
+  final int? reps;
+  final double? weight;
+  final Duration? duration;
+  const WorkoutFinished({this.reps, this.weight, this.duration});
+
+  @override
+  List<Object?> get props => [reps, weight, duration];
+}
 
 class ExerciseAdded extends WorkoutEvent {
   final String exerciseId;
@@ -36,7 +46,17 @@ class ExerciseAdded extends WorkoutEvent {
   List<Object?> get props => [exerciseId, name, muscleGroup, equipmentId];
 }
 
-class ExerciseFinished extends WorkoutEvent {}
+class ExerciseFinished extends WorkoutEvent {
+  final int reps;
+  final double weight;
+  final Duration duration;
+
+  const ExerciseFinished({
+    required this.reps,
+    required this.weight,
+    required this.duration,
+  });
+}
 
 class SetAdded extends WorkoutEvent {
   final int reps;

@@ -62,7 +62,8 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
       });
 
       // Finish current exercise and workout
-      context.read<WorkoutBloc>().add(ExerciseFinished());
+      // TODO add parameters to ExerciseFinished
+      // context.read<WorkoutBloc>().add(ExerciseFinished());
       context.read<WorkoutBloc>().add(WorkoutFinished());
 
       // Don't navigate here - let the BlocListener handle navigation

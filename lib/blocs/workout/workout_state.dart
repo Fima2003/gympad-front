@@ -14,12 +14,29 @@ class WorkoutLoading extends WorkoutState {}
 class WorkoutInProgress extends WorkoutState {
   final Workout workout;
   final CustomWorkout? workoutToFollow;
+  final int currentExerciseIdx;
+  final int currentSetIdx;
+  final double? progress; // between 0 to 100
 
-  const WorkoutInProgress(this.workout, {this.workoutToFollow});
+  const WorkoutInProgress(
+    this.workout, {
+    this.workoutToFollow,
+    required this.currentExerciseIdx,
+    required this.currentSetIdx,
+    this.progress,
+  });
 
   @override
-  List<Object?> get props => [workout, workoutToFollow];
+  List<Object?> get props => [
+    workout,
+    workoutToFollow,
+    currentExerciseIdx,
+    currentSetIdx,
+    progress,
+  ];
 }
+
+class AddingExercise extends WorkoutState {}
 
 class WorkoutCompleted extends WorkoutState {
   final Workout workout;

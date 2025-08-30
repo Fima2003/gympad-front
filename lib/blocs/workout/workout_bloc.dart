@@ -17,6 +17,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
   WorkoutBloc() : super(WorkoutInitial()) {
     on<WorkoutLoaded>(_onWorkoutLoaded);
     on<WorkoutStarted>(_onWorkoutStarted);
+    on<WorkoutCancelled>(_onWorkoutCancelled);
     on<WorkoutFinished>(_onWorkoutFinished);
     on<ExerciseAdded>(_onExerciseAdded);
     on<ExerciseFinished>(_onExerciseFinished);
@@ -31,11 +32,21 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     emit(WorkoutLoading());
     try {
       await _workoutService.loadCurrentWorkout();
+      await _workoutService.loadWorkoutToFollow();
       unawaited(_workoutService.uploadPendingWorkouts());
 
       final currentWorkout = _workoutService.currentWorkout;
+      final workoutToFollow = _workoutService.workoutToFollow;
       if (currentWorkout != null && currentWorkout.isOngoing) {
-        emit(WorkoutInProgress(currentWorkout));
+        emit(
+          WorkoutInProgress(
+            currentWorkout,
+            workoutToFollow: workoutToFollow,
+            currentExerciseIdx: _workoutService.getExerciseIdx(),
+            currentSetIdx: _workoutService.getSetIdx(),
+            progress: _workoutService.getPercentageDone(),
+          ),
+        );
       } else {
         emit(WorkoutInitial());
       }
@@ -50,6 +61,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     Emitter<WorkoutState> emit,
   ) async {
     try {
+      emit(WorkoutLoading());
       await _workoutService.startWorkout(
         event.type,
         workoutToFollow: event.workoutToFollow,
@@ -59,7 +71,13 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       final workoutToFollow = _workoutService.workoutToFollow;
       if (currentWorkout != null) {
         emit(
-          WorkoutInProgress(currentWorkout, workoutToFollow: workoutToFollow),
+          WorkoutInProgress(
+            currentWorkout,
+            workoutToFollow: workoutToFollow,
+            currentExerciseIdx: _workoutService.getExerciseIdx(),
+            currentSetIdx: _workoutService.getSetIdx(),
+            progress: _workoutService.getPercentageDone(),
+          ),
         );
       }
     } catch (e, st) {
@@ -68,14 +86,30 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     }
   }
 
+  Future<void> _onWorkoutCancelled(
+    WorkoutCancelled event,
+    Emitter<WorkoutState> emit,
+  ) async {
+    try {
+      await _workoutService.cancelWorkout();
+      emit(WorkoutInitial());
+    } catch (e, st) {
+      _logger.error('Failed to cancel workout', e, st);
+      emit(WorkoutError('Failed to cancel workout'));
+    }
+  }
+
   Future<void> _onWorkoutFinished(
     WorkoutFinished event,
     Emitter<WorkoutState> emit,
   ) async {
     try {
+      // emit(WorkoutLoading());
       final currentWorkout = _workoutService.currentWorkout;
       if (currentWorkout != null) {
-        await _workoutService.finishWorkout();
+        await _workoutService.finishWorkout(
+          event.reps, event.weight, event.duration
+        );
 
         emit(WorkoutCompleted(currentWorkout));
       }
@@ -90,6 +124,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     Emitter<WorkoutState> emit,
   ) async {
     try {
+      emit(AddingExercise());
       await _workoutService.addExercise(
         event.exerciseId,
         event.name,
@@ -101,7 +136,13 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       final workoutToFollow = _workoutService.workoutToFollow;
       if (currentWorkout != null) {
         emit(
-          WorkoutInProgress(currentWorkout, workoutToFollow: workoutToFollow),
+          WorkoutInProgress(
+            currentWorkout,
+            workoutToFollow: workoutToFollow,
+            currentExerciseIdx: _workoutService.getExerciseIdx(),
+            currentSetIdx: _workoutService.getSetIdx(),
+            progress: _workoutService.getPercentageDone(),
+          ),
         );
       }
     } catch (e, st) {
@@ -115,13 +156,23 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     Emitter<WorkoutState> emit,
   ) async {
     try {
-      await _workoutService.finishCurrentExercise();
+      await _workoutService.finishCurrentExercise(
+        event.reps,
+        event.weight,
+        event.duration,
+      );
 
       final currentWorkout = _workoutService.currentWorkout;
       final workoutToFollow = _workoutService.workoutToFollow;
       if (currentWorkout != null) {
         emit(
-          WorkoutInProgress(currentWorkout, workoutToFollow: workoutToFollow),
+          WorkoutInProgress(
+            currentWorkout,
+            workoutToFollow: workoutToFollow,
+            currentExerciseIdx: _workoutService.getExerciseIdx(),
+            currentSetIdx: _workoutService.getSetIdx(),
+            progress: _workoutService.getPercentageDone(),
+          ),
         );
       }
     } catch (e, st) {
@@ -142,7 +193,13 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       final workoutToFollow = _workoutService.workoutToFollow;
       if (currentWorkout != null) {
         emit(
-          WorkoutInProgress(currentWorkout, workoutToFollow: workoutToFollow),
+          WorkoutInProgress(
+            currentWorkout,
+            workoutToFollow: workoutToFollow,
+            currentExerciseIdx: _workoutService.getExerciseIdx(),
+            currentSetIdx: _workoutService.getSetIdx(),
+            progress: _workoutService.getPercentageDone(),
+          ),
         );
       }
     } catch (e, st) {

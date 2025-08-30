@@ -160,7 +160,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   void _newExercise() {
     // Finish current exercise in workout
     if (widget.isPartOfWorkout) {
-      context.read<WorkoutBloc>().add(ExerciseFinished());
+      // TODO add parameters to exercise finished
+      // context.read<WorkoutBloc>().add(ExerciseFinished());
     }
 
     // Navigate to exercise selection, defaulting to current muscle group

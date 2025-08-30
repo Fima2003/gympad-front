@@ -1,11 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../../blocs/analytics/analytics_bloc.dart';
+import '../../blocs/workout/workout_bloc.dart';
 import '../../constants/app_styles.dart';
 import '../../models/custom_workout.dart';
-import 'custom_workout_run_screen.dart';
+import '../../services/workout_service.dart';
 import '../../blocs/data/data_bloc.dart';
 import '../../blocs/audio/audio_bloc.dart';
+import 'cworkout_run/cworkout_run_manager.dart';
 
 class PrepareToStartWorkoutScreen extends StatefulWidget {
   final CustomWorkout workout;
@@ -43,6 +46,11 @@ class _PrepareToStartWorkoutScreenState
   void _startCountdown() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
+        if (_countdown == 3) {
+          context.read<WorkoutBloc>().add(
+            WorkoutStarted(WorkoutType.custom, workoutToFollow: widget.workout),
+          );
+        }
         if (_countdown > 1) {
           _countdown--;
           // Play tick for the last 2 seconds (when showing 2 and 1)
@@ -66,16 +74,15 @@ class _PrepareToStartWorkoutScreenState
 
   void _navigateToWorkout() {
     if (mounted) {
+      context.read<AnalyticsBloc>().add(AStartedWorkout());
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder:
-              (context) => PredefinedWorkoutsRunScreen(workout: widget.workout),
-        ),
+        MaterialPageRoute(builder: (context) => CWorkoutRunManager()),
       );
     }
   }
 
   void _cancelWorkout() {
+    BlocProvider.of<WorkoutBloc>(context).add(WorkoutCancelled());
     _timer?.cancel();
     Navigator.of(context).pop();
   }
