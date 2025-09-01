@@ -10,7 +10,7 @@ import '../../../constants/app_styles.dart';
 import '../../../models/custom_workout.dart';
 import '../../../models/exercise.dart';
 import '../../well_done_workout_screen.dart';
-import '../custom_workout_break_screen.dart';
+import '../cworkout_break/cworkout_break_manager.dart';
 
 class CWorkoutRunManager extends StatefulWidget {
   const CWorkoutRunManager({super.key});
@@ -154,17 +154,15 @@ class _CWorkoutRunManagerState extends State<CWorkoutRunManager> {
     stopSetTimer();
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder:
-            (context) => CustomWorkoutBreakScreen(
-              onBreakComplete: () {
-                Navigator.of(context).pop();
-                resetSetTimer();
-                startSetTimer(); // Automatically start timer when returning from break
-                tryStartExercise();
-              },
-            ),
+        builder: (context) => const CWorkoutBreakManager(),
       ),
-    );
+    ).then((_) {
+      // When break completes (popped), restart timers and continue
+      if (!mounted) return;
+      resetSetTimer();
+      startSetTimer();
+      tryStartExercise();
+    });
   }
 
   void handleFinish(
