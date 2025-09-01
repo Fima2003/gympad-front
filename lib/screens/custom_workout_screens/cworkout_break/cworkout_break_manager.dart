@@ -148,8 +148,13 @@ class _CWorkoutBreakManagerState extends State<CWorkoutBreakManager> {
 
   @override
   Widget build(BuildContext context) {
-    final exercises = progressState.workoutToFollow!.exercises;
-    final idx = progressState.currentExerciseIdx.clamp(0, exercises.length - 1);
+    final state = context.watch<WorkoutBloc>().state;
+    if (state is! WorkoutInProgress || state.workoutToFollow == null) {
+      // If workout completed or invalid, render nothing (navigation handled by listener)
+      return const SizedBox.shrink();
+    }
+    final exercises = state.workoutToFollow!.exercises;
+    final idx = state.currentExerciseIdx.clamp(0, exercises.length - 1);
     final previous = exercises.take(idx).toList();
     final future =
         idx + 1 < exercises.length
@@ -158,18 +163,18 @@ class _CWorkoutBreakManagerState extends State<CWorkoutBreakManager> {
 
     // Determine reorder window start index in full workout list.
     // If current exercise has not actually started (no sets recorded yet and we are at its index), include it in reorder window.
-    final bool currentExerciseStarted = progressState.currentSetIdx > 0;
+    final bool currentExerciseStarted = state.currentSetIdx > 0;
     // If currentExerciseStarted -> upcoming starts after current exercise; else include current exercise
     final reorderStartIndex = currentExerciseStarted ? idx + 1 : idx;
     final upcomingSlice = exercises.skip(reorderStartIndex).toList();
 
     void handleReorder(List<CustomWorkoutExercise> newOrder) {
       context.read<WorkoutBloc>().add(
-            UpcomingExercisesReordered(
-              reorderStartIndex,
-              newOrder.map((e) => e.id).toList(),
-            ),
-          );
+        UpcomingExercisesReordered(
+          reorderStartIndex,
+          newOrder.map((e) => e.id).toList(),
+        ),
+      );
     }
 
     return BlocListener<WorkoutBloc, WorkoutState>(
@@ -193,15 +198,15 @@ class _CWorkoutBreakManagerState extends State<CWorkoutBreakManager> {
         onFinishWorkout: _showFinishDialog,
         previousExercises: previous,
         futureExercises: future,
-        currentSetIdx: progressState.currentSetIdx,
-        currentExercise: exercises[progressState.currentExerciseIdx],
-        progress: progressState.progress ?? 0,
+        currentSetIdx: state.currentSetIdx,
+        currentExercise: exercises[state.currentExerciseIdx],
+        progress: state.progress ?? 0,
         dataBloc: context.read<DataBloc>(),
         nextExercise: nextExerciseMaybe,
         isFinishing: _finishing,
-  canReorder: upcomingSlice.length > 1,
-  upcomingReorderable: upcomingSlice,
-  onReorderUpcoming: handleReorder,
+        canReorder: upcomingSlice.length > 1,
+        upcomingReorderable: upcomingSlice,
+        onReorderUpcoming: handleReorder,
       ),
     );
   }

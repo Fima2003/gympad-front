@@ -42,7 +42,6 @@ class _CWorkoutRunManagerState extends State<CWorkoutRunManager> {
         currentState.workoutToFollow != null) {
       return currentState;
     }
-    print(currentState);
     throw Exception('Invalid state');
   }
 
@@ -91,7 +90,11 @@ class _CWorkoutRunManagerState extends State<CWorkoutRunManager> {
   }
 
   void tryStartExercise() {
-    if (state.currentSetIdx != 0) {
+    final s = context.read<WorkoutBloc>().state;
+    if (s is! WorkoutInProgress || s.workoutToFollow == null) {
+      return; // Workout ended or invalid
+    }
+    if (s.currentSetIdx != 0) {
       return;
     }
     final Exercise? exercise = BlocProvider.of<DataBloc>(
@@ -152,17 +155,20 @@ class _CWorkoutRunManagerState extends State<CWorkoutRunManager> {
 
   void goToBreak() {
     stopSetTimer();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const CWorkoutBreakManager(),
-      ),
-    ).then((_) {
-      // When break completes (popped), restart timers and continue
-      if (!mounted) return;
-      resetSetTimer();
-      startSetTimer();
-      tryStartExercise();
-    });
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(builder: (context) => const CWorkoutBreakManager()),
+        )
+        .then((_) {
+          // When break completes (popped), restart timers and continue
+          if (!mounted) return;
+          final s = context.read<WorkoutBloc>().state;
+          if (s is WorkoutInProgress && s.workoutToFollow != null) {
+            resetSetTimer();
+            startSetTimer();
+            tryStartExercise();
+          }
+        });
   }
 
   void handleFinish(
