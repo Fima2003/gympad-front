@@ -248,7 +248,7 @@ class WorkoutService {
 
   Future<void> _saveWorkoutToFollow() async {
     if (_workoutToFollow == null) {
-  await _currentWorkoutStorage.deleteWorkoutToFollowOnly();
+      await _currentWorkoutStorage.deleteWorkoutToFollowOnly();
       return;
     }
     try {
@@ -398,9 +398,7 @@ class WorkoutService {
     final before = _workoutToFollow!.exercises.take(startIndex).toList();
     final reorderSlice = _workoutToFollow!.exercises.skip(startIndex).toList();
     // Build map for quick lookup
-    final map = {
-      for (final e in reorderSlice) e.id: e,
-    };
+    final map = {for (final e in reorderSlice) e.id: e};
     final reordered = <CustomWorkoutExercise>[];
     for (final id in newOrderIds) {
       final ex = map[id];
@@ -413,5 +411,6 @@ class WorkoutService {
     _workoutToFollow = _workoutToFollow!.copyWith(
       exercises: [...before, ...reordered],
     );
+    unawaited(_saveWorkoutToFollow());
   }
 }
