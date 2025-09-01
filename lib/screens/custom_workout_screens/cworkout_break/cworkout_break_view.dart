@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../blocs/data/data_bloc.dart';
@@ -50,241 +52,250 @@ class CWorkoutBreakView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    final timerSize = height < 700 ? 150.0 : 190.0;
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a1a),
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Stack(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 4),
-                    Text(
-                      'REST TIME',
-                      style: AppTextStyles.titleLarge.copyWith(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 40),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox(
-                          width: 200,
-                          height: 200,
-                          child: CircularProgressIndicator(
-                            value: (totalTime - remainingTime) / totalTime,
-                            strokeWidth: 8,
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.2,
-                            ),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.accent,
-                            ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'REST TIME',
+                          style: AppTextStyles.titleLarge.copyWith(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
                           ),
                         ),
-                        Column(
-                          children: [
-                            Text(
-                              formatTime(remainingTime),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 48,
-                                fontWeight: FontWeight.bold,
+                      ),
+                      IconButton(
+                        tooltip: 'Finish workout',
+                        icon: const Icon(Icons.flag, color: Colors.white),
+                        onPressed: onFinishWorkout,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Timer & next side-by-side (responsive)
+                  Flexible(
+                    flex: 4,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Animated progress ring WITH time inside
+                        _AnimatedProgressRing(
+                          size: timerSize,
+                          progress: (totalTime - remainingTime) / totalTime,
+                          builder: () => Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                formatTime(remainingTime),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 44,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'remaining',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        // Next info card
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.08),
                               ),
                             ),
-                            Text(
-                              'remaining',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: Colors.white70,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      'NEXT',
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    if (canReorder)
+                                      GestureDetector(
+                                        onTap: () => _openReorderSheet(context),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.tune, size: 16, color: AppColors.accent),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              'Edit',
+                                              style: AppTextStyles.bodySmall.copyWith(
+                                                color: AppColors.accent,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  _nextExerciseTitle(),
+                                  style: AppTextStyles.titleSmall.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Set ${currentSetIdx + 1} of ${currentExercise.setsAmount}',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: Colors.white54,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 40),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                  const SizedBox(height: 16),
+                  // Completed exercises chips only
+                  if (previousExercises.isNotEmpty)
+                    SizedBox(
+                      height: 60,
+                      child: _PredefinedExerciseChipsRow(
+                        items: previousExercises,
+                        variant: ExerciseChipVariant.previous,
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  // Progress (compact)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'PROGRESS',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.white54,
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      child: Column(
-                        children: [
-                          Text(
-                            'NEXT:',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1,
+                      const SizedBox(height: 6),
+                      Container(
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: progress,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              gradient: LinearGradient(
+                                colors: [AppColors.accent, AppColors.accent.withOpacity(0.4)],
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            _nextExerciseTitle(),
-                            style: AppTextStyles.titleMedium.copyWith(
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${(progress * 100).toInt()}%',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  // Actions
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: OutlinedButton(
+                          onPressed: onAddThirtySeconds,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: const BorderSide(width: 2, color: Colors.white),
+                            padding: EdgeInsets.zero,
+                            shape: const CircleBorder(),
+                          ),
+                          child: Text(
+                            '+30\'\'',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
                               color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: onSkip,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF1a1a1a),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 3,
+                          ),
+                          child: Text(
+                            'SKIP',
+                            style: AppTextStyles.button.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Set ${currentSetIdx + 1} of ${currentExercise.setsAmount}',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (previousExercises.isNotEmpty) ...[
-                          _PredefinedExerciseChipsRow(
-                            items: previousExercises,
-                            variant: ExerciseChipVariant.previous,
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-                        if (futureExercises.isNotEmpty && !canReorder) ...[
-                          const SizedBox(height: 12),
-                          _PredefinedExerciseChipsRow(
-                            items: futureExercises,
-                            variant: ExerciseChipVariant.future,
-                          ),
-                        ] else if (canReorder) ...[
-                          const SizedBox(height: 12),
-                          _ReorderUpcomingRow(
-                            items: upcomingReorderable,
-                            dataBloc: dataBloc,
-                            onChanged: onReorderUpcoming,
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-                    Column(
-                      children: [
-                        Text(
-                          'WORKOUT PROGRESS',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: Colors.white70,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: progress,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                color: AppColors.accent,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${(progress * 100).toInt()}% Complete',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 50),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: OutlinedButton(
-                            onPressed: onAddThirtySeconds,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(
-                                width: 2,
-                                color: Colors.white,
-                              ),
-                              padding: EdgeInsets.zero,
-                              shape: const CircleBorder(),
-                            ),
-                            child: Text(
-                              '+30\'\'',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: onSkip,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF1a1a1a),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              elevation: 4,
-                            ),
-                            child: Text(
-                              'SKIP BREAK',
-                              style: AppTextStyles.button.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: IconButton(
-                    tooltip: 'Finish workout',
-                    icon: const Icon(Icons.flag, color: Colors.white),
-                    onPressed: onFinishWorkout,
+                    ],
                   ),
-                ),
-                if (isFinishing) ...[
-                  const ModalBarrier(dismissible: false, color: Colors.black26),
-                  const Center(child: CircularProgressIndicator()),
                 ],
+              ),
+              if (isFinishing) ...[
+                const ModalBarrier(dismissible: false, color: Colors.black26),
+                const Center(child: CircularProgressIndicator()),
               ],
-            ),
+            ],
           ),
         ),
       ),
@@ -307,8 +318,187 @@ class CWorkoutBreakView extends StatelessWidget {
     }
     return name;
   }
+
+  void _openReorderSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF222222),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Reorder Upcoming',
+                    style: AppTextStyles.titleSmall.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    icon: const Icon(Icons.close, color: Colors.white70),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              _ReorderUpcomingRow(
+                items: upcomingReorderable,
+                dataBloc: dataBloc,
+                onChanged: (list) {
+                  onReorderUpcoming(list);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
+/// Animated circular progress ring that tween-animates between progress updates
+class _AnimatedProgressRing extends StatefulWidget {
+  final double size;
+  final double progress; // 0..1
+  final Widget Function() builder; // inner content builder
+
+  const _AnimatedProgressRing({
+    required this.size,
+    required this.progress,
+    required this.builder,
+  });
+
+  @override
+  State<_AnimatedProgressRing> createState() => _AnimatedProgressRingState();
+}
+
+class _AnimatedProgressRingState extends State<_AnimatedProgressRing> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  double _from = 0;
+  double _to = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _to = widget.progress.clamp(0, 1);
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+  }
+
+  @override
+  void didUpdateWidget(covariant _AnimatedProgressRing oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if ((oldWidget.progress - widget.progress).abs() > 0.0001) {
+      _from = _to;
+      _to = widget.progress.clamp(0, 1);
+      final delta = (_to - _from).abs();
+      final ms = (delta * 600).clamp(120, 900).toInt();
+      _controller
+        ..duration = Duration(milliseconds: ms)
+        ..forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: widget.size,
+      height: widget.size,
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, _) {
+          final value = lerpDouble(_from, _to, _animation.value)!;
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              // Background ring
+              CustomPaint(
+                size: Size.square(widget.size),
+                painter: _RingPainter(
+                  progress: value,
+                  backgroundColor: Colors.white.withOpacity(0.08),
+                  foregroundColor: AppColors.accent,
+                ),
+              ),
+              // Inner content
+              widget.builder(),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  final double progress; // 0..1
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final double strokeWidth;
+
+  _RingPainter({
+    required this.progress,
+    required this.backgroundColor,
+    required this.foregroundColor,
+    double strokeWidth = 6,
+  }) : strokeWidth = strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = size.width / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final startAngle = -math.pi / 2;
+    final sweep = 2 * math.pi * progress;
+
+    final bgPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..color = backgroundColor;
+    final fgPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..shader = SweepGradient(
+        startAngle: 0,
+        endAngle: 2 * math.pi,
+        colors: [
+          foregroundColor,
+          foregroundColor.withOpacity(0.6),
+        ],
+      ).createShader(rect);
+
+    // Draw background full circle
+    canvas.drawArc(rect.deflate(strokeWidth / 2), 0, 2 * math.pi, false, bgPaint);
+
+    // Draw foreground arc
+    canvas.drawArc(rect.deflate(strokeWidth / 2), startAngle, sweep, false, fgPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _RingPainter oldDelegate) =>
+      oldDelegate.progress != progress ||
+      oldDelegate.backgroundColor != backgroundColor ||
+      oldDelegate.foregroundColor != foregroundColor ||
+      oldDelegate.strokeWidth != strokeWidth;
+}
 class _PredefinedExerciseChipsRow extends StatelessWidget {
   final List<CustomWorkoutExercise> items;
   final ExerciseChipVariant variant;
