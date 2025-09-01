@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/workout/workout_bloc.dart';
 import '../../constants/app_styles.dart';
 import 'select_exercise_screen.dart';
+import '../custom_workout_screens/cworkout_run/cworkout_run_manager.dart';
 
 class FreeWorkoutScreen extends StatelessWidget {
   const FreeWorkoutScreen({super.key});
@@ -103,17 +104,26 @@ class FreeWorkoutScreen extends StatelessWidget {
                     ),
                   )
                 else
-                  // Continue Workout Button
+                  // Continue Workout Button (route differs if following a custom workout)
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const SelectExerciseScreen(),
-                          ),
-                        );
+                        if (state.workoutToFollow != null) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const CWorkoutRunManager(),
+                            ),
+                          );
+                        } else {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => const SelectExerciseScreen(),
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.accent,
@@ -125,7 +135,9 @@ class FreeWorkoutScreen extends StatelessWidget {
                         elevation: 4,
                       ),
                       child: Text(
-                        'CONTINUE WORKOUT',
+                        state.workoutToFollow != null
+                            ? 'RESUME WORKOUT'
+                            : 'CONTINUE WORKOUT',
                         style: AppTextStyles.button.copyWith(
                           color: AppColors.primary,
                           fontSize: 18,

@@ -215,15 +215,15 @@ class WorkoutService {
   }
 
   Future<void> loadWorkoutToFollow() async {
-    // try {
-    //   _currentWorkout = await _currentWorkoutStorage.load();
-    //   if (_currentWorkout != null) {
-    //     _logger.info('Loaded current workout with ID: ${_currentWorkout!.id}');
-    //   }
-    // } catch (e, st) {
-    //   _logger.warning('Failed to load current workout', e, st);
-    //   await _clearCurrentWorkout();
-    // }
+    try {
+      _workoutToFollow = await _currentWorkoutStorage.loadWorkoutToFollow();
+      if (_workoutToFollow != null) {
+        _logger.info('Loaded workoutToFollow with ID: ${_workoutToFollow!.id}');
+      }
+    } catch (e, st) {
+      _logger.warning('Failed to load workoutToFollow', e, st);
+      _workoutToFollow = null;
+    }
   }
 
   Future<void> uploadPendingWorkouts() async {
@@ -246,7 +246,17 @@ class WorkoutService {
     }
   }
 
-  Future<void> _saveWorkoutToFollow() async {}
+  Future<void> _saveWorkoutToFollow() async {
+    if (_workoutToFollow == null) {
+  await _currentWorkoutStorage.deleteWorkoutToFollowOnly();
+      return;
+    }
+    try {
+      await _currentWorkoutStorage.saveWorkoutToFollow(_workoutToFollow!);
+    } catch (e, st) {
+      _logger.warning('Failed to persist workoutToFollow', e, st);
+    }
+  }
 
   Future<void> _saveWorkoutToHistory() async {
     if (_currentWorkout == null) return;

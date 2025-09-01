@@ -6,45 +6,36 @@ part of 'hive_workout.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class HiveWorkoutAdapter extends TypeAdapter<HiveWorkout> {
+class HiveWorkoutSetAdapter extends TypeAdapter<HiveWorkoutSet> {
   @override
   final int typeId = 2;
 
   @override
-  HiveWorkout read(BinaryReader reader) {
+  HiveWorkoutSet read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return HiveWorkout(
-      id: fields[0] as String,
-      name: fields[1] as String?,
-      exercises: (fields[2] as List).cast<HiveWorkoutExercise>(),
-      startTime: fields[3] as DateTime,
-      endTime: fields[4] as DateTime?,
-      isUploaded: fields[5] as bool,
-      isOngoing: fields[6] as bool,
+    return HiveWorkoutSet(
+      setNumber: fields[0] as int,
+      reps: fields[1] as int,
+      weight: fields[2] as double,
+      timeMicros: fields[3] as int,
     );
   }
 
   @override
-  void write(BinaryWriter writer, HiveWorkout obj) {
+  void write(BinaryWriter writer, HiveWorkoutSet obj) {
     writer
-      ..writeByte(7)
-      ..writeByte(0)
-      ..write(obj.id)
-      ..writeByte(1)
-      ..write(obj.name)
-      ..writeByte(2)
-      ..write(obj.exercises)
-      ..writeByte(3)
-      ..write(obj.startTime)
       ..writeByte(4)
-      ..write(obj.endTime)
-      ..writeByte(5)
-      ..write(obj.isUploaded)
-      ..writeByte(6)
-      ..write(obj.isOngoing);
+      ..writeByte(0)
+      ..write(obj.setNumber)
+      ..writeByte(1)
+      ..write(obj.reps)
+      ..writeByte(2)
+      ..write(obj.weight)
+      ..writeByte(3)
+      ..write(obj.timeMicros);
   }
 
   @override
@@ -53,7 +44,7 @@ class HiveWorkoutAdapter extends TypeAdapter<HiveWorkout> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is HiveWorkoutAdapter &&
+      other is HiveWorkoutSetAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
@@ -110,36 +101,45 @@ class HiveWorkoutExerciseAdapter extends TypeAdapter<HiveWorkoutExercise> {
           typeId == other.typeId;
 }
 
-class HiveWorkoutSetAdapter extends TypeAdapter<HiveWorkoutSet> {
+class HiveWorkoutAdapter extends TypeAdapter<HiveWorkout> {
   @override
   final int typeId = 4;
 
   @override
-  HiveWorkoutSet read(BinaryReader reader) {
+  HiveWorkout read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return HiveWorkoutSet(
-      setNumber: fields[0] as int,
-      reps: fields[1] as int,
-      weight: fields[2] as double,
-      timeMicros: fields[3] as int,
+    return HiveWorkout(
+      id: fields[0] as String,
+      name: fields[1] as String?,
+      exercises: (fields[2] as List).cast<HiveWorkoutExercise>(),
+      startTime: fields[3] as DateTime,
+      endTime: fields[4] as DateTime?,
+      isUploaded: fields[5] as bool,
+      isOngoing: fields[6] as bool,
     );
   }
 
   @override
-  void write(BinaryWriter writer, HiveWorkoutSet obj) {
+  void write(BinaryWriter writer, HiveWorkout obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(7)
       ..writeByte(0)
-      ..write(obj.setNumber)
+      ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.reps)
+      ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.weight)
+      ..write(obj.exercises)
       ..writeByte(3)
-      ..write(obj.timeMicros);
+      ..write(obj.startTime)
+      ..writeByte(4)
+      ..write(obj.endTime)
+      ..writeByte(5)
+      ..write(obj.isUploaded)
+      ..writeByte(6)
+      ..write(obj.isOngoing);
   }
 
   @override
@@ -148,7 +148,7 @@ class HiveWorkoutSetAdapter extends TypeAdapter<HiveWorkoutSet> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is HiveWorkoutSetAdapter &&
+      other is HiveWorkoutAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

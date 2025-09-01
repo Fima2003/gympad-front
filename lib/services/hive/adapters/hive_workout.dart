@@ -6,55 +6,35 @@ import 'package:hive/hive.dart';
 part 'hive_workout.g.dart';
 
 @HiveType(typeId: 2)
-class HiveWorkout extends HiveObject {
+class HiveWorkoutSet extends HiveObject {
   @HiveField(0)
-  final String id;
+  final int setNumber;
   @HiveField(1)
-  final String? name;
+  final int reps;
   @HiveField(2)
-  final List<HiveWorkoutExercise> exercises;
+  final double weight;
   @HiveField(3)
-  final DateTime startTime;
-  @HiveField(4)
-  DateTime? endTime;
-  @HiveField(5)
-  final bool isUploaded;
-  @HiveField(6)
-  final bool isOngoing;
+  final int timeMicros; // store as primitive for Hive
 
-  HiveWorkout({
-    required this.id,
-    required this.name,
-    required this.exercises,
-    required this.startTime,
-    this.endTime,
-    required this.isUploaded,
-    required this.isOngoing,
+  HiveWorkoutSet({
+    required this.setNumber,
+    required this.reps,
+    required this.weight,
+    required this.timeMicros,
   });
 
-  factory HiveWorkout.fromDomain(Workout workout) {
-    return HiveWorkout(
-      id: workout.id,
-      name: workout.name,
-      exercises:
-          workout.exercises
-              .map((exercise) => HiveWorkoutExercise.fromDomain(exercise))
-              .toList(),
-      startTime: workout.startTime,
-      endTime: workout.endTime,
-      isUploaded: workout.isUploaded,
-      isOngoing: workout.isOngoing,
-    );
-  }
+  factory HiveWorkoutSet.fromDomain(WorkoutSet set) => HiveWorkoutSet(
+    setNumber: set.setNumber,
+    reps: set.reps,
+    weight: set.weight,
+    timeMicros: set.time.inMicroseconds,
+  );
 
-  Workout toDomain() => Workout(
-    id: id,
-    name: name,
-    exercises: exercises.map((exercise) => exercise.toDomain()).toList(),
-    startTime: startTime,
-    endTime: endTime,
-    isUploaded: isUploaded,
-    isOngoing: isOngoing,
+  WorkoutSet toDomain() => WorkoutSet(
+    setNumber: setNumber,
+    reps: reps,
+    weight: weight,
+    time: Duration(microseconds: timeMicros),
   );
 }
 
@@ -109,34 +89,54 @@ class HiveWorkoutExercise extends HiveObject {
 }
 
 @HiveType(typeId: 4)
-class HiveWorkoutSet extends HiveObject {
+class HiveWorkout extends HiveObject {
   @HiveField(0)
-  final int setNumber;
+  final String id;
   @HiveField(1)
-  final int reps;
+  final String? name;
   @HiveField(2)
-  final double weight;
+  final List<HiveWorkoutExercise> exercises;
   @HiveField(3)
-  final int timeMicros; // store as primitive for Hive
+  final DateTime startTime;
+  @HiveField(4)
+  DateTime? endTime;
+  @HiveField(5)
+  final bool isUploaded;
+  @HiveField(6)
+  final bool isOngoing;
 
-  HiveWorkoutSet({
-    required this.setNumber,
-    required this.reps,
-    required this.weight,
-    required this.timeMicros,
+  HiveWorkout({
+    required this.id,
+    required this.name,
+    required this.exercises,
+    required this.startTime,
+    this.endTime,
+    required this.isUploaded,
+    required this.isOngoing,
   });
 
-  factory HiveWorkoutSet.fromDomain(WorkoutSet set) => HiveWorkoutSet(
-    setNumber: set.setNumber,
-    reps: set.reps,
-    weight: set.weight,
-    timeMicros: set.time.inMicroseconds,
-  );
+  factory HiveWorkout.fromDomain(Workout workout) {
+    return HiveWorkout(
+      id: workout.id,
+      name: workout.name,
+      exercises:
+          workout.exercises
+              .map((exercise) => HiveWorkoutExercise.fromDomain(exercise))
+              .toList(),
+      startTime: workout.startTime,
+      endTime: workout.endTime,
+      isUploaded: workout.isUploaded,
+      isOngoing: workout.isOngoing,
+    );
+  }
 
-  WorkoutSet toDomain() => WorkoutSet(
-    setNumber: setNumber,
-    reps: reps,
-    weight: weight,
-    time: Duration(microseconds: timeMicros),
+  Workout toDomain() => Workout(
+    id: id,
+    name: name,
+    exercises: exercises.map((exercise) => exercise.toDomain()).toList(),
+    startTime: startTime,
+    endTime: endTime,
+    isUploaded: isUploaded,
+    isOngoing: isOngoing,
   );
 }

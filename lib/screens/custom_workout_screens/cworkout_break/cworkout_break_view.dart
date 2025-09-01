@@ -96,27 +96,28 @@ class CWorkoutBreakView extends StatelessWidget {
                         _AnimatedProgressRing(
                           size: timerSize,
                           progress: (totalTime - remainingTime) / totalTime,
-                          builder: () => Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                formatTime(remainingTime),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 44,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
+                          builder:
+                              () => Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    formatTime(remainingTime),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 44,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'remaining',
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'remaining',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                         const SizedBox(width: 20),
                         // Next info card
@@ -151,14 +152,19 @@ class CWorkoutBreakView extends StatelessWidget {
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.tune, size: 16, color: AppColors.accent),
+                                            Icon(
+                                              Icons.tune,
+                                              size: 16,
+                                              color: AppColors.accent,
+                                            ),
                                             const SizedBox(width: 4),
                                             Text(
                                               'Edit',
-                                              style: AppTextStyles.bodySmall.copyWith(
-                                                color: AppColors.accent,
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                              style: AppTextStyles.bodySmall
+                                                  .copyWith(
+                                                    color: AppColors.accent,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                             ),
                                           ],
                                         ),
@@ -226,7 +232,10 @@ class CWorkoutBreakView extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
                               gradient: LinearGradient(
-                                colors: [AppColors.accent, AppColors.accent.withOpacity(0.4)],
+                                colors: [
+                                  AppColors.accent,
+                                  AppColors.accent.withOpacity(0.4),
+                                ],
                               ),
                             ),
                           ),
@@ -252,7 +261,10 @@ class CWorkoutBreakView extends StatelessWidget {
                           onPressed: onAddThirtySeconds,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.white,
-                            side: const BorderSide(width: 2, color: Colors.white),
+                            side: const BorderSide(
+                              width: 2,
+                              color: Colors.white,
+                            ),
                             padding: EdgeInsets.zero,
                             shape: const CircleBorder(),
                           ),
@@ -381,7 +393,8 @@ class _AnimatedProgressRing extends StatefulWidget {
   State<_AnimatedProgressRing> createState() => _AnimatedProgressRingState();
 }
 
-class _AnimatedProgressRingState extends State<_AnimatedProgressRing> with SingleTickerProviderStateMixin {
+class _AnimatedProgressRingState extends State<_AnimatedProgressRing>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   double _from = 0;
@@ -391,8 +404,14 @@ class _AnimatedProgressRingState extends State<_AnimatedProgressRing> with Singl
   void initState() {
     super.initState();
     _to = widget.progress.clamp(0, 1);
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
   }
 
   @override
@@ -467,29 +486,40 @@ class _RingPainter extends CustomPainter {
     final startAngle = -math.pi / 2;
     final sweep = 2 * math.pi * progress;
 
-    final bgPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..color = backgroundColor;
-    final fgPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..shader = SweepGradient(
-        startAngle: 0,
-        endAngle: 2 * math.pi,
-        colors: [
-          foregroundColor,
-          foregroundColor.withOpacity(0.6),
-        ],
-      ).createShader(rect);
+    final bgPaint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round
+          ..color = backgroundColor;
+    final fgPaint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round
+          ..shader = SweepGradient(
+            startAngle: 0,
+            endAngle: 2 * math.pi,
+            colors: [foregroundColor, foregroundColor.withOpacity(0.6)],
+          ).createShader(rect);
 
     // Draw background full circle
-    canvas.drawArc(rect.deflate(strokeWidth / 2), 0, 2 * math.pi, false, bgPaint);
+    canvas.drawArc(
+      rect.deflate(strokeWidth / 2),
+      0,
+      2 * math.pi,
+      false,
+      bgPaint,
+    );
 
     // Draw foreground arc
-    canvas.drawArc(rect.deflate(strokeWidth / 2), startAngle, sweep, false, fgPaint);
+    canvas.drawArc(
+      rect.deflate(strokeWidth / 2),
+      startAngle,
+      sweep,
+      false,
+      fgPaint,
+    );
   }
 
   @override
@@ -499,6 +529,7 @@ class _RingPainter extends CustomPainter {
       oldDelegate.foregroundColor != foregroundColor ||
       oldDelegate.strokeWidth != strokeWidth;
 }
+
 class _PredefinedExerciseChipsRow extends StatelessWidget {
   final List<CustomWorkoutExercise> items;
   final ExerciseChipVariant variant;
