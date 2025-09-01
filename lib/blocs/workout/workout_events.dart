@@ -76,3 +76,13 @@ class SetAdded extends WorkoutEvent {
 class WorkoutLoaded extends WorkoutEvent {}
 
 class WorkoutHistoryRequested extends WorkoutEvent {}
+
+class UpcomingExercisesReordered extends WorkoutEvent {
+  final int startIndex; // index in workoutToFollow.exercises where reordering begins
+  final List<String> newOrderIds; // ids of exercises in their new order for the reorderable suffix
+
+  const UpcomingExercisesReordered(this.startIndex, this.newOrderIds);
+
+  @override
+  List<Object?> get props => [startIndex, newOrderIds];
+}

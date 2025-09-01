@@ -378,4 +378,30 @@ class WorkoutService {
 
     return totalSets > 0 ? completedSets / totalSets : 0.0;
   }
+
+  void reorderUpcomingExercises(int startIndex, List<String> newOrderIds) {
+    if (_workoutToFollow == null) return;
+    // Defensive bounds
+    if (startIndex < 0 || startIndex >= _workoutToFollow!.exercises.length) {
+      return;
+    }
+    final before = _workoutToFollow!.exercises.take(startIndex).toList();
+    final reorderSlice = _workoutToFollow!.exercises.skip(startIndex).toList();
+    // Build map for quick lookup
+    final map = {
+      for (final e in reorderSlice) e.id: e,
+    };
+    final reordered = <CustomWorkoutExercise>[];
+    for (final id in newOrderIds) {
+      final ex = map[id];
+      if (ex != null) reordered.add(ex);
+    }
+    // Append any missing exercises (shouldn't normally happen)
+    for (final ex in reorderSlice) {
+      if (!reordered.contains(ex)) reordered.add(ex);
+    }
+    _workoutToFollow = _workoutToFollow!.copyWith(
+      exercises: [...before, ...reordered],
+    );
+  }
 }

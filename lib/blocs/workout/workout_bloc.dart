@@ -23,6 +23,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     on<ExerciseFinished>(_onExerciseFinished);
     on<SetAdded>(_onSetAdded);
     on<WorkoutHistoryRequested>(_onWorkoutHistoryRequested);
+  on<UpcomingExercisesReordered>(_onUpcomingExercisesReordered);
   }
 
   Future<void> _onWorkoutLoaded(
@@ -53,6 +54,27 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     } catch (e, st) {
       _logger.error('Failed to load workout', e, st);
       emit(WorkoutError('Failed to load workout'));
+    }
+  }
+
+  Future<void> _onUpcomingExercisesReordered(
+    UpcomingExercisesReordered event,
+    Emitter<WorkoutState> emit,
+  ) async {
+    if (state is! WorkoutInProgress) return;
+    _workoutService.reorderUpcomingExercises(event.startIndex, event.newOrderIds);
+    final currentWorkout = _workoutService.currentWorkout;
+    final workoutToFollow = _workoutService.workoutToFollow;
+    if (currentWorkout != null) {
+      emit(
+        WorkoutInProgress(
+          currentWorkout,
+          workoutToFollow: workoutToFollow,
+          currentExerciseIdx: _workoutService.getExerciseIdx(),
+          currentSetIdx: _workoutService.getSetIdx(),
+          progress: _workoutService.getPercentageDone(),
+        ),
+      );
     }
   }
 

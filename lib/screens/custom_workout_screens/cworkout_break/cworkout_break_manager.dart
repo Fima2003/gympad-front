@@ -46,8 +46,11 @@ class _CWorkoutBreakManagerState extends State<CWorkoutBreakManager> {
   @override
   void initState() {
     super.initState();
-    _remainingTime = progressState
-        .workoutToFollow!.exercises[progressState.currentExerciseIdx].restTime;
+    _remainingTime =
+        progressState
+            .workoutToFollow!
+            .exercises[progressState.currentExerciseIdx]
+            .restTime;
     _totalTime = _remainingTime;
     _startCountdown();
   }
@@ -94,29 +97,33 @@ class _CWorkoutBreakManagerState extends State<CWorkoutBreakManager> {
   void _showFinishDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Finish workout?'),
-        content: const Text('Are you sure you want to finish this workout now?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('No'),
-          ),
-          ElevatedButton(
-            onPressed: _finishing
-                ? null
-                : () {
-                    Navigator.of(context).pop();
-                    _finishWorkout();
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Finish workout?'),
+            content: const Text(
+              'Are you sure you want to finish this workout now?',
             ),
-            child: const Text('Yes'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('No'),
+              ),
+              ElevatedButton(
+                onPressed:
+                    _finishing
+                        ? null
+                        : () {
+                          Navigator.of(context).pop();
+                          _finishWorkout();
+                        },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Yes'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -144,14 +151,34 @@ class _CWorkoutBreakManagerState extends State<CWorkoutBreakManager> {
     final exercises = progressState.workoutToFollow!.exercises;
     final idx = progressState.currentExerciseIdx.clamp(0, exercises.length - 1);
     final previous = exercises.take(idx).toList();
-    final future = idx + 1 < exercises.length ? exercises.sublist(idx + 1) : const <CustomWorkoutExercise>[];
+    final future =
+        idx + 1 < exercises.length
+            ? exercises.sublist(idx + 1)
+            : const <CustomWorkoutExercise>[];
+
+    // Determine reorder window start index in full workout list.
+    // If current exercise has not actually started (no sets recorded yet and we are at its index), include it in reorder window.
+    final bool currentExerciseStarted = progressState.currentSetIdx > 0;
+    // If currentExerciseStarted -> upcoming starts after current exercise; else include current exercise
+    final reorderStartIndex = currentExerciseStarted ? idx + 1 : idx;
+    final upcomingSlice = exercises.skip(reorderStartIndex).toList();
+
+    void handleReorder(List<CustomWorkoutExercise> newOrder) {
+      context.read<WorkoutBloc>().add(
+            UpcomingExercisesReordered(
+              reorderStartIndex,
+              newOrder.map((e) => e.id).toList(),
+            ),
+          );
+    }
 
     return BlocListener<WorkoutBloc, WorkoutState>(
       listener: (context, state) {
         if (state is WorkoutCompleted) {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (context) => WellDoneWorkoutScreen(workout: state.workout),
+              builder:
+                  (context) => WellDoneWorkoutScreen(workout: state.workout),
             ),
             (route) => route.isFirst,
           );
@@ -172,6 +199,9 @@ class _CWorkoutBreakManagerState extends State<CWorkoutBreakManager> {
         dataBloc: context.read<DataBloc>(),
         nextExercise: nextExerciseMaybe,
         isFinishing: _finishing,
+  canReorder: upcomingSlice.length > 1,
+  upcomingReorderable: upcomingSlice,
+  onReorderUpcoming: handleReorder,
       ),
     );
   }
