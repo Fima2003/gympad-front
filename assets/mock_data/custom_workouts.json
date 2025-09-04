@@ -20,7 +20,7 @@
                 },
                 {
                     "id": "overhead_press",
-                    "sets_amount": 3,
+                    "sets_amount": 4,
                     "weight": 25,
                     "suggested_reps": 10,
                     "rest_time": 90

@@ -7,7 +7,7 @@ import '../../../widgets/velocity_weight_selector.dart';
 
 enum FinishType { set, exercise, workout }
 
-class CWorkoutRunView extends StatelessWidget {
+class CWorkoutRunView extends StatefulWidget {
   final String workoutTitle;
   final String exerciseName;
   final int totalSets;
@@ -21,11 +21,8 @@ class CWorkoutRunView extends StatelessWidget {
   )
   onFinish;
   final FinishType finishType;
-  final ValueNotifier<Duration> setDurationNotifier;
-  final ValueNotifier<bool> isTimerRunningNotifier;
-  final VoidCallback onStartSet;
-  final VoidCallback onStopSet;
-  final VoidCallback onResetSet;
+  final Duration elapsed;
+  final bool isRunning; // always true for now (timer managed by bloc)
 
   const CWorkoutRunView({
     super.key,
@@ -37,38 +34,55 @@ class CWorkoutRunView extends StatelessWidget {
     required this.completedSets,
     required this.onFinish,
     required this.finishType,
-    required this.setDurationNotifier,
-    required this.isTimerRunningNotifier,
-    required this.onStartSet,
-    required this.onStopSet,
-    required this.onResetSet,
+    required this.elapsed,
+    required this.isRunning,
   });
 
-  int get currentSetIdx => completedSets.length;
+  @override
+  State<CWorkoutRunView> createState() => _CWorkoutRunViewState();
+}
 
-  void _showRepsSelector(BuildContext context, double selectedWeight) {
-    onStopSet();
+class _CWorkoutRunViewState extends State<CWorkoutRunView> {
+  late double _selectedWeight;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedWeight = widget.initialWeight;
+  }
+
+  @override
+  void didUpdateWidget(covariant CWorkoutRunView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If exercise changed, re-seed weight to new suggested initial.
+    if (oldWidget.exerciseName != widget.exerciseName) {
+      _selectedWeight = widget.initialWeight;
+    }
+  }
+
+  int get currentSetIdx => widget.completedSets.length;
+
+  void _showRepsSelector(BuildContext context) {
+    // Stop not needed (bloc controls timer) but keep placeholder for future pause.
     showDialog<int>(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return RepsSelector(initialReps: suggestedReps);
+        return RepsSelector(initialReps: widget.suggestedReps);
       },
     ).then((reps) {
       if (reps == null) {
-        onStartSet();
         return;
       }
-      final duration = setDurationNotifier.value;
-      onResetSet();
-      onFinish(selectedWeight, reps, duration);
+      final duration = widget.elapsed;
+      widget.onFinish(_selectedWeight, reps, duration);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     const double buttonWidth = 280.0;
-    double selectedWeight = initialWeight;
+    // weight kept in state; local variable not needed.
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -77,7 +91,7 @@ class CWorkoutRunView extends StatelessWidget {
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Text(
-          workoutTitle,
+          widget.workoutTitle,
           style: AppTextStyles.titleMedium.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.bold,
@@ -91,7 +105,7 @@ class CWorkoutRunView extends StatelessWidget {
             children: [
               // Exercise name
               Text(
-                exerciseName,
+                widget.exerciseName,
                 style: AppTextStyles.titleLarge.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
@@ -103,7 +117,7 @@ class CWorkoutRunView extends StatelessWidget {
 
               // Set info
               Text(
-                'Set ${currentSetIdx + 1} of $totalSets',
+                'Set ${currentSetIdx + 1} of ${widget.totalSets}',
                 style: AppTextStyles.bodyLarge.copyWith(
                   color: AppColors.primary.withValues(alpha: 0.7),
                 ),
@@ -112,31 +126,26 @@ class CWorkoutRunView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Timer display
-              ValueListenableBuilder<Duration>(
-                valueListenable: setDurationNotifier,
-                builder: (context, duration, _) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 24,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          isTimerRunningNotifier.value
-                              ? AppColors.accent
-                              : AppColors.accent.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Text(
-                      '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
-                      style: AppTextStyles.titleLarge.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                      ),
-                    ),
-                  );
-                },
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 24,
+                ),
+                decoration: BoxDecoration(
+                  color:
+                      widget.isRunning
+                          ? AppColors.accent
+                          : AppColors.accent.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Text(
+                  '${widget.elapsed.inMinutes.toString().padLeft(2, '0')}:${(widget.elapsed.inSeconds % 60).toString().padLeft(2, '0')}',
+                  style: AppTextStyles.titleLarge.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                  ),
+                ),
               ),
 
               const SizedBox(height: 32),
@@ -144,9 +153,9 @@ class CWorkoutRunView extends StatelessWidget {
               // Weight selector
               Center(
                 child: WeightSelectorVelocity(
-                  initialWeight: initialWeight,
+                  initialWeight: _selectedWeight,
                   onWeightChanged: (weight) {
-                    selectedWeight = weight;
+                    setState(() => _selectedWeight = weight);
                   },
                 ),
               ),
@@ -154,7 +163,7 @@ class CWorkoutRunView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Sets table
-              if (completedSets.isNotEmpty) ...[
+              if (widget.completedSets.isNotEmpty) ...[
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -176,7 +185,7 @@ class CWorkoutRunView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ...(completedSets.map(
+                      ...(widget.completedSets.map(
                         (set) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -218,62 +227,31 @@ class CWorkoutRunView extends StatelessWidget {
               const Spacer(),
 
               // Action buttons
-              ValueListenableBuilder<bool>(
-                valueListenable: isTimerRunningNotifier,
-                builder: (context, isRunning, _) {
-                  if (isRunning) {
-                    return Center(
-                      child: SizedBox(
-                        width: buttonWidth,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed:
-                              () => _showRepsSelector(context, selectedWeight),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.accent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            finishType == FinishType.set
-                                ? 'Finish Set'
-                                : finishType == FinishType.exercise
-                                ? 'Finish Exercise'
-                                : 'Finish Workout',
-                            style: AppTextStyles.button.copyWith(
-                              color: AppColors.primary,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
+              Center(
+                child: SizedBox(
+                  width: buttonWidth,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: () => _showRepsSelector(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    );
-                  } else {
-                    return Center(
-                      child: SizedBox(
-                        width: buttonWidth,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: onStartSet,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            'Start Set',
-                            style: AppTextStyles.button.copyWith(
-                              color: AppColors.white,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
+                    ),
+                    child: Text(
+                      widget.finishType == FinishType.set
+                          ? 'Finish Set'
+                          : widget.finishType == FinishType.exercise
+                          ? 'Finish Exercise'
+                          : 'Finish Workout',
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.primary,
+                        fontSize: 18,
                       ),
-                    );
-                  }
-                },
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
             ],

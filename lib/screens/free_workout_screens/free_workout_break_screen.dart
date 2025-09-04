@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'dart:async';
+// Migrated to bloc run-phase rest timer (removed local timer).
 import '../../constants/app_styles.dart';
 import '../../models/exercise.dart';
 import '../../models/workout.dart';
@@ -31,22 +31,12 @@ class FreeWorkoutBreakScreen extends StatefulWidget {
 }
 
 class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
-  int _elapsedTime = 0; // Time in seconds
-  Timer? _timer;
   bool _isFinishingWorkout = false;
+  bool _autoPopOnNextSet = false; // only pop when user explicitly chose NEW SET
 
   @override
   void initState() {
     super.initState();
-    _startTimer();
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _elapsedTime++;
-      });
-    });
   }
 
   String _formatTime(int seconds) {
@@ -57,18 +47,10 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
 
   void _finishWorkout() async {
     if (widget.isPartOfWorkout) {
-      setState(() {
-        _isFinishingWorkout = true;
-      });
-
-      // Finish current exercise and workout
-      // TODO add parameters to ExerciseFinished
-      // context.read<WorkoutBloc>().add(ExerciseFinished());
-      context.read<WorkoutBloc>().add(WorkoutFinished());
-
-      // Don't navigate here - let the BlocListener handle navigation
-      // when WorkoutCompleted state is received
-      return;
+      // In run-phase model: finish early only allowed during rest -> dispatch RunFinishEarly
+      setState(() => _isFinishingWorkout = true);
+      context.read<WorkoutBloc>().add(const RunFinishEarly());
+      return; // Navigation handled by listener on WorkoutCompleted
     }
 
     if (mounted) {
@@ -135,7 +117,6 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel();
     super.dispose();
   }
 
@@ -143,7 +124,12 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
   Widget build(BuildContext context) {
     return BlocListener<WorkoutBloc, WorkoutState>(
       listener: (context, state) {
-        if (state is WorkoutCompleted && widget.isPartOfWorkout) {
+        if (state is WorkoutRunInSet && widget.isPartOfWorkout) {
+          if (_autoPopOnNextSet && Navigator.of(context).canPop()) {
+            _autoPopOnNextSet = false; // reset
+            Navigator.of(context).pop();
+          }
+        } else if (state is WorkoutCompleted && widget.isPartOfWorkout) {
           // Reset loading state and navigate to Well Done Workout screen
           setState(() {
             _isFinishingWorkout = false;
@@ -197,43 +183,51 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
                     const SizedBox(height: 40),
 
                     // Timer with circular progress background
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox(
-                          width: 200,
-                          height: 200,
-                          child: CircularProgressIndicator(
-                            value:
-                                null, // Indeterminate progress since we're counting up
-                            strokeWidth: 8,
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.2,
-                            ),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.accent,
-                            ),
-                          ),
-                        ),
-                        Column(
+                    BlocBuilder<WorkoutBloc, WorkoutState>(
+                      builder: (context, st) {
+                        if (st is! WorkoutRunRest) {
+                          return const SizedBox(height: 200); // placeholder
+                        }
+                        final elapsed =
+                            st.total.inSeconds - st.remaining.inSeconds;
+                        return Stack(
+                          alignment: Alignment.center,
                           children: [
-                            Text(
-                              _formatTime(_elapsedTime),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 48,
-                                fontWeight: FontWeight.bold,
+                            SizedBox(
+                              width: 200,
+                              height: 200,
+                              child: CircularProgressIndicator(
+                                value: null,
+                                strokeWidth: 8,
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.2,
+                                ),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.accent,
+                                ),
                               ),
                             ),
-                            Text(
-                              'elapsed',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: Colors.white70,
-                              ),
+                            Column(
+                              children: [
+                                Text(
+                                  _formatTime(elapsed),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 48,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'elapsed',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                      ],
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 50),
@@ -294,10 +288,16 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
                     if (widget.isPartOfWorkout) ...[
                       const SizedBox(height: 16),
                       BlocBuilder<WorkoutBloc, WorkoutState>(
-                        builder: (context, state) {
-                          if (state is! WorkoutInProgress)
-                            return const SizedBox.shrink();
-                          final list = state.workout.exercises;
+                        builder: (context, st) {
+                          Workout? w;
+                          if (st is WorkoutRunRest)
+                            w = st.workout;
+                          else if (st is WorkoutRunInSet)
+                            w = st.workout;
+                          else if (st is WorkoutInProgress)
+                            w = st.workout;
+                          if (w == null) return const SizedBox.shrink();
+                          final list = w.exercises;
                           if (list.length <= 1) return const SizedBox.shrink();
                           final previous = list.take(list.length - 1).toList();
                           return _PreviousExercisesRow(items: previous);
@@ -316,7 +316,13 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
                             width: double.infinity,
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: widget.onNewSet,
+                              onPressed: () {
+                                // Skip rest start next set and schedule auto pop.
+                                _autoPopOnNextSet = true;
+                                context.read<WorkoutBloc>().add(
+                                  const RunSkipRest(),
+                                );
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white,
                                 foregroundColor: const Color(0xFF1a1a1a),
@@ -340,7 +346,12 @@ class _FreeWorkoutBreakScreenState extends State<FreeWorkoutBreakScreen> {
                             width: double.infinity,
                             height: 50,
                             child: OutlinedButton(
-                              onPressed: widget.onNewExercise,
+                              onPressed: () {
+                                if (_isFinishingWorkout) return;
+                                // Navigate to selection; do NOT set auto pop so current rest screen remains until user returns.
+                                Navigator.of(context).pop();
+                                widget.onNewExercise();
+                              },
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.white,
                                 side: const BorderSide(

@@ -174,7 +174,6 @@ void main() {
           'updatedAt': DateTime.now().toString(),
           'lastLoggedIn': DateTime.now().toString(),
         };
-        print(DateTime.now().toString());
         when(
           () => mockApi.get<void, UserFullResponse>(
             'userFullRead',

@@ -183,7 +183,15 @@ class CWorkoutBreakView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Set ${currentSetIdx + 1} of ${currentExercise.setsAmount}',
+                                  () {
+                                    // If we're between exercises (nextExercise differs from currentExercise), always show upcoming exercise set 1.
+                                    if (nextExercise != null &&
+                                        nextExercise!.id !=
+                                            currentExercise.id) {
+                                      return 'Set 1 of ${nextExercise!.setsAmount}';
+                                    }
+                                    return 'Set ${currentSetIdx + 1} of ${currentExercise.setsAmount}';
+                                  }(),
                                   style: AppTextStyles.bodySmall.copyWith(
                                     color: Colors.white54,
                                   ),

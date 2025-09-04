@@ -170,14 +170,14 @@ class WorkoutService {
     _logger.info('Finished exercise ${currentExercise.name}');
   }
 
-  Future<void> finishWorkout(
+  Future<Workout?> finishWorkout(
     int? reps,
     double? weight,
     Duration? duration,
   ) async {
     if (_currentWorkout == null) {
       _logger.error('No current workout to finish');
-      return;
+      return null;
     }
     if (reps != null && weight != null && duration != null) {
       await finishCurrentExercise(reps, weight, duration);
@@ -187,15 +187,19 @@ class WorkoutService {
       endTime: DateTime.now(),
       isOngoing: false,
     );
+    final finished = _currentWorkout; // snapshot before nulling
 
     unawaited(_saveWorkoutToHistory());
     unawaited(_clearCurrentWorkout());
 
-    // Try to upload to backend
-    unawaited(_uploadWorkout(_currentWorkout!));
+    // Try to upload to backend (fire and forget)
+    if (finished != null) {
+      unawaited(_uploadWorkout(finished));
+    }
 
     _logger.info('Workout finished and saved');
     _currentWorkout = null;
+    return finished;
   }
 
   Future<List<Workout>> getWorkoutHistory() async {

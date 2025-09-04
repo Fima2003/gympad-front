@@ -47,6 +47,7 @@ Use `AppLogger` (do not use raw print unless debugging something transient). Tru
 
 Layers (top → bottom):
 1. UI Screens & Widgets (in `lib/screens`, `lib/widgets`)
+- Any new screen or widget should be split into view and manager. view should be stateless and accept only the values to render
 2. BLoC / Events / States (`lib/blocs`)
 3. Services (API, auth, audio, local storage) (`lib/services`)
 4. DTOs for sending objects via the network (`lib/services/api/models`)

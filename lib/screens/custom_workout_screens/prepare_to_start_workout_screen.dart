@@ -8,7 +8,7 @@ import '../../models/custom_workout.dart';
 import '../../services/workout_service.dart';
 import '../../blocs/data/data_bloc.dart';
 import '../../blocs/audio/audio_bloc.dart';
-import 'cworkout_run/cworkout_run_manager.dart';
+import 'cworkout_run/cworkout_run_screen.dart';
 
 class PrepareToStartWorkoutScreen extends StatefulWidget {
   final CustomWorkout workout;
@@ -76,7 +76,7 @@ class _PrepareToStartWorkoutScreenState
     if (mounted) {
       context.read<AnalyticsBloc>().add(AStartedWorkout());
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => CWorkoutRunManager()),
+  MaterialPageRoute(builder: (context) => const CWorkoutRunScreen()),
       );
     }
   }

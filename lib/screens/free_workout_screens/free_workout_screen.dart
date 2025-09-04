@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/workout/workout_bloc.dart';
 import '../../constants/app_styles.dart';
 import 'select_exercise_screen.dart';
-import '../custom_workout_screens/cworkout_run/cworkout_run_manager.dart';
+import '../custom_workout_screens/cworkout_run/cworkout_run_screen.dart';
 
 class FreeWorkoutScreen extends StatelessWidget {
   const FreeWorkoutScreen({super.key});
@@ -12,6 +12,14 @@ class FreeWorkoutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<WorkoutBloc, WorkoutState>(
       builder: (context, state) {
+        final inRunPhase =
+            state is WorkoutRunInSet ||
+            state is WorkoutRunRest ||
+            state is WorkoutRunFinishing;
+        final hasPlan =
+            (state is WorkoutInProgress && state.workoutToFollow != null) ||
+            (state is WorkoutRunInSet && state.workoutToFollow != null) ||
+            (state is WorkoutRunRest && state.workoutToFollow != null);
         return Center(
           child: Padding(
             padding: const EdgeInsets.all(40),
@@ -28,7 +36,7 @@ class FreeWorkoutScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  state is WorkoutInProgress
+                  (state is WorkoutInProgress || inRunPhase)
                       ? 'You have a workout in progress!'
                       : 'Ready to start your workout?',
                   style: AppTextStyles.bodyLarge.copyWith(
@@ -72,7 +80,7 @@ class FreeWorkoutScreen extends StatelessWidget {
                 ),
 
                 // Start Workout Button
-                if (state is! WorkoutInProgress)
+                if (!(state is WorkoutInProgress || inRunPhase))
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -110,10 +118,10 @@ class FreeWorkoutScreen extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     child: ElevatedButton(
                       onPressed: () {
-                        if (state.workoutToFollow != null) {
+                        if (hasPlan) {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => const CWorkoutRunManager(),
+                              builder: (context) => const CWorkoutRunScreen(),
                             ),
                           );
                         } else {
@@ -135,9 +143,7 @@ class FreeWorkoutScreen extends StatelessWidget {
                         elevation: 4,
                       ),
                       child: Text(
-                        state.workoutToFollow != null
-                            ? 'RESUME WORKOUT'
-                            : 'CONTINUE WORKOUT',
+                        hasPlan ? 'RESUME WORKOUT' : 'CONTINUE WORKOUT',
                         style: AppTextStyles.button.copyWith(
                           color: AppColors.primary,
                           fontSize: 18,
