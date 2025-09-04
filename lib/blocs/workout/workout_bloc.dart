@@ -19,6 +19,8 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
   Duration _currentRestRemaining = Duration.zero;
   Duration _currentRestTotal = Duration.zero;
   bool _usingNewRunStates = true; // feature flag (can toggle if needed)
+  bool _restPaused =
+      false; // pause flag for rest phase (free workout selection)
 
   WorkoutBloc() : super(WorkoutInitial()) {
     on<WorkoutLoaded>(_onWorkoutLoaded);
@@ -38,6 +40,10 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     on<RunSkipRest>(_onRunSkipRest);
     on<RunExtendRest>(_onRunExtendRest);
     on<RunFinishEarly>(_onRunFinishEarly);
+    on<RunPauseRest>(_onRunPauseRest);
+    on<RunResumeRest>(_onRunResumeRest);
+    // Free workout consolidated UI intent
+    on<FreeWorkoutFocusExercise>(_onFreeWorkoutFocusExercise);
   }
 
   Future<void> _onWorkoutLoaded(
@@ -87,7 +93,10 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
         return; // ignore invalid reorder attempting to move locked exercise
       }
     }
-    _workoutService.reorderUpcomingExercises(event.startIndex, event.newOrderIds);
+    _workoutService.reorderUpcomingExercises(
+      event.startIndex,
+      event.newOrderIds,
+    );
 
     // Always update legacy state if present
     final currentWorkout = _workoutService.currentWorkout;
@@ -108,13 +117,16 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     if (state is WorkoutRunRest && currentWorkout != null) {
       final s = state as WorkoutRunRest;
       final plan = workoutToFollow;
-      final upcoming = plan == null
-          ? <CustomWorkoutExercise>[]
-          : plan.exercises.skip(s.reorderStartIndex).toList();
+      final upcoming =
+          plan == null
+              ? <CustomWorkoutExercise>[]
+              : plan.exercises.skip(s.reorderStartIndex).toList();
       // Recompute nextExercise if we are between exercises (i.e., just finished previous)
       CustomWorkoutExercise? newNext = s.nextExercise;
       if (plan != null) {
-        final betweenExercises = currentWorkout.exercises.length == s.currentExerciseIdx && s.currentExerciseIdx < plan.exercises.length;
+        final betweenExercises =
+            currentWorkout.exercises.length == s.currentExerciseIdx &&
+            s.currentExerciseIdx < plan.exercises.length;
         if (betweenExercises) {
           newNext = plan.exercises[s.currentExerciseIdx];
         }
@@ -242,7 +254,6 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     }
   }
 
-
   Future<void> _onSetAdded(SetAdded event, Emitter<WorkoutState> emit) async {
     try {
       await _workoutService.addSetToCurrentExercise(
@@ -297,7 +308,9 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     Emitter<WorkoutState> emit,
   ) async {
     if (!_usingNewRunStates) return;
-  var currentWorkout = _workoutService.currentWorkout;
+    // Whenever we enter a set phase, ensure rest pause flag is cleared
+    _restPaused = false;
+    var currentWorkout = _workoutService.currentWorkout;
     final workoutToFollow = _workoutService.workoutToFollow;
     if (currentWorkout == null) return;
 
@@ -336,19 +349,26 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     // When starting a planned workout, before the first set of a planned exercise, the workout
     // may not yet contain that exercise entry. We auto-add a basic exercise record so that
     // subsequent set additions attach properly.
-    final needsCreation = currentWorkout.exercises.isEmpty ||
-        (workoutToFollow != null && currentWorkout.exercises.length <= exerciseIdx);
+    final needsCreation =
+        currentWorkout.exercises.isEmpty ||
+        (workoutToFollow != null &&
+            currentWorkout.exercises.length <= exerciseIdx);
     if (needsCreation) {
       try {
         await _workoutService.addExercise(
           plannedExercise.id,
-          plannedExercise.id, // placeholder name (can be enriched via DataBloc externally)
+          plannedExercise
+              .id, // placeholder name (can be enriched via DataBloc externally)
           'general',
         );
         currentWorkout = _workoutService.currentWorkout;
         if (currentWorkout == null) return; // safety
       } catch (e, st) {
-        _logger.error('Failed to auto-add exercise ${plannedExercise.id}', e, st);
+        _logger.error(
+          'Failed to auto-add exercise ${plannedExercise.id}',
+          e,
+          st,
+        );
         emit(const WorkoutError('Failed to initialize exercise'));
         return;
       }
@@ -371,7 +391,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       final totalSetsPlanned = plannedExercise.setsAmount;
       if (completedSetsForCurrent < totalSetsPlanned - 1) {
         finishType = RunFinishType.set;
-  } else if (exerciseIdx < workoutToFollow.exercises.length - 1) {
+      } else if (exerciseIdx < workoutToFollow.exercises.length - 1) {
         finishType = RunFinishType.exercise;
       } else {
         finishType = RunFinishType.workout;
@@ -447,18 +467,18 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
           add(RunEnterRest(Duration(seconds: restSeconds)));
           break;
         case RunFinishType.workout:
-            _cancelTimer();
-            emit(WorkoutRunFinishing(s.workout));
-            final finished = await _workoutService.finishWorkout(
-              event.reps,
-              event.weight,
-              event.duration,
-            );
-            if (finished != null) {
-              emit(WorkoutCompleted(finished));
-            } else {
-              emit(const WorkoutError('Failed to finish workout'));
-            }
+          _cancelTimer();
+          emit(WorkoutRunFinishing(s.workout));
+          final finished = await _workoutService.finishWorkout(
+            event.reps,
+            event.weight,
+            event.duration,
+          );
+          if (finished != null) {
+            emit(WorkoutCompleted(finished));
+          } else {
+            emit(const WorkoutError('Failed to finish workout'));
+          }
           break;
       }
     } catch (e, st) {
@@ -472,6 +492,8 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     Emitter<WorkoutState> emit,
   ) async {
     if (!_usingNewRunStates) return;
+    // Reset pause flag because a fresh rest starts now
+    _restPaused = false;
     final w = _workoutService.currentWorkout;
     final plan = _workoutService.workoutToFollow;
     if (w == null) return;
@@ -483,7 +505,8 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     final exerciseIdx = _workoutService.getExerciseIdx();
     final setIdx = _workoutService.getSetIdx();
     // Determine whether we are between exercises (finished previous) or between sets of current.
-    final betweenExercises = w.exercises.length == exerciseIdx && exerciseIdx > 0;
+    final betweenExercises =
+        w.exercises.length == exerciseIdx && exerciseIdx > 0;
     CustomWorkoutExercise currentPlanned;
     CustomWorkoutExercise? nextExercise;
     if (plan != null) {
@@ -523,17 +546,21 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     int reorderStartIndex = exerciseIdx;
     if (!betweenExercises) {
       // mid-exercise if the real workout already has at least one set for this exercise
-      final activeExerciseStarted = w.exercises.length > exerciseIdx && w.exercises[exerciseIdx].sets.isNotEmpty;
+      final activeExerciseStarted =
+          w.exercises.length > exerciseIdx &&
+          w.exercises[exerciseIdx].sets.isNotEmpty;
       if (activeExerciseStarted) {
-        reorderStartIndex = exerciseIdx + 1; // exclude active exercise from reorderable slice
+        reorderStartIndex =
+            exerciseIdx + 1; // exclude active exercise from reorderable slice
       }
     }
     if (plan != null && reorderStartIndex > plan.exercises.length) {
       reorderStartIndex = plan.exercises.length; // clamp
     }
-    final upcoming = plan == null
-        ? <CustomWorkoutExercise>[]
-        : plan.exercises.skip(reorderStartIndex).toList();
+    final upcoming =
+        plan == null
+            ? <CustomWorkoutExercise>[]
+            : plan.exercises.skip(reorderStartIndex).toList();
 
     emit(
       WorkoutRunRest(
@@ -558,6 +585,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     Emitter<WorkoutState> emit,
   ) async {
     if (state is! WorkoutRunRest) return;
+    if (_restPaused) return; // do not tick while paused
     if (_currentRestRemaining > Duration.zero) {
       _currentRestRemaining -= const Duration(seconds: 1);
     }
@@ -619,6 +647,60 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     );
   }
 
+  Future<void> _onRunPauseRest(
+    RunPauseRest event,
+    Emitter<WorkoutState> emit,
+  ) async {
+    if (state is! WorkoutRunRest) return;
+    if (_restPaused) return;
+    _restPaused = true;
+    _cancelTimer();
+    final s = state as WorkoutRunRest;
+    emit(
+      WorkoutRunRest(
+        workout: s.workout,
+        workoutToFollow: s.workoutToFollow,
+        currentExercise: s.currentExercise,
+        currentExerciseIdx: s.currentExerciseIdx,
+        currentSetIdx: s.currentSetIdx,
+        remaining: _currentRestRemaining,
+        total: _currentRestTotal,
+        nextExercise: s.nextExercise,
+        progress: s.progress,
+        upcomingReorderable: s.upcomingReorderable,
+        reorderStartIndex: s.reorderStartIndex,
+        isFinishing: s.isFinishing,
+      ),
+    );
+  }
+
+  Future<void> _onRunResumeRest(
+    RunResumeRest event,
+    Emitter<WorkoutState> emit,
+  ) async {
+    if (state is! WorkoutRunRest) return;
+    if (!_restPaused) return;
+    _restPaused = false;
+    _startRestTicker();
+    final s = state as WorkoutRunRest;
+    emit(
+      WorkoutRunRest(
+        workout: s.workout,
+        workoutToFollow: s.workoutToFollow,
+        currentExercise: s.currentExercise,
+        currentExerciseIdx: s.currentExerciseIdx,
+        currentSetIdx: s.currentSetIdx,
+        remaining: _currentRestRemaining,
+        total: _currentRestTotal,
+        nextExercise: s.nextExercise,
+        progress: s.progress,
+        upcomingReorderable: s.upcomingReorderable,
+        reorderStartIndex: s.reorderStartIndex,
+        isFinishing: s.isFinishing,
+      ),
+    );
+  }
+
   Future<void> _onRunFinishEarly(
     RunFinishEarly event,
     Emitter<WorkoutState> emit,
@@ -659,5 +741,87 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       _logger.error('Failed to load workout history', e, st);
       emit(WorkoutError('Failed to load workout history'));
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Free workout consolidated handler
+  // ---------------------------------------------------------------------------
+  Future<void> _onFreeWorkoutFocusExercise(
+    FreeWorkoutFocusExercise event,
+    Emitter<WorkoutState> emit,
+  ) async {
+    // If a planned workout is active, ignore (feature reserved for free mode only)
+    if (_workoutService.workoutToFollow != null) {
+      return; // do nothing silently
+    }
+
+    // Ensure workout started
+    if (_workoutService.currentWorkout == null ||
+        !(_workoutService.currentWorkout?.isOngoing ?? false)) {
+      add(WorkoutStarted(WorkoutType.free));
+      // Defer adding exercise until workout start completes; queue an ExerciseAdded
+      add(
+        ExerciseAdded(
+          exerciseId: event.exerciseId,
+          name: event.name,
+          muscleGroup: event.muscleGroup,
+          equipmentId: event.equipmentId,
+        ),
+      );
+      return; // RunEnterSet will be triggered by _onExerciseAdded
+    }
+
+    final w = _workoutService.currentWorkout;
+    if (w == null) return; // safety
+
+    // Check if exercise already present
+    final existingIndex = w.exercises.indexWhere(
+      (ex) => ex.exerciseId == event.exerciseId,
+    );
+
+    final isRestPhase = state is WorkoutRunRest;
+    final isSetPhase = state is WorkoutRunInSet;
+
+    if (existingIndex == -1) {
+      // Add new exercise then let normal add logic trigger RunEnterSet
+      add(
+        ExerciseAdded(
+          exerciseId: event.exerciseId,
+          name: event.name,
+          muscleGroup: event.muscleGroup,
+          equipmentId: event.equipmentId,
+        ),
+      );
+      return;
+    }
+
+    final isLast = existingIndex == w.exercises.length - 1;
+
+    if (!isLast) {
+      // Re-add to move it to last position (service implementation handles reposition)
+      add(
+        ExerciseAdded(
+          exerciseId: event.exerciseId,
+          name: event.name,
+          muscleGroup: event.muscleGroup,
+          equipmentId: event.equipmentId,
+        ),
+      );
+      // After reordering we want to immediately enter the set phase. If currently resting we skip rest first.
+      if (isRestPhase) {
+        add(const RunSkipRest());
+      } else if (!isSetPhase) {
+        add(const RunEnterSet());
+      }
+      return;
+    }
+
+    // Already last/current exercise.
+    if (isRestPhase) {
+      // Skip rest to immediately begin a new set.
+      add(const RunSkipRest());
+    } else if (!isSetPhase) {
+      add(const RunEnterSet());
+    } // if already in set phase, do nothing.
   }
 }

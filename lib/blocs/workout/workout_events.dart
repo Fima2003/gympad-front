@@ -46,7 +46,6 @@ class ExerciseAdded extends WorkoutEvent {
   List<Object?> get props => [exerciseId, name, muscleGroup, equipmentId];
 }
 
-
 class SetAdded extends WorkoutEvent {
   final int reps;
   final double weight;
@@ -67,8 +66,10 @@ class WorkoutLoaded extends WorkoutEvent {}
 class WorkoutHistoryRequested extends WorkoutEvent {}
 
 class UpcomingExercisesReordered extends WorkoutEvent {
-  final int startIndex; // index in workoutToFollow.exercises where reordering begins
-  final List<String> newOrderIds; // ids of exercises in their new order for the reorderable suffix
+  final int
+  startIndex; // index in workoutToFollow.exercises where reordering begins
+  final List<String>
+  newOrderIds; // ids of exercises in their new order for the reorderable suffix
   const UpcomingExercisesReordered(this.startIndex, this.newOrderIds);
   @override
   List<Object?> get props => [startIndex, newOrderIds];
@@ -129,3 +130,44 @@ class RunFinishEarly extends WorkoutEvent {
   const RunFinishEarly();
 }
 
+/// UI intent (free workout only): user wants to enter the exercise selection
+/// mode (e.g. from rest phase or before starting). This does not mutate the
+/// underlying workout; it is a pure presentation directive that the
+/// orchestration screen will react to. The bloc currently does not emit a
+/// dedicated state for this (handled locally), but the event is defined now
+/// for parity with custom workout flow and future possible centralization.
+class FreeWorkoutEnterSelection extends WorkoutEvent {
+  const FreeWorkoutEnterSelection();
+}
+
+/// Free workout consolidated intent: ensure workout is started, ensure the
+/// specified exercise becomes the current (last) exercise, and transition into
+/// an active set if appropriate (skipping rest when needed). Replaces the UI
+/// chain previously performed in `ExerciseScreen._startSet`.
+class FreeWorkoutFocusExercise extends WorkoutEvent {
+  final String exerciseId;
+  final String name;
+  final String muscleGroup;
+  final String? equipmentId;
+
+  const FreeWorkoutFocusExercise({
+    required this.exerciseId,
+    required this.name,
+    required this.muscleGroup,
+    this.equipmentId,
+  });
+
+  @override
+  List<Object?> get props => [exerciseId, name, muscleGroup, equipmentId];
+}
+
+/// Pause the rest countdown (free workout selection mode). Internal timer stops
+/// but remaining duration is preserved.
+class RunPauseRest extends WorkoutEvent {
+  const RunPauseRest();
+}
+
+/// Resume a previously paused rest countdown.
+class RunResumeRest extends WorkoutEvent {
+  const RunResumeRest();
+}

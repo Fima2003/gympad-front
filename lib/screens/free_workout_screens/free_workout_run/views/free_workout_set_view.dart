@@ -1,48 +1,46 @@
 import 'package:flutter/material.dart';
 
-import '../../../constants/app_styles.dart';
-import '../../../models/workout_set.dart';
-import '../../../widgets/reps_selector.dart';
-import '../../../widgets/velocity_weight_selector.dart';
+import '../../../../constants/app_styles.dart';
+import '../../../../models/workout_set.dart';
+import '../../../../widgets/reps_selector.dart';
+import '../../../../widgets/velocity_weight_selector.dart';
 
-enum FinishType { set, exercise, workout }
-
-class CWorkoutRunView extends StatefulWidget {
-  final String workoutTitle;
+/// Free workout set-running view (standalone, not yet wired into navigation).
+/// Mirrors the structure of `CWorkoutRunView` but adapted for the open-ended
+/// nature of free workouts (no predetermined total sets or finishType changes).
+///
+/// Responsibilities:
+/// - Display current exercise name.
+/// - Show incremental set number (completed + 1 while running).
+/// - Show per-set elapsed timer (passed in from parent / bloc state).
+/// - Allow weight adjustment (local state only until set finished).
+/// - List completed sets beneath.
+/// - Trigger reps selection dialog and invoke [onFinish] callback.
+class FreeWorkoutSetView extends StatefulWidget {
   final String exerciseName;
-  final int totalSets;
-  final double initialWeight;
-  final int suggestedReps;
   final List<WorkoutSet> completedSets;
-  final void Function(
-    double selectedWeight,
-    int selectedReps,
-    Duration duration,
-  )
-  onFinish;
-  final FinishType finishType;
-  final Duration elapsed;
-  final bool isRunning; // always true for now (timer managed by bloc)
+  final Duration elapsed; // elapsed time for the active (current) set
+  final double initialWeight;
+  final int? suggestedReps; // optional (free mode may not have suggestion)
+  final bool isRunning; // whether timer is active (from bloc)
+  final void Function(double weight, int reps, Duration duration) onFinish;
 
-  const CWorkoutRunView({
+  const FreeWorkoutSetView({
     super.key,
-    required this.workoutTitle,
     required this.exerciseName,
-    required this.totalSets,
-    required this.initialWeight,
-    required this.suggestedReps,
     required this.completedSets,
-    required this.onFinish,
-    required this.finishType,
     required this.elapsed,
+    required this.initialWeight,
     required this.isRunning,
+    required this.onFinish,
+    this.suggestedReps,
   });
 
   @override
-  State<CWorkoutRunView> createState() => _CWorkoutRunViewState();
+  State<FreeWorkoutSetView> createState() => _FreeWorkoutSetViewState();
 }
 
-class _CWorkoutRunViewState extends State<CWorkoutRunView> {
+class _FreeWorkoutSetViewState extends State<FreeWorkoutSetView> {
   late double _selectedWeight;
 
   @override
@@ -52,37 +50,29 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
   }
 
   @override
-  void didUpdateWidget(covariant CWorkoutRunView oldWidget) {
+  void didUpdateWidget(covariant FreeWorkoutSetView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If exercise changed, re-seed weight to new suggested initial.
+    // If exercise name changes (new exercise focused), reset weight baseline.
     if (oldWidget.exerciseName != widget.exerciseName) {
       _selectedWeight = widget.initialWeight;
     }
   }
 
-  int get currentSetIdx => widget.completedSets.length;
-
-  void _showRepsSelector(BuildContext context) {
-    // Stop not needed (bloc controls timer) but keep placeholder for future pause.
+  void _finishCurrentSet() {
     showDialog<int>(
       context: context,
       barrierDismissible: true,
-      builder: (BuildContext context) {
-        return RepsSelector(initialReps: widget.suggestedReps);
-      },
+      builder: (ctx) => RepsSelector(initialReps: widget.suggestedReps),
     ).then((reps) {
-      if (reps == null) {
-        return;
-      }
-      final duration = widget.elapsed;
-      widget.onFinish(_selectedWeight, reps, duration);
+      if (reps == null) return; // user cancelled
+      widget.onFinish(_selectedWeight, reps, widget.elapsed);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     const double buttonWidth = 280.0;
-    // weight kept in state; local variable not needed.
+    final currentSetNumber = widget.completedSets.length + 1; // next set idx +1
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -91,7 +81,7 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Text(
-          widget.workoutTitle,
+          'Free Workout',
           style: AppTextStyles.titleMedium.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.bold,
@@ -105,37 +95,29 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
             children: [
               // Exercise name
               Text(
-                widget.exerciseName,
+                widget.exerciseName.replaceAll('_', ' ').toUpperCase(),
                 style: AppTextStyles.titleLarge.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
-
               const SizedBox(height: 8),
-
-              // Set info
+              // Set info (open ended)
               Text(
-                'Set ${currentSetIdx + 1} of ${widget.totalSets}',
+                'Set $currentSetNumber',
                 style: AppTextStyles.bodyLarge.copyWith(
                   color: AppColors.primary.withValues(alpha: 0.7),
                 ),
               ),
-
               const SizedBox(height: 24),
-
-              // Timer display
+              // Timer pill
               Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 24,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 decoration: BoxDecoration(
-                  color:
-                      widget.isRunning
-                          ? AppColors.accent
-                          : AppColors.accent.withValues(alpha: 0.3),
+                  color: widget.isRunning
+                      ? AppColors.accent
+                      : AppColors.accent.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Text(
@@ -147,23 +129,16 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 32),
-
               // Weight selector
               Center(
                 child: WeightSelectorVelocity(
                   initialWeight: _selectedWeight,
-                  onWeightChanged: (weight) {
-                    setState(() => _selectedWeight = weight);
-                  },
+                  onWeightChanged: (w) => setState(() => _selectedWeight = w),
                 ),
               ),
-
               const SizedBox(height: 24),
-
-              // Sets table
-              if (widget.completedSets.isNotEmpty) ...[
+              if (widget.completedSets.isNotEmpty)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -185,54 +160,43 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ...(widget.completedSets.map(
-                        (set) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Set ${set.setNumber}',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.7,
+                      ...widget.completedSets.map((set) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Set ${set.setNumber}',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.primary.withValues(alpha: 0.7),
                                   ),
                                 ),
-                              ),
-                              Text(
-                                '${set.reps} reps × ${set.weight}kg',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                '${set.time.inMinutes}:${(set.time.inSeconds % 60).toString().padLeft(2, '0')}',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.5,
+                                Text(
+                                  '${set.reps} reps × ${set.weight}kg',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )),
+                                Text(
+                                  '${set.time.inMinutes}:${(set.time.inSeconds % 60).toString().padLeft(2, '0')}',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.primary.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-              ],
-
               const Spacer(),
-
-              // Action buttons
               Center(
                 child: SizedBox(
                   width: buttonWidth,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () => _showRepsSelector(context),
+                    onPressed: _finishCurrentSet,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accent,
                       shape: RoundedRectangleBorder(
@@ -240,11 +204,7 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
                       ),
                     ),
                     child: Text(
-                      widget.finishType == FinishType.set
-                          ? 'Finish Set'
-                          : widget.finishType == FinishType.exercise
-                          ? 'Finish Exercise'
-                          : 'Finish Workout',
+                      'Finish Set',
                       style: AppTextStyles.button.copyWith(
                         color: AppColors.primary,
                         fontSize: 18,

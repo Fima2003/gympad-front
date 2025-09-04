@@ -117,6 +117,8 @@ class _MainScreenState extends State<MainScreen> {
               //     ),
               //   ],
               // ),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.endContained,
             ),
           ),
           if (_isSigningOut) ...[

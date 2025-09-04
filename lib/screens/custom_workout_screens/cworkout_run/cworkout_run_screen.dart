@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gympad/blocs/workout/workout_bloc.dart';
-import 'package:gympad/screens/custom_workout_screens/cworkout_run/cworkout_set_view.dart';
+import 'package:gympad/screens/custom_workout_screens/cworkout_run/views/cworkout_set_view.dart';
 
 import '../../../blocs/data/data_bloc.dart';
 import '../../../models/custom_workout.dart';
 import '../../well_done_workout_screen.dart';
-import 'cworkout_break_view.dart';
+import 'views/cworkout_break_view.dart';
 
 class CWorkoutRunScreen extends StatefulWidget {
   const CWorkoutRunScreen({super.key});

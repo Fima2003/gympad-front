@@ -15,6 +15,12 @@ import 'blocs/auth/auth_bloc.dart';
 import 'blocs/audio/audio_bloc.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
+import 'models/workout_set.dart';
+import 'screens/free_workout_screens/free_workout_run/views/free_workout_set_view.dart';
+import 'screens/free_workout_screens/free_workout_run/views/free_workout_break_view.dart';
+import 'models/workout_exercise.dart';
+import 'screens/free_workout_screens/free_workout_run/views/free_workout_selection_view.dart';
+import 'screens/free_workout_screens/free_workout_run/free_workout_run_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
