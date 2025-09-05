@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/workout/workout_bloc.dart';
-import '../../constants/app_styles.dart';
+import '../../../blocs/workout/workout_bloc.dart';
+import '../../../constants/app_styles.dart';
 // import 'select_exercise_screen.dart'; // legacy (pending removal Phase 7)
 import '../custom_workout_screens/cworkout_run/cworkout_run_screen.dart';
 import 'free_workout_run/free_workout_run_screen.dart';

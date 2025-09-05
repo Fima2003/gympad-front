@@ -1,13 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import '../../blocs/analytics/analytics_bloc.dart';
-import '../../blocs/workout/workout_bloc.dart';
-import '../../constants/app_styles.dart';
-import '../../models/custom_workout.dart';
-import '../../services/workout_service.dart';
-import '../../blocs/data/data_bloc.dart';
-import '../../blocs/audio/audio_bloc.dart';
+import '../../../blocs/analytics/analytics_bloc.dart';
+import '../../../blocs/workout/workout_bloc.dart';
+import '../../../constants/app_styles.dart';
+import '../../../models/custom_workout.dart';
+import '../../../services/workout_service.dart';
+import '../../../blocs/data/data_bloc.dart';
+import '../../../blocs/audio/audio_bloc.dart';
 import 'cworkout_run/cworkout_run_screen.dart';
 
 class PrepareToStartWorkoutScreen extends StatefulWidget {

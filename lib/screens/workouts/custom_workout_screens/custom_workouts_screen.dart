@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../constants/app_styles.dart';
+import '../../../constants/app_styles.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/data/data_bloc.dart';
+import '../../../blocs/data/data_bloc.dart';
 import 'custom_workout_detail_screen.dart';
 
 class PredefinedWorkoutsScreen extends StatelessWidget {

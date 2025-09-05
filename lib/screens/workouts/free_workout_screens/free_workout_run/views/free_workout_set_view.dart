@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../constants/app_styles.dart';
-import '../../../../models/workout_set.dart';
-import '../../../../widgets/reps_selector.dart';
-import '../../../../widgets/velocity_weight_selector.dart';
+import '../../../../../constants/app_styles.dart';
+import '../../../../../models/workout_set.dart';
+import '../../../../../widgets/reps_selector.dart';
+import '../../../../../widgets/velocity_weight_selector.dart';
 
 /// Free workout set-running view (standalone, not yet wired into navigation).
 /// Mirrors the structure of `CWorkoutRunView` but adapted for the open-ended

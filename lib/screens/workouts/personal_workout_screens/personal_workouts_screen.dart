@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/personal_workouts/personal_workout_bloc.dart';
-import '../../constants/app_styles.dart';
-import '../../models/personal_workout.dart';
-import '../../services/hive/personal_workout_lss.dart';
-import '../../blocs/data/data_bloc.dart';
+import '../../../blocs/personal_workouts/personal_workout_bloc.dart';
+import '../../../constants/app_styles.dart';
+import '../../../models/personal_workout.dart';
+import '../../../services/hive/personal_workout_lss.dart';
+import '../../../blocs/data/data_bloc.dart';
 import 'personal_workout_detail_screen.dart';
 
 class PersonalWorkoutsScreen extends StatefulWidget {

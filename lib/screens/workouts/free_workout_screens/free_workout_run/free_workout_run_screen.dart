@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../blocs/workout/workout_bloc.dart';
-import '../../../blocs/data/data_bloc.dart';
-import '../../../constants/app_styles.dart';
-import '../../../models/exercise.dart';
-import '../../../models/workout_exercise.dart';
+import '../../../../blocs/workout/workout_bloc.dart';
+import '../../../../blocs/data/data_bloc.dart';
+import '../../../../constants/app_styles.dart';
+import '../../../../models/exercise.dart';
+import '../../../../models/workout_exercise.dart';
 import 'views/free_workout_selection_view.dart';
 import 'views/free_workout_set_view.dart';
 import 'views/free_workout_break_view.dart';
-import '../../well_done_workout_screen.dart';
+import '../../../well_done_workout_screen.dart';
 
 /// Orchestrates the free workout run-phase using the new bloc run states.
 /// Single route that conditionally shows one of: selection, set, rest.

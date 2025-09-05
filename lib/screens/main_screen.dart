@@ -4,10 +4,10 @@ import '../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../constants/app_styles.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/workout/workout_bloc.dart';
-import 'free_workout_screens/free_workout_screen.dart';
+import 'workouts/free_workout_screens/free_workout_screen.dart';
 import 'login_screen.dart';
-import 'custom_workout_screens/custom_workouts_screen.dart';
-import 'personal_workout_screens/personal_workouts_screen.dart';
+import 'workouts/custom_workout_screens/custom_workouts_screen.dart';
+import 'workouts/personal_workout_screens/personal_workouts_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

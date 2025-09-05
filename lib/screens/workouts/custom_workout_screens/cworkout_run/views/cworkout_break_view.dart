@@ -4,10 +4,10 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../blocs/data/data_bloc.dart';
-import '../../../../constants/app_styles.dart';
-import '../../../../models/custom_workout.dart';
-import '../../../../widgets/exercise_chip.dart';
+import '../../../../../blocs/data/data_bloc.dart';
+import '../../../../../constants/app_styles.dart';
+import '../../../../../models/custom_workout.dart';
+import '../../../../../widgets/exercise_chip.dart';
 
 class CWorkoutBreakView extends StatelessWidget {
   final int remainingTime;

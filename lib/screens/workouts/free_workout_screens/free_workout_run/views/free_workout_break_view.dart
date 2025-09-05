@@ -2,9 +2,9 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-import '../../../../constants/app_styles.dart';
-import '../../../../models/workout_exercise.dart';
-import '../../../../widgets/exercise_chip.dart';
+import '../../../../../constants/app_styles.dart';
+import '../../../../../models/workout_exercise.dart';
+import '../../../../../widgets/exercise_chip.dart';
 
 /// Free workout rest-phase view (presentation only).
 ///
@@ -57,12 +57,9 @@ class FreeWorkoutBreakView extends StatelessWidget {
     return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
-  double get _safeProgress => (progress ?? 0).clamp(0, 1);
-
   @override
   Widget build(BuildContext context) {
     final ringSize = MediaQuery.of(context).size.height < 700 ? 160.0 : 200.0;
-    final rem = remainingSeconds.clamp(0, totalSeconds);
     final height = MediaQuery.of(context).size.height;
     final timerSize = height < 700 ? 150.0 : 190.0;
 

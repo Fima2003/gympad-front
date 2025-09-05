@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:gympad/blocs/analytics/analytics_bloc.dart';
 import 'package:gympad/firebase_options.dart';
 import 'package:gympad/services/api/api.dart';
@@ -15,12 +16,6 @@ import 'blocs/auth/auth_bloc.dart';
 import 'blocs/audio/audio_bloc.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
-import 'models/workout_set.dart';
-import 'screens/free_workout_screens/free_workout_run/views/free_workout_set_view.dart';
-import 'screens/free_workout_screens/free_workout_run/views/free_workout_break_view.dart';
-import 'models/workout_exercise.dart';
-import 'screens/free_workout_screens/free_workout_run/views/free_workout_selection_view.dart';
-import 'screens/free_workout_screens/free_workout_run/free_workout_run_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,7 +71,7 @@ class MyApp extends StatelessWidget {
           create: (context) => PersonalWorkoutBloc()..add(RequestSync()),
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'GymPad',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
@@ -84,11 +79,23 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           scaffoldBackgroundColor: AppColors.background,
         ),
-        home: const SplashScreen(),
-        routes: {
-          '/main': (context) => const MainScreen(),
-          '/login': (context) => const LoginScreen(),
-        },
+        routerConfig: GoRouter(
+          initialLocation: '/',
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, state) => const SplashScreen(),
+            ),
+            GoRoute(
+              path: '/main',
+              builder: (context, state) => const MainScreen(),
+            ),
+            GoRoute(
+              path: '/login',
+              builder: (context, state) => const LoginScreen(),
+            ),
+          ],
+        ),
       ),
     );
   }

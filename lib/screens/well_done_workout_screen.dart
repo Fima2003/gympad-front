@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_styles.dart';
 import '../models/workout.dart';
 import '../widgets/workout_exercises_table.dart';
-import 'free_workout_screens/save_workout_screen.dart';
+import 'workouts/free_workout_screens/save_workout_screen.dart';
 
 class WellDoneWorkoutScreen extends StatefulWidget {
   final Workout workout;

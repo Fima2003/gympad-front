@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../constants/app_styles.dart';
-import '../../../../blocs/data/data_bloc.dart';
-import '../../../../models/exercise.dart';
+import '../../../../../constants/app_styles.dart';
+import '../../../../../blocs/data/data_bloc.dart';
+import '../../../../../models/exercise.dart';
 
 /// Stateless-ish (internally stateful for filters) selection view for free workout.
 /// Extracted from the legacy `SelectExerciseScreen` to be embedded directly
