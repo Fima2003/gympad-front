@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../../../constants/app_styles.dart';
 import '../../../models/personal_workout.dart';
 import '../../../services/hive/personal_workout_lss.dart';
 import '../../../blocs/data/data_bloc.dart';
-import 'personal_workout_detail_screen.dart';
 
 class PersonalWorkoutsScreen extends StatefulWidget {
   const PersonalWorkoutsScreen({super.key});
@@ -134,13 +134,7 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
                     ),
                     child: InkWell(
                       onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder:
-                                (context) =>
-                                    PersonalWorkoutDetailScreen(workout: w),
-                          ),
-                        );
+                        context.pushNamed('personal-workout-detail', extra: w);
                       },
                       borderRadius: BorderRadius.circular(16),
                       child: Padding(

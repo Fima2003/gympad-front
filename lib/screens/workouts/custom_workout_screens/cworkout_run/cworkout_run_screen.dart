@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:gympad/blocs/workout/workout_bloc.dart';
 import 'package:gympad/screens/workouts/custom_workout_screens/cworkout_run/views/cworkout_set_view.dart';
 
 import '../../../../blocs/data/data_bloc.dart';
 import '../../../../models/custom_workout.dart';
-import '../../../well_done_workout_screen.dart';
 import 'views/cworkout_break_view.dart';
 
 class CWorkoutRunScreen extends StatefulWidget {
@@ -21,12 +21,7 @@ class _CWorkoutRunScreenState extends State<CWorkoutRunScreen> {
     return BlocConsumer<WorkoutBloc, WorkoutState>(
       listener: (context, state) {
         if (state is WorkoutCompleted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder:
-                  (context) => WellDoneWorkoutScreen(workout: state.workout),
-            ),
-          );
+          context.pushReplacement('/workout/well-done', extra: state.workout);
         } else if (state is WorkoutError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message), backgroundColor: Colors.red),
@@ -116,11 +111,11 @@ class _CWorkoutRunScreenState extends State<CWorkoutRunScreen> {
                     ),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(false),
+                        onPressed: () => ctx.pop(false),
                         child: const Text('No'),
                       ),
                       FilledButton(
-                        onPressed: () => Navigator.of(ctx).pop(true),
+                        onPressed: () => ctx.pop(true),
                         child: const Text('Yes'),
                       ),
                     ],

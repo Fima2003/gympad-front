@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gympad/blocs/analytics/analytics_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 import '../constants/app_styles.dart';
 import '../models/workout.dart';
 import '../widgets/workout_exercises_table.dart';
-import 'workouts/free_workout_screens/save_workout_screen.dart';
 
 class WellDoneWorkoutScreen extends StatefulWidget {
   final Workout workout;
@@ -145,10 +145,15 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed:
-                        () => Navigator.of(
-                          context,
-                        ).popUntil((route) => route.isFirst),
+                    onPressed: () {
+                      // Navigate back to main via GoRouter to keep page-based navigation consistent.
+                      if (context.canPop()) {
+                        // If there is intermediate stack (e.g., nested), clear to main.
+                        context.go('/main');
+                      } else {
+                        context.go('/main');
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.white,
@@ -196,13 +201,8 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder:
-                            (context) =>
-                                SaveWorkoutScreen(workout: widget.workout),
-                      ),
-                    );
+                    // Use GoRouter; workout passed via extra.
+                    context.push('/workout/save', extra: widget.workout);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

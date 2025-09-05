@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:gympad/widgets/number_picker.dart';
 import '../constants/app_styles.dart';
 
@@ -64,7 +65,7 @@ class _RepsSelectorState extends State<RepsSelector> {
               child: ElevatedButton(
                 onPressed: () {
                   // Return selected reps to the caller
-                  Navigator.of(context).pop(_reps);
+                  context.pop(_reps);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,

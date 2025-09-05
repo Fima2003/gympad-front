@@ -2,8 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import '../../../constants/app_styles.dart';
 import '../../../models/custom_workout.dart';
-import 'prepare_to_start_workout_screen.dart';
 import '../../../blocs/data/data_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class PredefinedWorkoutDetailScreen extends StatelessWidget {
   final CustomWorkout workout;
@@ -31,7 +31,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
           icon: Icon(Icons.arrow_back, color: AppColors.primary),
         ),
         title: Text(workout.name, style: AppTextStyles.appBarTitle),
@@ -286,12 +286,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         child: FloatingActionButton.extended(
           onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder:
-                    (context) => PrepareToStartWorkoutScreen(workout: workout),
-              ),
-            );
+            context.push('/workout/prepare-to-start', extra: workout);
           },
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,

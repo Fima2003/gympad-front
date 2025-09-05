@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:async';
 import '../../../blocs/analytics/analytics_bloc.dart';
 import '../../../blocs/workout/workout_bloc.dart';
@@ -8,7 +9,6 @@ import '../../../models/custom_workout.dart';
 import '../../../services/workout_service.dart';
 import '../../../blocs/data/data_bloc.dart';
 import '../../../blocs/audio/audio_bloc.dart';
-import 'cworkout_run/cworkout_run_screen.dart';
 
 class PrepareToStartWorkoutScreen extends StatefulWidget {
   final CustomWorkout workout;
@@ -75,16 +75,14 @@ class _PrepareToStartWorkoutScreenState
   void _navigateToWorkout() {
     if (mounted) {
       context.read<AnalyticsBloc>().add(AStartedWorkout());
-      Navigator.of(context).pushReplacement(
-  MaterialPageRoute(builder: (context) => const CWorkoutRunScreen()),
-      );
+      context.pushReplacement('/workout/run-custom');
     }
   }
 
   void _cancelWorkout() {
     BlocProvider.of<WorkoutBloc>(context).add(WorkoutCancelled());
     _timer?.cancel();
-    Navigator.of(context).pop();
+    context.pop();
   }
 
   @override

@@ -6,6 +6,7 @@ import '../models/workout_exercise.dart';
 import '../models/workout_set.dart';
 import '../services/api/api.dart';
 import '../services/logger_service.dart';
+import '../models/capabilities.dart';
 import 'hive/current_workout_lss.dart';
 import 'hive/workout_history_lss.dart';
 
@@ -17,6 +18,14 @@ class WorkoutService {
   WorkoutService._internal();
 
   final AppLogger _logger = AppLogger();
+  CapabilitiesProvider _capabilitiesProvider = () => Capabilities.guest;
+
+  /// Allow app layer to inject a dynamic capabilities provider (e.g. derived
+  /// from AuthBloc). Optional; defaults to authenticated so existing behavior
+  /// is preserved until configured.
+  void configureCapabilitiesProvider(CapabilitiesProvider provider) {
+    _capabilitiesProvider = provider;
+  }
   final WorkoutApiService _workoutApiService = WorkoutApiService();
 
   Workout? _currentWorkout;
@@ -281,6 +290,11 @@ class WorkoutService {
 
   Future<void> _uploadWorkout(Workout workout) async {
     try {
+      final caps = _capabilitiesProvider();
+      if (!caps.canUpload) {
+        _logger.info('Skipping workout upload (guest mode): ${workout.id}');
+        return; // Do not attempt network call in guest mode
+      }
       // Convert all times to UTC+0
       final startTimeUtc = workout.startTime.toUtc();
       final endTimeUtc = (workout.endTime ?? DateTime.now()).toUtc();
@@ -321,7 +335,7 @@ class WorkoutService {
         endTime: endTimeUtc,
       );
 
-      final response = await _workoutApiService.createWorkout(request);
+  final response = await _workoutApiService.createWorkout(request);
       _logger.info(response.success.toString());
 
       if (response.success) {

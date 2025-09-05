@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../blocs/workout/workout_bloc.dart';
 import '../../../../blocs/data/data_bloc.dart';
@@ -9,7 +10,6 @@ import '../../../../models/workout_exercise.dart';
 import 'views/free_workout_selection_view.dart';
 import 'views/free_workout_set_view.dart';
 import 'views/free_workout_break_view.dart';
-import '../../../well_done_workout_screen.dart';
 
 /// Orchestrates the free workout run-phase using the new bloc run states.
 /// Single route that conditionally shows one of: selection, set, rest.
@@ -30,7 +30,9 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
     super.initState();
     // If already mid workout (set/rest), open directly in running mode.
     final st = context.read<WorkoutBloc>().state;
-    if (st is WorkoutRunInSet || st is WorkoutRunRest || st is WorkoutRunFinishing) {
+    if (st is WorkoutRunInSet ||
+        st is WorkoutRunRest ||
+        st is WorkoutRunFinishing) {
       _mode = _FreeRunUIMode.running;
     }
   }
@@ -47,12 +49,12 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
 
   void _focusExercise(Exercise ex) {
     context.read<WorkoutBloc>().add(
-          FreeWorkoutFocusExercise(
-            exerciseId: ex.id,
-            name: ex.name,
-            muscleGroup: ex.muscleGroup,
-          ),
-        );
+      FreeWorkoutFocusExercise(
+        exerciseId: ex.id,
+        name: ex.name,
+        muscleGroup: ex.muscleGroup,
+      ),
+    );
     // Screen will switch to running once we get a RunInSet state.
   }
 
@@ -62,20 +64,16 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
       listener: (context, state) {
         if (state is WorkoutRunInSet) {
           // Any active set means we're running (exit selection mode)
-            if (_mode != _FreeRunUIMode.running) {
-              setState(() => _mode = _FreeRunUIMode.running);
-            }
+          if (_mode != _FreeRunUIMode.running) {
+            setState(() => _mode = _FreeRunUIMode.running);
+          }
         }
         if (state is WorkoutRunRest && _mode == _FreeRunUIMode.running) {
           // remain running UI (rest view) unless user explicitly enters selection
         }
         if (state is WorkoutCompleted) {
           // Navigate to well done screen (replace current) like custom workout flow.
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (ctx) => WellDoneWorkoutScreen(workout: state.workout),
-            ),
-          );
+          context.pushReplacement('/workout/well-done', extra: state.workout);
         }
       },
       builder: (context, state) {
@@ -90,7 +88,8 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
                 icon: Icon(Icons.close, color: AppColors.primary),
                 onPressed: () {
                   final st = context.read<WorkoutBloc>().state;
-                  final hasActive = st is WorkoutRunInSet || st is WorkoutRunRest;
+                  final hasActive =
+                      st is WorkoutRunInSet || st is WorkoutRunRest;
                   // If a workout is active, just return to the running view instead of leaving the screen.
                   if (hasActive) {
                     // If we were resting and paused, resume the timer when returning.
@@ -99,8 +98,8 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
                     }
                     if (mounted) setState(() => _mode = _FreeRunUIMode.running);
                   } else {
-                    if (Navigator.of(context).canPop()) {
-                      Navigator.of(context).pop();
+                    if (context.canPop()) {
+                      context.pop();
                     }
                   }
                 },
@@ -114,7 +113,7 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
                   context.read<WorkoutBloc>().add(const RunResumeRest());
                   if (mounted) setState(() => _mode = _FreeRunUIMode.running);
                 } else {
-                  Navigator.of(context).maybePop();
+                  if (context.canPop()) context.pop();
                 }
               },
             ),
@@ -133,7 +132,8 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
           }
 
           final completedSets = state.completedSets;
-          final lastWeight = completedSets.isNotEmpty ? completedSets.last.weight : 0.0;
+          final lastWeight =
+              completedSets.isNotEmpty ? completedSets.last.weight : 0.0;
 
           return FreeWorkoutSetView(
             exerciseName: displayName,
@@ -144,8 +144,8 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
             suggestedReps: state.currentExercise.suggestedReps,
             onFinish: (w, r, d) {
               context.read<WorkoutBloc>().add(
-                    RunFinishCurrent(weight: w, reps: r, duration: d),
-                  );
+                RunFinishCurrent(weight: w, reps: r, duration: d),
+              );
             },
           );
         }
@@ -158,7 +158,8 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
           WorkoutExercise? current; // last exercise in list
           if (all.isNotEmpty) {
             current = all.last;
-            previous = all.length > 1 ? all.sublist(0, all.length - 1) : const [];
+            previous =
+                all.length > 1 ? all.sublist(0, all.length - 1) : const [];
           }
           final setsCount = current?.sets.length ?? 0;
           final exerciseName = current?.name ?? state.currentExercise.id;
@@ -171,32 +172,38 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
             previousExercises: previous,
             isFinishing: state.isFinishing,
             progress: state.progress, // note: may show 0 for free mode
-            onNewSet: () => context.read<WorkoutBloc>().add(const RunSkipRest()),
+            onNewSet:
+                () => context.read<WorkoutBloc>().add(const RunSkipRest()),
             onNewExercise: _enterSelection,
             onFinishWorkout: () async {
               final confirm = await showDialog<bool>(
                 context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Finish workout?'),
-                  content: const Text('Are you sure you want to finish now?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(false),
-                      child: const Text('No'),
+                builder:
+                    (ctx) => AlertDialog(
+                      title: const Text('Finish workout?'),
+                      content: const Text(
+                        'Are you sure you want to finish now?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => ctx.pop(false),
+                          child: const Text('No'),
+                        ),
+                        FilledButton(
+                          onPressed: () => ctx.pop(true),
+                          child: const Text('Yes'),
+                        ),
+                      ],
                     ),
-                    FilledButton(
-                      onPressed: () => Navigator.of(ctx).pop(true),
-                      child: const Text('Yes'),
-                    ),
-                  ],
-                ),
               );
               if (confirm == true) {
                 context.read<WorkoutBloc>().add(const RunFinishEarly());
               }
             },
-            onSkipRest: () => context.read<WorkoutBloc>().add(const RunSkipRest()),
-            onAddThirtySeconds: () => context.read<WorkoutBloc>().add(const RunExtendRest()),
+            onSkipRest:
+                () => context.read<WorkoutBloc>().add(const RunSkipRest()),
+            onAddThirtySeconds:
+                () => context.read<WorkoutBloc>().add(const RunExtendRest()),
           );
         }
 
@@ -213,9 +220,7 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
             title: Text('Select Exercise', style: AppTextStyles.appBarTitle),
             backgroundColor: AppColors.background,
           ),
-          body: FreeWorkoutSelectionView(
-            onExerciseChosen: _focusExercise,
-          ),
+          body: FreeWorkoutSelectionView(onExerciseChosen: _focusExercise),
         );
       },
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../blocs/data/data_bloc.dart';
 import '../../../../../constants/app_styles.dart';
@@ -364,7 +365,7 @@ class CWorkoutBreakView extends StatelessWidget {
                   ),
                   const Spacer(),
                   IconButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
+                    onPressed: () => ctx.pop(),
                     icon: const Icon(Icons.close, color: Colors.white70),
                   ),
                 ],

@@ -22,6 +22,13 @@ class AuthAuthenticated extends AuthState {
   List<Object?> get props => [userId, gymId, authToken];
 }
 
+class AuthGuest extends AuthState {
+  final String deviceId;
+  const AuthGuest({required this.deviceId});
+  @override
+  List<Object?> get props => [deviceId];
+}
+
 class AuthUnauthenticated extends AuthState {}
 
 class AuthError extends AuthState {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../blocs/data/data_bloc.dart';
 import '../../../constants/app_styles.dart';
 import '../../../models/personal_workout.dart';
-import '../custom_workout_screens/prepare_to_start_workout_screen.dart';
 
 class PersonalWorkoutDetailScreen extends StatelessWidget {
   final PersonalWorkout workout;
@@ -32,7 +32,7 @@ class PersonalWorkoutDetailScreen extends StatelessWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
           icon: Icon(Icons.arrow_back, color: AppColors.primary),
         ),
         title: Text(workout.name, style: AppTextStyles.appBarTitle),
@@ -227,16 +227,12 @@ class PersonalWorkoutDetailScreen extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         child: FloatingActionButton.extended(
           onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder:
-                    (context) => PrepareToStartWorkoutScreen(
-                      workout: workout.toCustomWorkout(
-                        context.read<DataBloc>().state is DataReady
-                            ? context.read<DataBloc>().state as DataReady
-                            : null,
-                      ),
-                    ),
+            context.pushNamed(
+              'workout/prepare-to-start',
+              extra: workout.toCustomWorkout(
+                context.read<DataBloc>().state is DataReady
+                    ? context.read<DataBloc>().state as DataReady
+                    : null,
               ),
             );
           },

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../constants/app_styles.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../blocs/data/data_bloc.dart';
-import 'custom_workout_detail_screen.dart';
 
 class PredefinedWorkoutsScreen extends StatelessWidget {
   const PredefinedWorkoutsScreen({super.key});
@@ -84,14 +84,7 @@ class PredefinedWorkoutsScreen extends StatelessWidget {
                         ),
                         child: InkWell(
                           onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => PredefinedWorkoutDetailScreen(
-                                      workout: workout,
-                                    ),
-                              ),
-                            );
+                            context.push('/workout/details', extra: workout);
                           },
                           borderRadius: BorderRadius.circular(16),
                           child: Padding(

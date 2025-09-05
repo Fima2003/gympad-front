@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gympad/services/auth_service.dart';
 import 'package:gympad/services/logger_service.dart';
+import 'package:gympad/services/device_identity_service.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -19,6 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignInRequested>(_onSignInRequested);
     on<AuthSignOutRequested>(_onSignOutRequested);
     on<AuthRefreshRequested>(_onRefreshRequested);
+  on<AuthGuestRequested>(_onGuestRequested);
   }
 
   Future<void> _onAppStarted(
@@ -129,6 +131,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e, st) {
       _logger.error('Auth refresh failed', e, st);
+    }
+  }
+
+  Future<void> _onGuestRequested(
+    AuthGuestRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      final deviceId = await DeviceIdentityService().getOrCreate();
+      emit(AuthGuest(deviceId: deviceId));
+    } catch (e, st) {
+      _logger.warning('Failed to obtain device id for guest mode', e, st);
+      // Fallback to placeholder (not ideal but keeps app functional)
+      emit(const AuthGuest(deviceId: 'unknown-device'));
     }
   }
 }

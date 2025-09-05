@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../constants/app_styles.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/workout/workout_bloc.dart';
-import 'workouts/free_workout_screens/free_workout_screen.dart';
-import 'login_screen.dart';
-import 'workouts/custom_workout_screens/custom_workouts_screen.dart';
-import 'workouts/personal_workout_screens/personal_workouts_screen.dart';
+import 'workouts/workouts.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -64,9 +62,7 @@ class _MainScreenState extends State<MainScreen> {
                     setState(() => _isSigningOut = true);
                   } else if (state is AuthUnauthenticated) {
                     if (mounted) {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      );
+                      context.pushReplacement('/login');
                     }
                   } else if (state is AuthError) {
                     setState(() => _isSigningOut = false);

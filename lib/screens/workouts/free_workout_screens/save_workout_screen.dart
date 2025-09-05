@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import '../../../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../../../models/workout.dart';
 import '../../../models/workout_exercise.dart';
@@ -484,18 +485,18 @@ class _SaveWorkoutScreenState extends State<SaveWorkoutScreen> {
           goHome
               ? SnackBarAction(
                 label: 'Go Home',
-                onPressed:
-                    () => Navigator.of(context).popUntil((r) => r.isFirst),
+                onPressed: () {
+                  if (mounted) context.go('/main');
+                },
               )
               : null,
       duration: const Duration(seconds: 3),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
     if (goHome) {
-      Future.delayed(
-        const Duration(seconds: 3),
-        () => Navigator.of(context).popUntil((r) => r.isFirst),
-      );
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) context.go('/main');
+      });
     }
   }
 
