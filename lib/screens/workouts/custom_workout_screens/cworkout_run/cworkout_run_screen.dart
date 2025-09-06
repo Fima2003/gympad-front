@@ -65,8 +65,6 @@ class _CWorkoutRunScreenState extends State<CWorkoutRunScreen> {
             ],
           );
         }
-
-        // Legacy WorkoutInProgress no longer handled directly; rely on run-phase states.
         if (s is WorkoutRunRest) {
           // Derive previous / future exercises from plan if present
           final plan = s.workoutToFollow;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,6 +24,7 @@ import 'blocs/data/data_bloc.dart';
 import 'blocs/workout/workout_bloc.dart';
 import 'models/capabilities.dart';
 import 'services/workout_service.dart';
+import 'services/migration/migrate_guest_workouts_usecase.dart';
 import 'blocs/auth/auth_bloc.dart';
 import 'blocs/audio/audio_bloc.dart';
 import 'screens/login_screen.dart';
@@ -77,13 +80,12 @@ class MyApp extends StatelessWidget {
         BlocProvider<WorkoutBloc>(
           create: (context) {
             final bloc = WorkoutBloc();
-            // Configure capabilities provider on the singleton WorkoutService.
-            // We access AuthBloc lazily inside the provider to always reflect
-            // most recent auth state without needing explicit reconfiguration.
             WorkoutService().configureCapabilitiesProvider(() {
               final authState = context.read<AuthBloc>().state;
-              if (authState is AuthAuthenticated)
+              print('Authenticated in Main: ${authState is AuthAuthenticated}');
+              if (authState is AuthAuthenticated) {
                 return Capabilities.authenticated;
+              }
               if (authState is AuthGuest) return Capabilities.guest;
               return Capabilities.guest; // default for unauth / loading
             });
@@ -94,120 +96,157 @@ class MyApp extends StatelessWidget {
         BlocProvider<AnalyticsBloc>(create: (context) => AnalyticsBloc()),
         BlocProvider<AudioBloc>(create: (context) => AudioBloc()),
         BlocProvider<PersonalWorkoutBloc>(
-          create: (context) => PersonalWorkoutBloc()..add(RequestSync()),
+          create: (context) => PersonalWorkoutBloc(),
         ),
       ],
-      child: MaterialApp.router(
-        title: 'GymPad',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-          useMaterial3: true,
-          scaffoldBackgroundColor: AppColors.background,
-        ),
-        routerConfig: GoRouter(
-          initialLocation: '/',
-          routes: [
-            GoRoute(
-              path: '/',
-              builder: (context, state) => const SplashScreen(),
-            ),
-            GoRoute(
-              path: '/main',
-              builder: (context, state) => const MainScreen(),
-            ),
-            GoRoute(
-              path: '/login',
-              builder: (context, state) => const LoginScreen(),
-            ),
-            GoRoute(
-              path: '/workout',
-              builder:(context, state) {
-                return const FreeWorkoutRunScreen();
+      child: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          unawaited(() async {
+            final useCase = MigrateGuestWorkoutsUseCase(
+              capabilitiesProvider: () {
+                final s = context.read<AuthBloc>().state;
+                if (s is AuthAuthenticated) return Capabilities.authenticated;
+                if (s is AuthGuest) return Capabilities.guest;
+                return Capabilities.guest;
               },
-              routes: [
-                GoRoute(
-                  path: '/run-custom',
-                  builder: (context, state) => CWorkoutRunScreen(),
-                ),
-                GoRoute(
-                  path: '/run-free',
-                  builder: (context, state) => FreeWorkoutRunScreen(),
-                ),
-                GoRoute(
-                  path: '/save',
-                  builder: (context, state) {
-                    final workout = state.extra as Workout?;
-                    if (workout == null) {
-                      // Fallback UI if navigation missing data
-                      return const Scaffold(
-                        body: Center(child: Text('No workout to save.')),
-                      );
-                    }
-                    return SaveWorkoutScreen(workout: workout);
-                  },
-                ),
-                GoRoute(
-                  path: '/details',
-                  builder: (context, state) {
-                    final workout = state.extra as CustomWorkout?;
-                    if (workout == null) {
-                      // Fallback UI if navigation missing data
-                      return const Scaffold(
-                        body: Center(
-                          child: Text('No workout details available.'),
-                        ),
-                      );
-                    }
-                    return PredefinedWorkoutDetailScreen(workout: workout);
-                  },
-                ),
-                GoRoute(
-                  path: '/personal-details',
-                  builder: (context, state) {
-                    final workout = state.extra as PersonalWorkout?;
-                    if (workout == null) {
-                      // Fallback UI if navigation missing data
-                      return const Scaffold(
-                        body: Center(
-                          child: Text('No workout details available.'),
-                        ),
-                      );
-                    }
-                    return PersonalWorkoutDetailScreen(workout: workout);
-                  },
-                ),
-                GoRoute(
-                  path: '/prepare-to-start',
-                  builder: (context, state) {
-                    final workout = state.extra as CustomWorkout?;
-                    if (workout == null) {
-                      // Fallback UI if navigation missing data
-                      return const Scaffold(
-                        body: Center(child: Text('No workout to prepare.')),
-                      );
-                    }
-                    return PrepareToStartWorkoutScreen(workout: workout);
-                  },
-                ),
-                GoRoute(
-                  path: '/well-done',
-                  builder: (context, state) {
-                    final workout = state.extra as Workout?;
-                    if (workout == null) {
-                      // Fallback UI if navigation missing data
-                      return const Scaffold(
-                        body: Center(
-                          child: Text('No workout details available.'),
-                        ),
-                      );
-                    }
-                    return WellDoneWorkoutScreen(workout: workout);
-                  },
-                ),
-              ],
-            ),
-          ],
+            );
+            await useCase.run();
+            await WorkoutService().uploadPendingWorkouts();
+          }());
+        },
+        listenWhen:
+            (previous, current) =>
+                previous is AuthGuest && current is AuthAuthenticated,
+        child: MaterialApp.router(
+          title: 'GymPad',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+            useMaterial3: true,
+            scaffoldBackgroundColor: AppColors.background,
+          ),
+          routerConfig: GoRouter(
+            initialLocation: '/',
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const SplashScreen(),
+              ),
+              GoRoute(
+                path: '/main',
+                builder: (context, state) => const MainScreen(),
+              ),
+              GoRoute(
+                path: '/login',
+                builder: (context, state) => const LoginScreen(),
+              ),
+              GoRoute(
+                path: '/workout',
+                builder: (context, state) => const MainScreen(defaultIndex: 0),
+                routes: [
+                  GoRoute(
+                    path: 'custom',
+                    builder: (context, state) {
+                      return const MainScreen(defaultIndex: 1);
+                    },
+                    routes: [
+                      GoRoute(
+                        path: 'run',
+                        builder: (context, state) => CWorkoutRunScreen(),
+                      ),
+                      GoRoute(
+                        path: 'details',
+                        builder: (context, state) {
+                          final workout = state.extra as CustomWorkout?;
+                          if (workout == null) {
+                            return const Scaffold(
+                              body: Center(
+                                child: Text('No workout details available.'),
+                              ),
+                            );
+                          }
+                          return PredefinedWorkoutDetailScreen(
+                            workout: workout,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'free',
+                    builder: (context, state) {
+                      return const MainScreen(defaultIndex: 0);
+                    },
+                    routes: [
+                      GoRoute(
+                        path: 'run',
+                        builder: (context, state) => FreeWorkoutRunScreen(),
+                      ),
+                      GoRoute(
+                        path: 'save',
+                        builder: (context, state) {
+                          final workout = state.extra as Workout?;
+                          if (workout == null) {
+                            return const Scaffold(
+                              body: Center(child: Text('No workout to save.')),
+                            );
+                          }
+                          return SaveWorkoutScreen(workout: workout);
+                        },
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'personal',
+                    builder:
+                        (context, state) => const MainScreen(defaultIndex: 2),
+                    routes: [
+                      GoRoute(
+                        path: 'details',
+                        builder: (context, state) {
+                          final workout = state.extra as PersonalWorkout?;
+                          if (workout == null) {
+                            return const Scaffold(
+                              body: Center(
+                                child: Text('No workout details available.'),
+                              ),
+                            );
+                          }
+                          return PersonalWorkoutDetailScreen(workout: workout);
+                        },
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'prepare-to-start',
+                    builder: (context, state) {
+                      final workout = state.extra as CustomWorkout?;
+                      if (workout == null) {
+                        return const Scaffold(
+                          body: Center(child: Text('No workout to prepare.')),
+                        );
+                      }
+                      return PrepareToStartWorkoutScreen(workout: workout);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'well-done',
+                    builder: (context, state) {
+                      final workout = state.extra as Workout?;
+                      if (workout == null) {
+                        return const Scaffold(
+                          body: Center(
+                            child: Text('No workout details available.'),
+                          ),
+                        );
+                      }
+                      return WellDoneWorkoutScreen(workout: workout);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -252,7 +291,7 @@ class _SplashScreenState extends State<SplashScreen> {
         BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (_navigated) return;
-            if (state is AuthAuthenticated) {
+            if (state is AuthAuthenticated || state is AuthGuest) {
               _navigated = true;
               if (!mounted) return;
               // Use GoRouter for navigation (page-based Navigator) instead of imperative pushReplacement

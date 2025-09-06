@@ -75,7 +75,7 @@ class _PrepareToStartWorkoutScreenState
   void _navigateToWorkout() {
     if (mounted) {
       context.read<AnalyticsBloc>().add(AStartedWorkout());
-      context.pushReplacement('/workout/run-custom');
+      context.pushReplacement('/workout/custom/run');
     }
   }
 

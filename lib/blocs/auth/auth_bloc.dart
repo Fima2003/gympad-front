@@ -35,6 +35,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
       final local = await _authService.getLocalUserData();
       final userId = local['userId'];
+      final isGuest = local['is_guest'] == 'true';
       if (userId != null) {
         emit(
           AuthAuthenticated(
@@ -43,6 +44,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             authToken: local['auth_token'],
           ),
         );
+      } else if (isGuest) {
+        // Re-enter guest mode immediately.
+        final deviceId = await DeviceIdentityService().getOrCreate();
+        emit(AuthGuest(deviceId: deviceId));
       } else {
         emit(AuthUnauthenticated());
       }
@@ -140,6 +145,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     try {
       final deviceId = await DeviceIdentityService().getOrCreate();
+  await _authService.markGuestSelected(deviceId);
       emit(AuthGuest(deviceId: deviceId));
     } catch (e, st) {
       _logger.warning('Failed to obtain device id for guest mode', e, st);

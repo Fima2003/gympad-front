@@ -1,177 +1,124 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
+import '../blocs/auth/auth_bloc.dart';
 import '../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../constants/app_styles.dart';
-import '../blocs/auth/auth_bloc.dart';
-import '../blocs/workout/workout_bloc.dart';
-import 'workouts/workouts.dart';
+import 'me/me_screen.dart';
+import 'workouts/workout_page.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int defaultIndex; // initial workouts tab index
+  const MainScreen({super.key, this.defaultIndex = 0});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  bool _isSigningOut = false; // controlled via bloc listener
-
-  final List<Widget> _screens = [
-    const FreeWorkoutScreen(),
-    const PredefinedWorkoutsScreen(),
-    const PersonalWorkoutsScreen(),
-  ];
+  int _bottomIndex = 0; // 0 = Workouts, 1 = Me
 
   @override
   void initState() {
     super.initState();
-    // Let the BLoC handle syncing personal workouts
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PersonalWorkoutBloc>().add(RequestSync());
     });
   }
 
-  void _signOut() {
-    context.read<AuthBloc>().add(AuthSignOutRequested());
+  void _signOut() => context.read<AuthBloc>().add(AuthSignOutRequested());
+  void _signIn() => context.read<AuthBloc>().add(AuthSignInRequested());
+
+  BottomNavigationBar _buildBottomNav() => BottomNavigationBar(
+    currentIndex: _bottomIndex,
+    onTap: (i) => setState(() => _bottomIndex = i),
+    backgroundColor: AppColors.white,
+    selectedItemColor: AppColors.primary,
+    unselectedItemColor: AppColors.textSecondary,
+    items: const [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.fitness_center),
+        label: 'Workouts',
+      ),
+      BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Me'),
+    ],
+  );
+
+  PreferredSizeWidget _buildAppBar({PreferredSizeWidget? bottom}) {
+    final authState = context.watch<AuthBloc>().state;
+    final actions = <Widget>[];
+    if (authState is AuthGuest) {
+      actions.add(
+        IconButton(
+          tooltip: 'Sign In',
+          onPressed: _signIn,
+          icon: Icon(Icons.login, color: AppColors.primary),
+        ),
+      );
+    } else if (authState is AuthAuthenticated) {
+      actions.add(
+        IconButton(
+          tooltip: 'Sign Out',
+          onPressed: _signOut,
+          icon: Icon(Icons.logout, color: AppColors.primary),
+        ),
+      );
+    }
+    return AppBar(
+      title: Text('GymPad', style: AppTextStyles.appBarTitle),
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      actions: actions,
+      bottom: bottom,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Stack(
-        children: [
-          MultiBlocListener(
-            listeners: [
-              BlocListener<WorkoutBloc, WorkoutState>(
-                listener: (context, state) {
-                  if (state is WorkoutError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
+    Widget page;
+    if (_bottomIndex == 0) {
+      page = DefaultTabController(
+        length: 3,
+        initialIndex: widget.defaultIndex.clamp(0, 2),
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: _buildAppBar(
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(56),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: const _TopTabSlider(),
               ),
-              BlocListener<AuthBloc, AuthState>(
-                listener: (context, state) {
-                  if (state is AuthSigningOut) {
-                    setState(() => _isSigningOut = true);
-                  } else if (state is AuthUnauthenticated) {
-                    if (mounted) {
-                      context.pushReplacement('/login');
-                    }
-                  } else if (state is AuthError) {
-                    setState(() => _isSigningOut = false);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  } else if (state is AuthAuthenticated) {
-                    setState(() => _isSigningOut = false);
-                  }
-                },
-              ),
-            ],
-            child: Scaffold(
-              backgroundColor: AppColors.background,
-              appBar: AppBar(
-                title: Text('GymPad', style: AppTextStyles.appBarTitle),
-                backgroundColor: AppColors.background,
-                elevation: 0,
-                actions: [
-                  IconButton(
-                    onPressed: _signOut,
-                    icon: Icon(Icons.logout, color: AppColors.primary),
-                  ),
-                ],
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(56),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                    child: _TopTabSlider(),
-                  ),
-                ),
-              ),
-              body: TabBarView(children: _screens),
-              // bottomNavigationBar: BottomNavigationBar(
-              //   currentIndex: 0,
-              //   onTap: (_) {},
-              //   backgroundColor: AppColors.white,
-              //   selectedItemColor: AppColors.primary,
-              //   unselectedItemColor: AppColors.textSecondary,
-              //   type: BottomNavigationBarType.fixed,
-              //   items: const [
-              //     BottomNavigationBarItem(
-              //       icon: Icon(Icons.dashboard_customize),
-              //       label: 'Workouts',
-              //     ),
-              //   ],
-              // ),
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.endContained,
             ),
           ),
-          if (_isSigningOut) ...[
-            const ModalBarrier(dismissible: false, color: Colors.black26),
-            Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.accent.withValues(alpha: 0.4),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Signing you out…',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
+          body: const WorkoutPage(),
+          bottomNavigationBar: _buildBottomNav(),
+        ),
+      );
+    } else {
+      page = Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: _buildAppBar(),
+        body: const MeScreen(),
+        bottomNavigationBar: _buildBottomNav(),
+      );
+    }
+
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (prev, curr) => prev.runtimeType != curr.runtimeType,
+      listener: (context, state) {
+        if (state is AuthUnauthenticated) {
+          context.go('/login');
+        }
+      },
+      child: page,
     );
   }
 }
 
 class _TopTabSlider extends StatelessWidget {
+  const _TopTabSlider();
   @override
   Widget build(BuildContext context) {
     return Container(

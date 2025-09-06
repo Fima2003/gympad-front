@@ -8,6 +8,7 @@ class Workout {
   DateTime? endTime;
   final bool isUploaded;
   final bool isOngoing;
+  final bool createdWhileGuest; // Marker for workouts created without auth
 
   /// Returns true if this workout is a free workout (no predefined name/id pattern)
   bool get isFreeWorkout {
@@ -23,6 +24,7 @@ class Workout {
     this.endTime,
     this.isUploaded = false,
     this.isOngoing = true,
+  this.createdWhileGuest = false,
   });
 
   Duration get totalDuration {
@@ -44,6 +46,7 @@ class Workout {
       'endTime': endTime?.toIso8601String(),
       'isUploaded': isUploaded,
       'isOngoing': isOngoing,
+  'createdWhileGuest': createdWhileGuest,
     };
   }
 
@@ -60,6 +63,7 @@ class Workout {
       endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
       isUploaded: json['isUploaded'] ?? false,
       isOngoing: json['isOngoing'] ?? true,
+  createdWhileGuest: json['createdWhileGuest'] ?? false,
     );
   }
 
@@ -71,6 +75,7 @@ class Workout {
     DateTime? endTime,
     bool? isUploaded,
     bool? isOngoing,
+    bool? createdWhileGuest,
   }) {
     return Workout(
       id: id ?? this.id,
@@ -80,6 +85,7 @@ class Workout {
       endTime: endTime ?? this.endTime,
       isUploaded: isUploaded ?? this.isUploaded,
       isOngoing: isOngoing ?? this.isOngoing,
+      createdWhileGuest: createdWhileGuest ?? this.createdWhileGuest,
     );
   }
 }

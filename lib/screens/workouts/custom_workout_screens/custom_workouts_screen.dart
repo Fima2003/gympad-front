@@ -84,7 +84,10 @@ class PredefinedWorkoutsScreen extends StatelessWidget {
                         ),
                         child: InkWell(
                           onTap: () {
-                            context.push('/workout/details', extra: workout);
+                            context.push(
+                              '/workout/custom/details',
+                              extra: workout,
+                            );
                           },
                           borderRadius: BorderRadius.circular(16),
                           child: Padding(

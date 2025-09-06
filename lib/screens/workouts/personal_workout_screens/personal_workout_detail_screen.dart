@@ -227,8 +227,8 @@ class PersonalWorkoutDetailScreen extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         child: FloatingActionButton.extended(
           onPressed: () {
-            context.pushNamed(
-              'workout/prepare-to-start',
+            context.push(
+              '/workout/prepare-to-start',
               extra: workout.toCustomWorkout(
                 context.read<DataBloc>().state is DataReady
                     ? context.read<DataBloc>().state as DataReady

@@ -20,19 +20,22 @@ class HiveUserAuthAdapter extends TypeAdapter<HiveUserAuth> {
       userId: fields[0] as String?,
       gymId: fields[1] as String?,
       authToken: fields[2] as String?,
+  isGuest: (fields[3] as bool?) ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, HiveUserAuth obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.userId)
       ..writeByte(1)
       ..write(obj.gymId)
       ..writeByte(2)
-      ..write(obj.authToken);
+      ..write(obj.authToken)
+      ..writeByte(3)
+      ..write(obj.isGuest);
   }
 
   @override

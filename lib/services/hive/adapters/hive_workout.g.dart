@@ -119,13 +119,14 @@ class HiveWorkoutAdapter extends TypeAdapter<HiveWorkout> {
       endTime: fields[4] as DateTime?,
       isUploaded: fields[5] as bool,
       isOngoing: fields[6] as bool,
+  createdWhileGuest: (fields[7] as bool?) ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, HiveWorkout obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -139,7 +140,9 @@ class HiveWorkoutAdapter extends TypeAdapter<HiveWorkout> {
       ..writeByte(5)
       ..write(obj.isUploaded)
       ..writeByte(6)
-      ..write(obj.isOngoing);
+      ..write(obj.isOngoing)
+      ..writeByte(7)
+      ..write(obj.createdWhileGuest);
   }
 
   @override

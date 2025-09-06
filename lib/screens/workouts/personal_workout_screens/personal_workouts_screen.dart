@@ -134,7 +134,7 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
                     ),
                     child: InkWell(
                       onTap: () {
-                        context.pushNamed('personal-workout-detail', extra: w);
+                        context.push('/workout/personal/details', extra: w);
                       },
                       borderRadius: BorderRadius.circular(16),
                       child: Padding(

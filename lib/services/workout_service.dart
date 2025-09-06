@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:gympad/models/personal_workout.dart';
+import 'package:gympad/services/hive/personal_workout_lss.dart';
+
 import '../models/custom_workout.dart';
 import '../models/workout.dart';
 import '../models/workout_exercise.dart';
@@ -18,6 +21,8 @@ class WorkoutService {
   WorkoutService._internal();
 
   final AppLogger _logger = AppLogger();
+  final PersonalWorkoutLocalService _personalLocal =
+      PersonalWorkoutLocalService();
   CapabilitiesProvider _capabilitiesProvider = () => Capabilities.guest;
 
   /// Allow app layer to inject a dynamic capabilities provider (e.g. derived
@@ -26,6 +31,7 @@ class WorkoutService {
   void configureCapabilitiesProvider(CapabilitiesProvider provider) {
     _capabilitiesProvider = provider;
   }
+
   final WorkoutApiService _workoutApiService = WorkoutApiService();
 
   Workout? _currentWorkout;
@@ -53,6 +59,7 @@ class WorkoutService {
       name: workoutToFollow?.name,
       exercises: [],
       startTime: DateTime.now(),
+      createdWhileGuest: !_capabilitiesProvider().canUpload,
     );
 
     _workoutToFollow = workoutToFollow?.copyWith();
@@ -335,7 +342,7 @@ class WorkoutService {
         endTime: endTimeUtc,
       );
 
-  final response = await _workoutApiService.createWorkout(request);
+      final response = await _workoutApiService.createWorkout(request);
       _logger.info(response.success.toString());
 
       if (response.success) {
@@ -430,5 +437,23 @@ class WorkoutService {
       exercises: [...before, ...reordered],
     );
     unawaited(_saveWorkoutToFollow());
+  }
+
+  Future<List<PersonalWorkout>> getPersonalWorkouts() async {
+    final caps = _capabilitiesProvider();
+    if (!caps.canSync) {
+      _logger.info('Skipping fetching personal workouts (guest mode)');
+      final cached = await _personalLocal.loadAll();
+      return cached;
+    }
+    final resp = await _workoutApiService.getPersonalWorkouts();
+    if (resp.success && resp.data != null) {
+      final list = resp.data!;
+      await _personalLocal.saveAll(list);
+      return list.map((e) => PersonalWorkout.fromResponse(e)).toList();
+    } else {
+      final cached = await _personalLocal.loadAll();
+      return cached;
+    }
   }
 }

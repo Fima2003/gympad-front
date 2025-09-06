@@ -16,7 +16,6 @@ class FreeWorkoutScreen extends StatelessWidget {
             state is WorkoutRunRest ||
             state is WorkoutRunFinishing;
         final hasPlan =
-            (state is WorkoutInProgress && state.workoutToFollow != null) ||
             (state is WorkoutRunInSet && state.workoutToFollow != null) ||
             (state is WorkoutRunRest && state.workoutToFollow != null);
         return Center(
@@ -35,7 +34,7 @@ class FreeWorkoutScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  (state is WorkoutInProgress || inRunPhase)
+                  inRunPhase
                       ? 'You have a workout in progress!'
                       : 'Ready to start your workout?',
                   style: AppTextStyles.bodyLarge.copyWith(
@@ -79,13 +78,13 @@ class FreeWorkoutScreen extends StatelessWidget {
                 ),
 
                 // Start Workout Button
-                if (!(state is WorkoutInProgress || inRunPhase))
+                if (!inRunPhase)
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     child: ElevatedButton(
                       onPressed: () {
-                        context.push('workout/run-free');
+                        context.push('/workout/free/run');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -114,9 +113,9 @@ class FreeWorkoutScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         if (hasPlan) {
-                          context.push('/workout/run-custom');
+                          context.push('/workout/custom/run');
                         } else {
-                          context.push('/workout/run-free');
+                          context.push('/workout/free/run');
                         }
                       },
                       style: ElevatedButton.styleFrom(

@@ -74,6 +74,7 @@ class WorkoutHistoryLocalStorageService {
           endTime: existing.endTime,
           isUploaded: true,
           isOngoing: existing.isOngoing,
+          createdWhileGuest: existing.createdWhileGuest,
         );
         await box.put(workoutId, updated);
       }

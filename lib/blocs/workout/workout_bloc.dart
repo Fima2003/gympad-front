@@ -18,7 +18,6 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
   Duration _currentSetElapsed = Duration.zero;
   Duration _currentRestRemaining = Duration.zero;
   Duration _currentRestTotal = Duration.zero;
-  bool _usingNewRunStates = true; // feature flag (can toggle if needed)
   bool _restPaused =
       false; // pause flag for rest phase (free workout selection)
 
@@ -68,9 +67,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
             progress: _workoutService.getPercentageDone(),
           ),
         );
-        if (_usingNewRunStates) {
-          add(const RunEnterSet());
-        }
+        add(const RunEnterSet());
       } else {
         emit(WorkoutInitial());
       }
@@ -173,10 +170,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
             progress: _workoutService.getPercentageDone(),
           ),
         );
-        if (_usingNewRunStates) {
-          // Immediately enter first set phase (elapsed=0)
-          add(const RunEnterSet());
-        }
+        add(const RunEnterSet());
       }
     } catch (e, st) {
       _logger.error('Failed to start workout', e, st);
@@ -224,7 +218,6 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     Emitter<WorkoutState> emit,
   ) async {
     try {
-      emit(AddingExercise());
       await _workoutService.addExercise(
         event.exerciseId,
         event.name,
@@ -244,9 +237,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
             progress: _workoutService.getPercentageDone(),
           ),
         );
-        if (_usingNewRunStates) {
-          add(const RunEnterSet());
-        }
+        add(const RunEnterSet());
       }
     } catch (e, st) {
       _logger.error('Failed to add exercise', e, st);
@@ -307,7 +298,6 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     RunEnterSet event,
     Emitter<WorkoutState> emit,
   ) async {
-    if (!_usingNewRunStates) return;
     // Whenever we enter a set phase, ensure rest pause flag is cleared
     _restPaused = false;
     var currentWorkout = _workoutService.currentWorkout;
@@ -491,7 +481,6 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     RunEnterRest event,
     Emitter<WorkoutState> emit,
   ) async {
-    if (!_usingNewRunStates) return;
     // Reset pause flag because a fresh rest starts now
     _restPaused = false;
     final w = _workoutService.currentWorkout;

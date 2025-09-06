@@ -27,6 +27,7 @@ class AuthService {
       'userId': hive?.userId,
       'gymId': hive?.gymId,
       'auth_token': hive?.authToken,
+  'is_guest': hive?.isGuest == true ? 'true' : null,
     };
   }
 
@@ -35,12 +36,19 @@ class AuthService {
     String? userId,
     String? gymId,
     String? idToken,
+    bool? isGuest,
   }) async {
     await _userAuthStorage.save(
       userId: userId,
       gymId: gymId,
       authToken: idToken,
+      isGuest: isGuest,
     );
+  }
+
+  Future<void> markGuestSelected(String deviceId) async {
+    // DeviceId not stored here (kept by DeviceIdentityService), just set guest flag.
+    await _userAuthStorage.save(isGuest: true);
   }
 
   /// Clear local user data

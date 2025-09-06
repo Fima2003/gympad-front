@@ -26,7 +26,12 @@ class UserAuthLocalStorageService {
     }
   }
 
-  Future<void> save({String? userId, String? gymId, String? authToken}) async {
+  Future<void> save({
+    String? userId,
+    String? gymId,
+    String? authToken,
+    bool? isGuest,
+  }) async {
     try {
       final box = await _box();
       _logger.info('Loaded box $box');
@@ -36,6 +41,7 @@ class UserAuthLocalStorageService {
         userId: userId,
         gymId: gymId,
         authToken: authToken,
+        isGuest: isGuest,
       );
       _logger.info('Saving updated user auth: $updated');
       await box.put(_key, updated);

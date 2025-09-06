@@ -202,7 +202,7 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     // Use GoRouter; workout passed via extra.
-                    context.push('/workout/save', extra: widget.workout);
+                    context.push('/workout/free/save', extra: widget.workout);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

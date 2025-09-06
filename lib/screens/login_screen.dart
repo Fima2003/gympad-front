@@ -16,6 +16,10 @@ class _LoginScreenState extends State<LoginScreen> {
     context.read<AuthBloc>().add(AuthSignInRequested());
   }
 
+  void _continueAsGuest() {
+    context.read<AuthBloc>().add(AuthGuestRequested());
+  }
+
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -40,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: AppColors.background,
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
+          if (state is AuthAuthenticated || state is AuthGuest) {
             context.pushReplacement('/main');
           } else if (state is AuthError) {
             _showErrorDialog(state.message);
@@ -90,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 60),
 
-              // Sign In with Google button / progress
+              // Sign In & Guest buttons / progress
               if (authState is AuthLoading) ...[
                 Column(
                   children: [
@@ -105,29 +109,56 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ] else ...[
-                Container(
-                  width: double.infinity,
-                  height: 56,
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  child: ElevatedButton.icon(
-                    onPressed: _signInWithGoogle,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.accent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 56,
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      child: ElevatedButton.icon(
+                        onPressed: _signInWithGoogle,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.accent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                        ),
+                        icon: Icon(Icons.login, size: 24, color: AppColors.accent),
+                        label: Text(
+                          'Sign In with Google',
+                          style: AppTextStyles.button.copyWith(
+                            color: AppColors.accent,
+                            fontSize: 18,
+                          ),
+                        ),
                       ),
-                      elevation: 2,
                     ),
-                    icon: Icon(Icons.login, size: 24, color: AppColors.accent),
-                    label: Text(
-                      'Sign In with Google',
-                      style: AppTextStyles.button.copyWith(
-                        color: AppColors.accent,
-                        fontSize: 18,
+                    const SizedBox(height: 16),
+                    Text('or', style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      height: 48,
+                      margin: const EdgeInsets.symmetric(horizontal: 40),
+                      child: OutlinedButton(
+                        onPressed: _continueAsGuest,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: BorderSide(color: AppColors.primary, width: 1.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: Text(
+                          'Continue as Guest',
+                          style: AppTextStyles.button.copyWith(
+                            color: AppColors.primary,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ],
 
@@ -137,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'By signing in, you agree to our Terms of Service and Privacy Policy',
+                  'By signing in (or continuing as guest), you agree to our Terms of Service and Privacy Policy. Some features are limited in guest mode.',
                   style: AppTextStyles.bodySmall.copyWith(
                     fontStyle: FontStyle.italic,
                   ),

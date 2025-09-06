@@ -104,6 +104,8 @@ class HiveWorkout extends HiveObject {
   final bool isUploaded;
   @HiveField(6)
   final bool isOngoing;
+  @HiveField(7)
+  final bool createdWhileGuest;
 
   HiveWorkout({
     required this.id,
@@ -113,6 +115,7 @@ class HiveWorkout extends HiveObject {
     this.endTime,
     required this.isUploaded,
     required this.isOngoing,
+  required this.createdWhileGuest,
   });
 
   factory HiveWorkout.fromDomain(Workout workout) {
@@ -127,6 +130,7 @@ class HiveWorkout extends HiveObject {
       endTime: workout.endTime,
       isUploaded: workout.isUploaded,
       isOngoing: workout.isOngoing,
+  createdWhileGuest: workout.createdWhileGuest,
     );
   }
 
@@ -138,5 +142,6 @@ class HiveWorkout extends HiveObject {
     endTime: endTime,
     isUploaded: isUploaded,
     isOngoing: isOngoing,
+  createdWhileGuest: createdWhileGuest,
   );
 }

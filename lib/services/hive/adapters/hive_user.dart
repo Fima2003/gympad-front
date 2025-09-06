@@ -10,13 +10,24 @@ class HiveUserAuth extends HiveObject {
   final String? gymId;
   @HiveField(2)
   final String? authToken;
+  @HiveField(3)
+  final bool isGuest;
 
-  HiveUserAuth({this.userId, this.gymId, this.authToken});
+  HiveUserAuth({this.userId, this.gymId, this.authToken, this.isGuest = false});
 
-  HiveUserAuth copyWith({String? userId, String? gymId, String? authToken}) =>
-      HiveUserAuth(
-        userId: userId ?? this.userId,
-        gymId: gymId ?? this.gymId,
-        authToken: authToken ?? this.authToken,
-      );
+  HiveUserAuth copyWith({
+    String? userId,
+    String? gymId,
+    String? authToken,
+    bool? isGuest,
+  }) => HiveUserAuth(
+    userId: userId ?? this.userId,
+    gymId: gymId ?? this.gymId,
+    authToken: authToken ?? this.authToken,
+    isGuest: isGuest ?? this.isGuest,
+  );
+
+  @override
+  String toString() =>
+      'HiveUserAuth(userId: $userId, gymId: $gymId, isGuest: $isGuest)';
 }
