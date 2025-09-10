@@ -29,7 +29,6 @@ import 'blocs/auth/auth_bloc.dart';
 import 'blocs/audio/audio_bloc.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
-import 'screens/workouts/free_workout_screens/save_workout_screen.dart';
 import 'models/workout.dart';
 
 Future<void> main() async {
@@ -66,8 +65,124 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    // Build router once to avoid resetting to '/' on hot reload.
+    _router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const SplashScreen(),
+        ),
+        GoRoute(
+          path: '/main',
+          builder: (context, state) => const MainScreen(),
+        ),
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: '/workout',
+          builder: (context, state) => const MainScreen(defaultIndex: 0),
+          routes: [
+            GoRoute(
+              path: 'custom',
+              builder: (context, state) => const MainScreen(defaultIndex: 1),
+              routes: [
+                GoRoute(
+                  path: 'run',
+                  builder: (context, state) => CWorkoutRunScreen(),
+                ),
+                GoRoute(
+                  path: 'details',
+                  builder: (context, state) {
+                    final workout = state.extra as CustomWorkout?;
+                    if (workout == null) {
+                      return const Scaffold(
+                        body: Center(
+                          child: Text('No workout details available.'),
+                        ),
+                      );
+                    }
+                    return PredefinedWorkoutDetailScreen(workout: workout);
+                  },
+                ),
+              ],
+            ),
+            GoRoute(
+              path: 'free',
+              builder: (context, state) => const MainScreen(defaultIndex: 0),
+              routes: [
+                GoRoute(
+                  path: 'run',
+                  builder: (context, state) => FreeWorkoutRunScreen(),
+                ),
+              ],
+            ),
+            GoRoute(
+              path: 'personal',
+              builder: (context, state) => const MainScreen(defaultIndex: 2),
+              routes: [
+                GoRoute(
+                  path: 'details',
+                  builder: (context, state) {
+                    final workout = state.extra as PersonalWorkout?;
+                    if (workout == null) {
+                      return const Scaffold(
+                        body: Center(
+                          child: Text('No workout details available.'),
+                        ),
+                      );
+                    }
+                    return PersonalWorkoutDetailScreen(workout: workout);
+                  },
+                ),
+              ],
+            ),
+            GoRoute(
+              path: 'prepare-to-start',
+              builder: (context, state) {
+                final workout = state.extra as CustomWorkout?;
+                if (workout == null) {
+                  return const Scaffold(
+                    body: Center(child: Text('No workout to prepare.')),
+                  );
+                }
+                return PrepareToStartWorkoutScreen(workout: workout);
+              },
+            ),
+            GoRoute(
+              path: 'well-done',
+              builder: (context, state) {
+                final workout = state.extra as Workout?;
+                if (workout == null) {
+                  return const Scaffold(
+                    body: Center(
+                      child: Text('No workout details available.'),
+                    ),
+                  );
+                }
+                return WellDoneWorkoutScreen(workout: workout);
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +197,6 @@ class MyApp extends StatelessWidget {
             final bloc = WorkoutBloc();
             WorkoutService().configureCapabilitiesProvider(() {
               final authState = context.read<AuthBloc>().state;
-              print('Authenticated in Main: ${authState is AuthAuthenticated}');
               if (authState is AuthAuthenticated) {
                 return Capabilities.authenticated;
               }
@@ -114,9 +228,8 @@ class MyApp extends StatelessWidget {
             await WorkoutService().uploadPendingWorkouts();
           }());
         },
-        listenWhen:
-            (previous, current) =>
-                previous is AuthGuest && current is AuthAuthenticated,
+        listenWhen: (previous, current) =>
+            previous is AuthGuest && current is AuthAuthenticated,
         child: MaterialApp.router(
           title: 'GymPad',
           debugShowCheckedModeBanner: false,
@@ -125,128 +238,7 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
             scaffoldBackgroundColor: AppColors.background,
           ),
-          routerConfig: GoRouter(
-            initialLocation: '/',
-            routes: [
-              GoRoute(
-                path: '/',
-                builder: (context, state) => const SplashScreen(),
-              ),
-              GoRoute(
-                path: '/main',
-                builder: (context, state) => const MainScreen(),
-              ),
-              GoRoute(
-                path: '/login',
-                builder: (context, state) => const LoginScreen(),
-              ),
-              GoRoute(
-                path: '/workout',
-                builder: (context, state) => const MainScreen(defaultIndex: 0),
-                routes: [
-                  GoRoute(
-                    path: 'custom',
-                    builder: (context, state) {
-                      return const MainScreen(defaultIndex: 1);
-                    },
-                    routes: [
-                      GoRoute(
-                        path: 'run',
-                        builder: (context, state) => CWorkoutRunScreen(),
-                      ),
-                      GoRoute(
-                        path: 'details',
-                        builder: (context, state) {
-                          final workout = state.extra as CustomWorkout?;
-                          if (workout == null) {
-                            return const Scaffold(
-                              body: Center(
-                                child: Text('No workout details available.'),
-                              ),
-                            );
-                          }
-                          return PredefinedWorkoutDetailScreen(
-                            workout: workout,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  GoRoute(
-                    path: 'free',
-                    builder: (context, state) {
-                      return const MainScreen(defaultIndex: 0);
-                    },
-                    routes: [
-                      GoRoute(
-                        path: 'run',
-                        builder: (context, state) => FreeWorkoutRunScreen(),
-                      ),
-                      // GoRoute(
-                      //   path: 'save',
-                      //   builder: (context, state) {
-                      //     final workout = state.extra as Workout?;
-                      //     if (workout == null) {
-                      //       return const Scaffold(
-                      //         body: Center(child: Text('No workout to save.')),
-                      //       );
-                      //     }
-                      //     return SaveWorkoutScreen(workout: workout);
-                      //   },
-                      // ),
-                    ],
-                  ),
-                  GoRoute(
-                    path: 'personal',
-                    builder:
-                        (context, state) => const MainScreen(defaultIndex: 2),
-                    routes: [
-                      GoRoute(
-                        path: 'details',
-                        builder: (context, state) {
-                          final workout = state.extra as PersonalWorkout?;
-                          if (workout == null) {
-                            return const Scaffold(
-                              body: Center(
-                                child: Text('No workout details available.'),
-                              ),
-                            );
-                          }
-                          return PersonalWorkoutDetailScreen(workout: workout);
-                        },
-                      ),
-                    ],
-                  ),
-                  GoRoute(
-                    path: 'prepare-to-start',
-                    builder: (context, state) {
-                      final workout = state.extra as CustomWorkout?;
-                      if (workout == null) {
-                        return const Scaffold(
-                          body: Center(child: Text('No workout to prepare.')),
-                        );
-                      }
-                      return PrepareToStartWorkoutScreen(workout: workout);
-                    },
-                  ),
-                  GoRoute(
-                    path: 'well-done',
-                    builder: (context, state) {
-                      final workout = state.extra as Workout?;
-                      if (workout == null) {
-                        return const Scaffold(
-                          body: Center(
-                            child: Text('No workout details available.'),
-                          ),
-                        );
-                      }
-                      return WellDoneWorkoutScreen(workout: workout);
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
+          routerConfig: _router,
         ),
       ),
     );
@@ -264,6 +256,19 @@ class _SplashScreenState extends State<SplashScreen> {
   final AppLogger _logger = AppLogger();
   bool _isLoading = true;
   bool _navigated = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Handle hot reload scenario: if data already loaded, kick auth.
+    final dataState = context.read<DataBloc>().state;
+    if (_isLoading) {
+      // Schedule after build to avoid setState during build warnings.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _maybeKickAuth(dataState);
+      });
+    }
+  }
 
   void _maybeKickAuth(DataState dataState) {
     if (dataState is DataReady) {
