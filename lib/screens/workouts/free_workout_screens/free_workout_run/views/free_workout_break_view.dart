@@ -135,9 +135,11 @@ class FreeWorkoutBreakView extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
+                  color: Colors.white.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
                 ),
                 child: Column(
                   children: [
@@ -154,7 +156,7 @@ class FreeWorkoutBreakView extends StatelessWidget {
                     Text(
                       'SETS: $completedSetsForExercise',
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -167,7 +169,7 @@ class FreeWorkoutBreakView extends StatelessWidget {
                   child: Text(
                     'PREVIOUS',
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       letterSpacing: 1,
                     ),
                   ),
@@ -339,7 +341,7 @@ class _AnimatedProgressRingState extends State<_AnimatedProgressRing>
                 size: Size.square(widget.size),
                 painter: _RingPainter(
                   progress: value,
-                  backgroundColor: Colors.white.withOpacity(0.08),
+                  backgroundColor: Colors.white.withValues(alpha: 0.08),
                   foregroundColor: AppColors.accent,
                 ),
               ),
@@ -388,7 +390,7 @@ class _RingPainter extends CustomPainter {
           ..shader = SweepGradient(
             startAngle: 0,
             endAngle: 2 * math.pi,
-            colors: [foregroundColor, foregroundColor.withOpacity(0.6)],
+            colors: [foregroundColor, foregroundColor.withValues(alpha: 0.6)],
           ).createShader(rect);
 
     // Draw background full circle

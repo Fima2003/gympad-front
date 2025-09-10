@@ -182,18 +182,18 @@ class MyApp extends StatelessWidget {
                         path: 'run',
                         builder: (context, state) => FreeWorkoutRunScreen(),
                       ),
-                      GoRoute(
-                        path: 'save',
-                        builder: (context, state) {
-                          final workout = state.extra as Workout?;
-                          if (workout == null) {
-                            return const Scaffold(
-                              body: Center(child: Text('No workout to save.')),
-                            );
-                          }
-                          return SaveWorkoutScreen(workout: workout);
-                        },
-                      ),
+                      // GoRoute(
+                      //   path: 'save',
+                      //   builder: (context, state) {
+                      //     final workout = state.extra as Workout?;
+                      //     if (workout == null) {
+                      //       return const Scaffold(
+                      //         body: Center(child: Text('No workout to save.')),
+                      //       );
+                      //     }
+                      //     return SaveWorkoutScreen(workout: workout);
+                      //   },
+                      // ),
                     ],
                   ),
                   GoRoute(

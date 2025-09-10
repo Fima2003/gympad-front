@@ -243,7 +243,7 @@ class CWorkoutBreakView extends StatelessWidget {
                               gradient: LinearGradient(
                                 colors: [
                                   AppColors.accent,
-                                  AppColors.accent.withOpacity(0.4),
+                                  AppColors.accent.withValues(alpha: 0.4),
                                 ],
                               ),
                             ),
@@ -460,7 +460,7 @@ class _AnimatedProgressRingState extends State<_AnimatedProgressRing>
                 size: Size.square(widget.size),
                 painter: _RingPainter(
                   progress: value,
-                  backgroundColor: Colors.white.withOpacity(0.08),
+                  backgroundColor: Colors.white.withValues(alpha: 0.08),
                   foregroundColor: AppColors.accent,
                 ),
               ),
@@ -509,7 +509,7 @@ class _RingPainter extends CustomPainter {
           ..shader = SweepGradient(
             startAngle: 0,
             endAngle: 2 * math.pi,
-            colors: [foregroundColor, foregroundColor.withOpacity(0.6)],
+            colors: [foregroundColor, foregroundColor.withValues(alpha: 0.6)],
           ).createShader(rect);
 
     // Draw background full circle
@@ -698,7 +698,7 @@ class _ReorderUpcomingRowState extends State<_ReorderUpcomingRow> {
           decoration: BoxDecoration(
             color:
                 highlight
-                    ? AppColors.accent.withOpacity(0.6)
+                    ? AppColors.accent.withValues(alpha: 0.6)
                     : (isActive ? Colors.white24 : Colors.transparent),
             borderRadius: BorderRadius.circular(4),
           ),

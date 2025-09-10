@@ -76,8 +76,8 @@ class PersonalWorkoutExerciseDto {
       exerciseId: json['exerciseId'] as String,
       name: json['name'] as String,
       sets: (json['sets'] as num).toInt(),
-      reps: (json['reps'] as num).toInt(),
       weight: (json['weight'] as num).toDouble(),
+      reps: (json['reps'] as num).toInt(),
       restTime: (json['restTime'] as num).toInt(),
     );
   }

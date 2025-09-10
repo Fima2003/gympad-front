@@ -1,15 +1,17 @@
+import 'package:equatable/equatable.dart';
+
 import 'workout_set.dart';
 
-class WorkoutExercise {
+class WorkoutExercise extends Equatable {
   final String exerciseId;
   final String name;
   final String? equipmentId;
   final String muscleGroup;
   final List<WorkoutSet> sets;
   final DateTime startTime;
-  DateTime? endTime;
+  final DateTime? endTime;
 
-  WorkoutExercise({
+  const WorkoutExercise({
     required this.exerciseId,
     required this.name,
     this.equipmentId,
@@ -78,4 +80,15 @@ class WorkoutExercise {
       endTime: endTime ?? this.endTime,
     );
   }
+
+  @override
+  List<Object?> get props => [
+    exerciseId,
+    name,
+    equipmentId,
+    muscleGroup,
+    sets,
+    startTime,
+    endTime,
+  ];
 }

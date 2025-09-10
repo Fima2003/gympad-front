@@ -456,4 +456,9 @@ class WorkoutService {
       return cached;
     }
   }
+
+  Future savePersonalWorkout(CreatePersonalWorkoutRequest req) async {
+    final resp = await WorkoutApiService().createPersonalWorkout(req);
+    return resp.success;
+  }
 }

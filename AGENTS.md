@@ -114,7 +114,7 @@ Central references:
 - `AppTextStyles`
 
 Guidelines:
-- Use semi-transparent surfaces (e.g., `Colors.white.withOpacity(0.06)`) for cards over dark backgrounds.
+- Use semi-transparent surfaces (e.g., `Colors.white.withValues(alpha: 0.06)`) for cards over dark backgrounds.
 - Accent color limited to primary CTAs and current exercise highlight.
 - Avoid hard-coded text styles; use `AppTextStyles` or copyWith.
 
