@@ -24,6 +24,8 @@ class SaveWorkoutBloc extends Bloc<SaveWorkoutEvent, SaveWorkoutState> {
     on<SaveWorkoutRemoveSet>(_removeSet);
     on<SaveWorkoutSwitch>(_switch);
     on<SaveWorkoutUpload>(_upload);
+    on<SaveWorkoutEditExercise>(_editExercise);
+    on<SaveWorkoutCloseEditor>(_closeEditor);
   }
 
   void _updateName(
@@ -31,11 +33,12 @@ class SaveWorkoutBloc extends Bloc<SaveWorkoutEvent, SaveWorkoutState> {
     Emitter<SaveWorkoutState> emit,
   ) {
     name = event.name;
-    emit(SaveWorkoutInfo(name, description));
+    emit(SaveWorkoutInfo(name, description, false));
   }
 
   bool _validateName(String name) {
-    return name.length > 6;
+    final regex = RegExp(r'^[a-zA-Z0-9 ]+$');
+    return name.length > 6 && regex.hasMatch(name);
   }
 
   void _updateDescription(
@@ -43,19 +46,37 @@ class SaveWorkoutBloc extends Bloc<SaveWorkoutEvent, SaveWorkoutState> {
     Emitter<SaveWorkoutState> emit,
   ) {
     description = event.description;
-    emit(SaveWorkoutInfo(name, description));
+    emit(SaveWorkoutInfo(name, description, false));
   }
 
   bool _validateDescription(String description) {
-    return true;
+    final regex = RegExp(r'^[a-zA-Z0-9 ]+$');
+    return regex.hasMatch(description);
+  }
+
+  void _editExercise(
+    SaveWorkoutEditExercise event,
+    Emitter<SaveWorkoutState> emit,
+  ) {
+    final index = event.index;
+    if (index < 0 || index >= exercises.length) return;
+    emit(SaveWorkoutExercises(List.unmodifiable(exercises), editIndex: index));
+  }
+
+  void _closeEditor(
+    SaveWorkoutCloseEditor event,
+    Emitter<SaveWorkoutState> emit,
+  ) {
+    // Re-emit exercises without edit index to signal sheet closed.
+    emit(SaveWorkoutExercises(List.unmodifiable(exercises)));
   }
 
   void _setExercises(
     SaveWorkoutSetExercises event,
     Emitter<SaveWorkoutState> emit,
   ) {
-    exercises = event.exercises;
-    emit(SaveWorkoutExercises(exercises));
+    exercises = List<WorkoutExercise>.from(event.exercises);
+    emit(SaveWorkoutExercises(List.unmodifiable(exercises)));
   }
 
   void _updateExercise(
@@ -65,11 +86,15 @@ class SaveWorkoutBloc extends Bloc<SaveWorkoutEvent, SaveWorkoutState> {
     final idxToReplace = event.idx;
     final exerciseToReplace = event.exercise;
     if (exerciseToReplace != null) {
-      exercises[idxToReplace] = exerciseToReplace;
+      final newList = List<WorkoutExercise>.from(exercises);
+      newList[idxToReplace] = exerciseToReplace;
+      exercises = newList;
     } else {
-      exercises.removeAt(idxToReplace);
+      final newList = List<WorkoutExercise>.from(exercises)
+        ..removeAt(idxToReplace);
+      exercises = newList;
     }
-    emit(SaveWorkoutExercises(exercises));
+    emit(SaveWorkoutExercises(List.unmodifiable(exercises)));
   }
 
   void _modifySet(SaveWorkoutModifySet event, Emitter<SaveWorkoutState> emit) {
@@ -86,8 +111,10 @@ class SaveWorkoutBloc extends Bloc<SaveWorkoutEvent, SaveWorkoutState> {
               ? Duration(seconds: event.restSeconds!)
               : current.time,
     );
-    exercises[event.exerciseIdx] = exercise.copyWith(sets: sets);
-    emit(SaveWorkoutExercises(exercises));
+    final newExercises = List<WorkoutExercise>.from(exercises);
+    newExercises[event.exerciseIdx] = exercise.copyWith(sets: sets);
+    exercises = newExercises;
+    emit(SaveWorkoutExercises(List.unmodifiable(exercises)));
   }
 
   void _addSet(SaveWorkoutAddSet event, Emitter<SaveWorkoutState> emit) {
@@ -102,8 +129,10 @@ class SaveWorkoutBloc extends Bloc<SaveWorkoutEvent, SaveWorkoutState> {
         time: sets.last.time,
       ),
     );
-    exercises[event.exerciseIdx] = exercise.copyWith(sets: sets);
-    emit(SaveWorkoutExercises(exercises));
+    final newExercises = List<WorkoutExercise>.from(exercises);
+    newExercises[event.exerciseIdx] = exercise.copyWith(sets: sets);
+    exercises = newExercises;
+    emit(SaveWorkoutExercises(List.unmodifiable(exercises)));
   }
 
   void _removeSet(SaveWorkoutRemoveSet event, Emitter<SaveWorkoutState> emit) {
@@ -117,15 +146,17 @@ class SaveWorkoutBloc extends Bloc<SaveWorkoutEvent, SaveWorkoutState> {
       final s = sets[i];
       renumbered.add(s.copyWith(setNumber: i + 1));
     }
-    exercises[event.exerciseIdx] = exercise.copyWith(sets: renumbered);
-    emit(SaveWorkoutExercises(exercises));
+    final newExercises = List<WorkoutExercise>.from(exercises);
+    newExercises[event.exerciseIdx] = exercise.copyWith(sets: renumbered);
+    exercises = newExercises;
+    emit(SaveWorkoutExercises(List.unmodifiable(exercises)));
   }
 
   void _switch(SaveWorkoutSwitch event, Emitter<SaveWorkoutState> emit) {
     if (event.info) {
-      emit(SaveWorkoutInfo(name, description));
+      emit(SaveWorkoutInfo(name, description, false));
     } else {
-      emit(SaveWorkoutExercises(exercises));
+      emit(SaveWorkoutExercises(List.unmodifiable(exercises)));
     }
   }
 
@@ -133,13 +164,26 @@ class SaveWorkoutBloc extends Bloc<SaveWorkoutEvent, SaveWorkoutState> {
     SaveWorkoutUpload event,
     Emitter<SaveWorkoutState> emit,
   ) async {
+    emit(SaveWorkoutInfo(name, description, true));
     // Validate on final upload
     if (!_validateName(name)) {
-      emit(const SaveWorkoutError(nameError: "Invalid name"));
+      emit(
+        SaveWorkoutError(
+          name,
+          description,
+          nameError: "At least 6 characters, english and numbers only",
+        ),
+      );
       return;
     }
-    if (!_validateDescription(description)) {
-      emit(const SaveWorkoutError(descriptionError: "Invalid description"));
+    if (description != '' && !_validateDescription(description)) {
+      emit(
+        SaveWorkoutError(
+          name,
+          description,
+          descriptionError: "English and numbers only",
+        ),
+      );
       return;
     }
     final exercisesDto =

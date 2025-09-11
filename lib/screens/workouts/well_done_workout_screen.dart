@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gympad/blocs/analytics/analytics_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
-import '../constants/app_styles.dart';
-import '../models/workout.dart';
-import '../widgets/workout_exercises_table.dart';
+import '../../constants/app_styles.dart';
+import '../../models/workout.dart';
+import '../../widgets/workout_exercises_table.dart';
 
 class WellDoneWorkoutScreen extends StatefulWidget {
   final Workout workout;
@@ -202,7 +202,10 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     // Use GoRouter; workout passed via extra.
-                    context.push('/workout/free/save', extra: widget.workout);
+                    context.push(
+                      '/workout/free/save',
+                      extra: widget.workout.exercises,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

@@ -15,6 +15,16 @@ class SaveWorkoutSetExercises extends SaveWorkoutEvent {
   List<Object> get props => [exercises];
 }
 
+class SaveWorkoutEditExercise extends SaveWorkoutEvent {
+  final int index;
+  const SaveWorkoutEditExercise(this.index);
+
+  @override
+  List<Object> get props => [index];
+}
+
+class SaveWorkoutCloseEditor extends SaveWorkoutEvent {}
+
 class SaveWorkoutSwitch extends SaveWorkoutEvent {
   final bool info;
   const SaveWorkoutSwitch(this.info);

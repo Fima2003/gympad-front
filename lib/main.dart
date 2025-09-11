@@ -7,11 +7,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gympad/blocs/analytics/analytics_bloc.dart';
 import 'package:gympad/firebase_options.dart';
+import 'package:gympad/models/workout_exercise.dart';
 import 'package:gympad/services/api/api.dart';
 import 'blocs/personal_workouts/personal_workout_bloc.dart';
 import 'models/custom_workout.dart';
 import 'models/personal_workout.dart';
-import 'screens/well_done_workout_screen.dart';
+import 'screens/workouts/free_workout_screens/save_workout/save_workout_screen.dart';
+import 'screens/workouts/well_done_workout_screen.dart';
 import 'screens/workouts/custom_workout_screens/custom_workout_detail_screen.dart';
 import 'screens/workouts/custom_workout_screens/cworkout_run/cworkout_run_screen.dart';
 import 'screens/workouts/custom_workout_screens/prepare_to_start_workout_screen.dart';
@@ -82,14 +84,8 @@ class _MyAppState extends State<MyApp> {
     _router = GoRouter(
       initialLocation: '/',
       routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) => const SplashScreen(),
-        ),
-        GoRoute(
-          path: '/main',
-          builder: (context, state) => const MainScreen(),
-        ),
+        GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+        GoRoute(path: '/main', builder: (context, state) => const MainScreen()),
         GoRoute(
           path: '/login',
           builder: (context, state) => const LoginScreen(),
@@ -129,6 +125,13 @@ class _MyAppState extends State<MyApp> {
                 GoRoute(
                   path: 'run',
                   builder: (context, state) => FreeWorkoutRunScreen(),
+                ),
+                GoRoute(
+                  path: 'save',
+                  builder:
+                      (context, state) => SaveWorkoutScreen(
+                        exercises: state.extra as List<WorkoutExercise>,
+                      ),
                 ),
               ],
             ),
@@ -170,9 +173,7 @@ class _MyAppState extends State<MyApp> {
                 final workout = state.extra as Workout?;
                 if (workout == null) {
                   return const Scaffold(
-                    body: Center(
-                      child: Text('No workout details available.'),
-                    ),
+                    body: Center(child: Text('No workout details available.')),
                   );
                 }
                 return WellDoneWorkoutScreen(workout: workout);
@@ -228,8 +229,9 @@ class _MyAppState extends State<MyApp> {
             await WorkoutService().uploadPendingWorkouts();
           }());
         },
-        listenWhen: (previous, current) =>
-            previous is AuthGuest && current is AuthAuthenticated,
+        listenWhen:
+            (previous, current) =>
+                previous is AuthGuest && current is AuthAuthenticated,
         child: MaterialApp.router(
           title: 'GymPad',
           debugShowCheckedModeBanner: false,
