@@ -6,7 +6,8 @@ import 'logger_service.dart';
 /// Provides a stable, non-PII device identifier for guest mode linkage.
 /// Stored locally; regenerated only if preferences are cleared.
 class DeviceIdentityService {
-  static final DeviceIdentityService _instance = DeviceIdentityService._internal();
+  static final DeviceIdentityService _instance =
+      DeviceIdentityService._internal();
   factory DeviceIdentityService() => _instance;
   DeviceIdentityService._internal();
 
@@ -28,9 +29,11 @@ class DeviceIdentityService {
     final rand = Random();
     // Not a RFC4122 UUID, but sufficiently unique for local device identity.
     final millis = DateTime.now().millisecondsSinceEpoch.toRadixString(16);
-    final randPart = List<int>.generate(4, (_) => rand.nextInt(1 << 16))
-        .map((e) => e.toRadixString(16).padLeft(4, '0'))
-        .join();
+    final randPart =
+        List<int>.generate(
+          4,
+          (_) => rand.nextInt(1 << 16),
+        ).map((e) => e.toRadixString(16).padLeft(4, '0')).join();
     return '$millis-$randPart';
   }
 }

@@ -18,9 +18,9 @@ GymPad is a Flutter (Dart) mobile + web app for:
 - Flutter stable (assume latest stable; validate with `flutter --version`).
 - Dart formatting via `dart format .` (run before commits).
 - State management: flutter_bloc (WorkoutBloc + others).
-- Storage: SharedPreferences for lightweight local caches (auth, personal workouts).
-- Firebase Auth + backend API services (user + workout endpoints).
-- Platform targets: iOS, Android, Web (some sound features are mobile-only currently).
+- Storage: Hive for storage
+- Firebase Auth + backend API services
+- Platform targets: iOS, Android, Web
 
 ---
 
@@ -49,10 +49,11 @@ Layers (top → bottom):
 1. UI Screens & Widgets (in `lib/screens`, `lib/widgets`)
 - Any new screen or widget should be split into view and manager. view should be stateless and accept only the values to render
 2. BLoC / Events / States (`lib/blocs`)
-3. Services (API, auth, audio, local storage) (`lib/services`)
+3. Services (API, hive, auth, audio, etc.) (`lib/services`)
 4. DTOs for sending objects via the network (`lib/services/api/models`)
 5. Models for the internal use in the application (`lib/models`)
-6. Utilities (timers, formatting)
+6. Adapters for the hive (`lib/services/hive/adapters`)
+7. Utilities (timers, formatting)
 
 Rules:
 - Screens never call API services directly—dispatch BLoC events or call a domain service exposed via BLoC.
@@ -61,7 +62,7 @@ Rules:
 
 ---
 
-## 6. State Management (WorkoutBloc)
+## 6. State Management
 
 Primary responsibilities:
 - Sync personal workouts (event: `PersonalWorkoutsSyncRequested`)
@@ -80,34 +81,12 @@ Do not mutate lists in-place; emit cloned lists to force rebuild.
 
 ## 7. Navigation Conventions
 
-- Use explicit Navigator pushes with strongly typed arguments.
-- For flows reused between custom and personal workouts: convert models early (e.g., personal workout → custom workout structure) so downstream screens stay generic.
-- Break screen & run screen share UI components—import shared widgets (e.g., `exercise_chip.dart`).
+- Use go router navigation with strongly typed arguments.
+- if the screen is not present in the `main.dart`, add it there
 
 ---
 
-## 8. Audio Abstraction
-
-`AudioService` exposes:
-- `playTick()`
-- `playStart()`
-
-Currently uses `SystemSound` (no-op on Web). If migrating to `just_audio`, only change internals. Never call platform channels from UI directly.
-
----
-
-## 9. Weight Selector (Velocity-Based)
-
-Widget: `WeightSelectorVelocity`
-- Horizontal scroll with custom physics for acceleration (0.5 increments).
-- If modifying:
-  - Keep public API: `initialWeight`, `onWeightChanged`
-  - Tuning params inside widget: baseline velocity (v0), max multiplier
-- Avoid adding synchronous heavy computations in scroll callbacks.
-
----
-
-## 10. Theming & Styling
+## 8. Theming & Styling
 
 Central references:
 - `AppColors`

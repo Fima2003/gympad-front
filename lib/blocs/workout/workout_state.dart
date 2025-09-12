@@ -89,8 +89,10 @@ class WorkoutRunInSet extends WorkoutState with WorkoutRunPhase {
   final CustomWorkout? workoutToFollow; // planned template (optional)
   final CustomWorkoutExercise currentExercise; // exercise being performed
   final int currentExerciseIdx; // index in planned list (if any)
-  final int currentSetIdx; // zero-based index of next set to complete within exercise
-  final List<WorkoutSet> completedSets; // sets already recorded for this exercise
+  final int
+  currentSetIdx; // zero-based index of next set to complete within exercise
+  final List<WorkoutSet>
+  completedSets; // sets already recorded for this exercise
   final Duration elapsed; // elapsed time for CURRENT set
   final RunFinishType finishType; // what finishing action will produce
 
@@ -107,29 +109,31 @@ class WorkoutRunInSet extends WorkoutState with WorkoutRunPhase {
 
   @override
   List<Object?> get props => [
-        workout,
-        workoutToFollow,
-        currentExercise,
-        currentExerciseIdx,
-        currentSetIdx,
-        completedSets,
-        elapsed,
-        finishType,
-      ];
+    workout,
+    workoutToFollow,
+    currentExercise,
+    currentExerciseIdx,
+    currentSetIdx,
+    completedSets,
+    elapsed,
+    finishType,
+  ];
 }
 
 /// Rest phase between sets / exercises.
 class WorkoutRunRest extends WorkoutState with WorkoutRunPhase {
   final Workout workout;
   final CustomWorkout? workoutToFollow;
-  final CustomWorkoutExercise currentExercise; // exercise just completed (or mid-exercise rest)
+  final CustomWorkoutExercise
+  currentExercise; // exercise just completed (or mid-exercise rest)
   final int currentExerciseIdx;
   final int currentSetIdx; // next set index to start when rest ends
   final Duration remaining; // rest remaining
   final Duration total; // originally allocated rest
   final CustomWorkoutExercise? nextExercise; // null if workout end
   final double progress; // overall workout progress 0..1
-  final List<CustomWorkoutExercise> upcomingReorderable; // reorderable tail slice
+  final List<CustomWorkoutExercise>
+  upcomingReorderable; // reorderable tail slice
   final int reorderStartIndex; // global index at which reordering slice begins
   final bool isFinishing; // user triggered early finish & awaiting persistence
 
@@ -150,19 +154,19 @@ class WorkoutRunRest extends WorkoutState with WorkoutRunPhase {
 
   @override
   List<Object?> get props => [
-        workout,
-        workoutToFollow,
-        currentExercise,
-        currentExerciseIdx,
-        currentSetIdx,
-        remaining,
-        total,
-        nextExercise,
-        progress,
-        upcomingReorderable,
-        reorderStartIndex,
-        isFinishing,
-      ];
+    workout,
+    workoutToFollow,
+    currentExercise,
+    currentExerciseIdx,
+    currentSetIdx,
+    remaining,
+    total,
+    nextExercise,
+    progress,
+    upcomingReorderable,
+    reorderStartIndex,
+    isFinishing,
+  ];
 }
 
 /// Emitted when finalization logic (upload/persist) is running after the user
@@ -176,4 +180,3 @@ class WorkoutRunFinishing extends WorkoutState with WorkoutRunPhase {
 }
 
 // NOTE: We reuse existing WorkoutCompleted & WorkoutError for terminal states.
-

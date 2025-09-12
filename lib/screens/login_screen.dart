@@ -125,7 +125,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           elevation: 2,
                         ),
-                        icon: Icon(Icons.login, size: 24, color: AppColors.accent),
+                        icon: Icon(
+                          Icons.login,
+                          size: 24,
+                          color: AppColors.accent,
+                        ),
                         label: Text(
                           'Sign In with Google',
                           style: AppTextStyles.button.copyWith(
@@ -136,7 +140,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text('or', style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+                    Text(
+                      'or',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     Container(
                       width: double.infinity,
@@ -146,8 +155,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: _continueAsGuest,
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primary,
-                          side: BorderSide(color: AppColors.primary, width: 1.5),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          side: BorderSide(
+                            color: AppColors.primary,
+                            width: 1.5,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         child: Text(
                           'Continue as Guest',

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class WorkoutSet extends Equatable{
+class WorkoutSet extends Equatable {
   final int setNumber;
   final int reps;
   final double weight;

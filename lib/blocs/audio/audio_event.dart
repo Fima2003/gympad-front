@@ -7,4 +7,5 @@ abstract class AudioEvent extends Equatable {
 }
 
 class PlayTickSound extends AudioEvent {}
+
 class PlayStartSound extends AudioEvent {}

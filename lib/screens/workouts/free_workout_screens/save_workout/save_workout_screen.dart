@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../constants/app_styles.dart';
+
 import '../../../../blocs/save_workout/save_workout_bloc.dart';
 import '../../../../models/workout_exercise.dart';
 import '../../../../models/workout_set.dart';
@@ -112,72 +114,155 @@ class _SaveWorkoutScreenState extends State<SaveWorkoutScreen> {
               descriptionError:
                   state is SaveWorkoutError ? state.descriptionError : null,
             );
-            if (state is SaveWorkoutInfo && state.uploading) {
-              print("Uploading...");
-              content = Stack(
-                children: [
-                  content,
-                  Positioned.fill(
-                    child: AbsorbPointer(
-                      absorbing: true,
-                      child: Container(color: Colors.black26),
-                    ),
-                  ),
-                  const Center(child: CircularProgressIndicator()),
-                ],
-              );
-            }
+            // Keep logic the same; overlay handled below in the Scaffold body
           } else {
             content = const Center(child: CircularProgressIndicator());
           }
 
+          final isInfo = state is SaveWorkoutInfo || state is SaveWorkoutError;
+          final isUploading = state is SaveWorkoutInfo && state.uploading;
+
           return Scaffold(
+            backgroundColor: AppColors.background,
             appBar: AppBar(
+              backgroundColor: AppColors.background,
+              elevation: 0,
               title: Text(
-                state is SaveWorkoutInfo ? 'Edit Info' : 'Edit Exercises',
+                isInfo ? 'Edit Info' : 'Edit Exercises',
+                style: AppTextStyles.appBarTitle,
               ),
             ),
-            body: Column(
+            body: Stack(
               children: [
-                content,
-                Row(
-                  children: [
-                    if (state is SaveWorkoutExercises) ...[
-                      ElevatedButton(
-                        onPressed: () {
-                          BlocProvider.of<SaveWorkoutBloc>(
-                            context,
-                          ).add(SaveWorkoutSwitch(true));
-                        },
-                        child: Text("Next"),
+                SafeArea(
+                  child: Column(
+                    children: [
+                      // Content area
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: content,
+                        ),
                       ),
-                    ] else if (state is SaveWorkoutInfo ||
-                        state is SaveWorkoutError) ...[
-                      ElevatedButton(
-                        onPressed:
-                            state is SaveWorkoutInfo && state.uploading
-                                ? null
-                                : () {
-                                  BlocProvider.of<SaveWorkoutBloc>(
-                                    context,
-                                  ).add(SaveWorkoutSwitch(false));
-                                },
-                        child: Text("Back"),
-                      ),
-                      ElevatedButton(
-                        onPressed:
-                            state is SaveWorkoutInfo && state.uploading
-                                ? null
-                                : () {
-                                  BlocProvider.of<SaveWorkoutBloc>(
-                                    context,
-                                  ).add(SaveWorkoutUpload());
-                                },
-                        child: Text("Save"),
+                      // Bottom action bar
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              blurRadius: 10,
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            if (!isInfo) ...[
+                              Expanded(
+                                child: SizedBox(
+                                  height: 52,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      BlocProvider.of<SaveWorkoutBloc>(
+                                        context,
+                                      ).add(SaveWorkoutSwitch(true));
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Next',
+                                      style: AppTextStyles.button.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ] else ...[
+                              Expanded(
+                                child: SizedBox(
+                                  height: 48,
+                                  child: OutlinedButton(
+                                    onPressed:
+                                        isUploading
+                                            ? null
+                                            : () {
+                                              BlocProvider.of<SaveWorkoutBloc>(
+                                                context,
+                                              ).add(SaveWorkoutSwitch(false));
+                                            },
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(
+                                        color: AppColors.primary,
+                                        width: 1.5,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Back',
+                                      style: AppTextStyles.button.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 52,
+                                  child: ElevatedButton(
+                                    onPressed:
+                                        isUploading
+                                            ? null
+                                            : () {
+                                              BlocProvider.of<SaveWorkoutBloc>(
+                                                context,
+                                              ).add(SaveWorkoutUpload());
+                                            },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Save',
+                                      style: AppTextStyles.button.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
                     ],
-                  ],
+                  ),
                 ),
+
+                if (isUploading) ...[
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                  ),
+                ],
               ],
             ),
           );

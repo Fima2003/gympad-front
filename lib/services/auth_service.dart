@@ -27,7 +27,7 @@ class AuthService {
       'userId': hive?.userId,
       'gymId': hive?.gymId,
       'auth_token': hive?.authToken,
-  'is_guest': hive?.isGuest == true ? 'true' : null,
+      'is_guest': hive?.isGuest == true ? 'true' : null,
     };
   }
 

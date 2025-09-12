@@ -115,7 +115,7 @@ class HiveWorkout extends HiveObject {
     this.endTime,
     required this.isUploaded,
     required this.isOngoing,
-  required this.createdWhileGuest,
+    required this.createdWhileGuest,
   });
 
   factory HiveWorkout.fromDomain(Workout workout) {
@@ -130,7 +130,7 @@ class HiveWorkout extends HiveObject {
       endTime: workout.endTime,
       isUploaded: workout.isUploaded,
       isOngoing: workout.isOngoing,
-  createdWhileGuest: workout.createdWhileGuest,
+      createdWhileGuest: workout.createdWhileGuest,
     );
   }
 
@@ -142,6 +142,6 @@ class HiveWorkout extends HiveObject {
     endTime: endTime,
     isUploaded: isUploaded,
     isOngoing: isOngoing,
-  createdWhileGuest: createdWhileGuest,
+    createdWhileGuest: createdWhileGuest,
   );
 }

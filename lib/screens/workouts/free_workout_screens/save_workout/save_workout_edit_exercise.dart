@@ -206,25 +206,36 @@ class _SaveWorkoutEditExerciseWidgetState
 
   @override
   void dispose() {
-    for (final c in _repsControllers.values) c.dispose();
-    for (final c in _weightControllers.values) c.dispose();
-    for (final c in _timeControllers.values) c.dispose();
+    for (final c in _repsControllers.values) {
+      c.dispose();
+    }
+    for (final c in _weightControllers.values) {
+      c.dispose();
+    }
+    for (final c in _timeControllers.values) {
+      c.dispose();
+    }
     super.dispose();
   }
 
   InputDecoration _decoration(String label, {bool error = false}) =>
       InputDecoration(
         labelText: label,
+        labelStyle: AppTextStyles.bodySmall.copyWith(
+          color: AppColors.textSecondary,
+        ),
         border: const OutlineInputBorder(),
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 10,
+        ),
         errorText: error ? '' : null,
         counterText: '',
       );
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     return AnimatedPadding(
       duration: const Duration(milliseconds: 200),
@@ -240,36 +251,62 @@ class _SaveWorkoutEditExerciseWidgetState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.exerciseName,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.exerciseName
+                              .replaceAll('_', ' ')
+                              .toUpperCase(),
+                          style: AppTextStyles.titleSmall.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      tooltip: 'Close',
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
+                      IconButton(
+                        tooltip: 'Close',
+                        icon: Icon(Icons.close, color: AppColors.primary),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Flexible(
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        for (var i = 0; i < _sets.length; i++) _buildSetRow(i),
+                        ...List.generate(
+                          _sets.length,
+                          (i) => _buildSetRow(i),
+                        ),
                         const SizedBox(height: 12),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
                             onPressed: _addSet,
-                            icon: const Icon(Icons.add),
-                            label: const Text('Add Set'),
+                            icon: Icon(Icons.add, color: AppColors.primary),
+                            label: Text(
+                              'Add Set',
+                              style: AppTextStyles.button.copyWith(
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: AppColors.primary,
+                                width: 1.2,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -280,16 +317,48 @@ class _SaveWorkoutEditExerciseWidgetState
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
+                      child: SizedBox(
+                        height: 48,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: AppColors.primary,
+                              width: 1.2,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: AppTextStyles.button.copyWith(
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: _hasInvalidInput ? null : _onDone,
-                        child: const Text('Done'),
+                      child: SizedBox(
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: _hasInvalidInput ? null : _onDone,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Done',
+                            style: AppTextStyles.button.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -312,98 +381,122 @@ class _SaveWorkoutEditExerciseWidgetState
     final invalidTime = int.tryParse(timeCtrl.text) == null;
     final invalidWeight = _parseWeight(weightCtrl.text) == null;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.2)),
+      ),
+      child: Column(
         children: [
-          SizedBox(
-            width: 32,
-            child: Center(
-              child: Text(
-                '#${index + 1}',
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Focus(
-                        onFocusChange: (hasFocus) {
-                          if (!hasFocus) _commitField(index);
-                        },
-                        child: TextField(
-                          controller: repsCtrl,
-                          keyboardType: TextInputType.number,
-                          maxLength: 4,
-                          decoration: _decoration('Reps', error: invalidReps),
-                          onChanged: (_) => setState(() {}),
-                          onEditingComplete: () => _commitField(index),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Focus(
-                        onFocusChange: (hasFocus) {
-                          if (!hasFocus) _commitField(index);
-                        },
-                        child: TextField(
-                          controller: weightCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          maxLength: 6,
-                          inputFormatters: [_WeightHalfStepsFormatter()],
-                          decoration: _decoration(
-                            'Weight',
-                            error: invalidWeight,
-                          ),
-                          onChanged: (_) => setState(() {}),
-                          onEditingComplete: () => _commitField(index),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Focus(
-                        onFocusChange: (hasFocus) {
-                          if (!hasFocus) _commitField(index);
-                        },
-                        child: TextField(
-                          controller: timeCtrl,
-                          keyboardType: TextInputType.number,
-                          maxLength: 5,
-                          decoration: _decoration('Time s', error: invalidTime),
-                          onChanged: (_) => setState(() {}),
-                          onEditingComplete: () => _commitField(index),
-                        ),
-                      ),
-                    ),
-                  ],
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    tooltip:
-                        _sets.length == 1
-                            ? 'Cannot remove last set'
-                            : 'Remove set',
-                    icon: Icon(
-                      Icons.delete,
-                      color: _sets.length == 1 ? Colors.grey : Colors.red,
+                child: Center(
+                  child: Text(
+                    '${index + 1}',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    onPressed:
-                        _sets.length == 1 ? null : () => _removeSet(index),
                   ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Set',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                tooltip:
+                    _sets.length == 1 ? 'Cannot remove last set' : 'Remove set',
+                icon: Icon(
+                  Icons.delete_outline,
+                  color:
+                      _sets.length == 1
+                          ? AppColors.textSecondary
+                          : Colors.redAccent,
+                ),
+                onPressed: _sets.length == 1 ? null : () => _removeSet(index),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Focus(
+                  onFocusChange: (hasFocus) {
+                    if (!hasFocus) _commitField(index);
+                  },
+                  child: TextField(
+                    controller: repsCtrl,
+                    keyboardType: TextInputType.number,
+                    maxLength: 4,
+                    decoration: _decoration(
+                      'Reps',
+                      error: invalidReps,
+                    ).copyWith(prefixIcon: const Icon(Icons.repeat, size: 18)),
+                    onChanged: (_) => setState(() {}),
+                    onEditingComplete: () => _commitField(index),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Focus(
+                  onFocusChange: (hasFocus) {
+                    if (!hasFocus) _commitField(index);
+                  },
+                  child: TextField(
+                    controller: weightCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    maxLength: 6,
+                    inputFormatters: [_WeightHalfStepsFormatter()],
+                    decoration: _decoration(
+                      'Weight (kg)',
+                      error: invalidWeight,
+                    ).copyWith(
+                      prefixIcon: const Icon(Icons.fitness_center, size: 18),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                    onEditingComplete: () => _commitField(index),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Focus(
+                  onFocusChange: (hasFocus) {
+                    if (!hasFocus) _commitField(index);
+                  },
+                  child: TextField(
+                    controller: timeCtrl,
+                    keyboardType: TextInputType.number,
+                    maxLength: 5,
+                    decoration: _decoration(
+                      'Time (s)',
+                      error: invalidTime,
+                    ).copyWith(prefixIcon: const Icon(Icons.timer, size: 18)),
+                    onChanged: (_) => setState(() {}),
+                    onEditingComplete: () => _commitField(index),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -418,14 +511,21 @@ class _WeightHalfStepsFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final text = newValue.text.replaceAll(',', '.');
-    if (text.isEmpty) return newValue;
+    if (text.isEmpty) {
+      return newValue;
+    }
     // Allow pure integers
-    if (RegExp(r'^\d+$').hasMatch(text)) return newValue;
+    if (RegExp(r'^\d+$').hasMatch(text)) {
+      return newValue;
+    }
     // Allow a trailing dot during typing
-    if (RegExp(r'^\d+\.$').hasMatch(text)) return newValue.copyWith(text: text);
-    // Allow X.5 only
-    if (RegExp(r'^\d+\.5$').hasMatch(text))
+    if (RegExp(r'^\d+\.$').hasMatch(text)) {
       return newValue.copyWith(text: text);
+    }
+    // Allow X.5 only
+    if (RegExp(r'^\d+\.5$').hasMatch(text)) {
+      return newValue.copyWith(text: text);
+    }
     return oldValue; // reject other changes
   }
 }

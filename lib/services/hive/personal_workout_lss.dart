@@ -30,11 +30,14 @@ class PersonalWorkoutLocalService {
     final box = await _openBox();
     try {
       await box.clear();
-      final hiveList = workouts
-          .map((w) => HivePersonalWorkout.fromDomain(
-                PersonalWorkout.fromResponse(w),
-              ))
-          .toList();
+      final hiveList =
+          workouts
+              .map(
+                (w) => HivePersonalWorkout.fromDomain(
+                  PersonalWorkout.fromResponse(w),
+                ),
+              )
+              .toList();
       // Use putAll with incremental keys for deterministic ordering.
       final entries = <int, HivePersonalWorkout>{};
       for (var i = 0; i < hiveList.length; i++) {
@@ -53,7 +56,11 @@ class PersonalWorkoutLocalService {
     try {
       return box.values.map((h) => h.toDomain()).toList(growable: false);
     } catch (e, st) {
-      log('Failed to load personal workouts from Hive', error: e, stackTrace: st);
+      log(
+        'Failed to load personal workouts from Hive',
+        error: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
@@ -64,7 +71,11 @@ class PersonalWorkoutLocalService {
     try {
       await box.clear();
     } catch (e, st) {
-      log('Failed to clear personal workouts Hive box', error: e, stackTrace: st);
+      log(
+        'Failed to clear personal workouts Hive box',
+        error: e,
+        stackTrace: st,
+      );
       rethrow;
     }
   }

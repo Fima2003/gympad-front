@@ -21,7 +21,8 @@ class FreeWorkoutSelectionView extends StatefulWidget {
   });
 
   @override
-  State<FreeWorkoutSelectionView> createState() => _FreeWorkoutSelectionViewState();
+  State<FreeWorkoutSelectionView> createState() =>
+      _FreeWorkoutSelectionViewState();
 }
 
 class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
@@ -45,7 +46,16 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
     }
     final all = dataState.exercises.values.toList();
     if (_searchQuery.isNotEmpty) {
-      _filtered = all.where((e) => e.name.toLowerCase().contains(_searchQuery.toLowerCase()) || e.muscleGroup.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+      _filtered =
+          all
+              .where(
+                (e) =>
+                    e.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                    e.muscleGroup.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ),
+              )
+              .toList();
     } else if (_selectedGroup != null) {
       _filtered = all.where((e) => e.muscleGroup == _selectedGroup).toList();
     } else {
@@ -79,7 +89,8 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
     final dataState = context.watch<DataBloc>().state;
     Set<String> muscleGroups = {};
     if (dataState is DataReady) {
-      muscleGroups = dataState.exercises.values.map((e) => e.muscleGroup).toSet();
+      muscleGroups =
+          dataState.exercises.values.map((e) => e.muscleGroup).toSet();
     }
 
     return Column(
@@ -92,9 +103,16 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
               child: TextButton.icon(
                 onPressed: _clearGroupSelection,
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
-                icon: Icon(Icons.arrow_back, color: AppColors.primary, size: 18),
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: AppColors.primary,
+                  size: 18,
+                ),
                 label: Text(
                   'Back to Muscle Groups',
                   style: AppTextStyles.bodyMedium.copyWith(
@@ -197,11 +215,7 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
                   color: AppColors.accent.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.category,
-                  color: AppColors.primary,
-                  size: 28,
-                ),
+                child: Icon(Icons.category, color: AppColors.primary, size: 28),
               ),
               const SizedBox(height: 12),
               Text(
@@ -210,10 +224,7 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
-              Text(
-                '$exerciseCount exercises',
-                style: AppTextStyles.bodySmall,
-              ),
+              Text('$exerciseCount exercises', style: AppTextStyles.bodySmall),
             ],
           ),
         ),
@@ -290,12 +301,18 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
                   color: AppColors.accent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.fitness_center, color: AppColors.primary, size: 32),
+                child: Icon(
+                  Icons.fitness_center,
+                  color: AppColors.primary,
+                  size: 32,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 e.name,
-                style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

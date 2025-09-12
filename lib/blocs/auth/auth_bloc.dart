@@ -20,7 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignInRequested>(_onSignInRequested);
     on<AuthSignOutRequested>(_onSignOutRequested);
     on<AuthRefreshRequested>(_onRefreshRequested);
-  on<AuthGuestRequested>(_onGuestRequested);
+    on<AuthGuestRequested>(_onGuestRequested);
   }
 
   Future<void> _onAppStarted(
@@ -145,7 +145,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     try {
       final deviceId = await DeviceIdentityService().getOrCreate();
-  await _authService.markGuestSelected(deviceId);
+      await _authService.markGuestSelected(deviceId);
       emit(AuthGuest(deviceId: deviceId));
     } catch (e, st) {
       _logger.warning('Failed to obtain device id for guest mode', e, st);

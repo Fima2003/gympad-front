@@ -113,11 +113,15 @@ class _FreeWorkoutSetViewState extends State<FreeWorkoutSetView> {
               const SizedBox(height: 24),
               // Timer pill
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 24,
+                ),
                 decoration: BoxDecoration(
-                  color: widget.isRunning
-                      ? AppColors.accent
-                      : AppColors.accent.withValues(alpha: 0.3),
+                  color:
+                      widget.isRunning
+                          ? AppColors.accent
+                          : AppColors.accent.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Text(
@@ -160,33 +164,39 @@ class _FreeWorkoutSetViewState extends State<FreeWorkoutSetView> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ...widget.completedSets.map((set) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Set ${set.setNumber}',
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.primary.withValues(alpha: 0.7),
+                      ...widget.completedSets.map(
+                        (set) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Set ${set.setNumber}',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.7,
                                   ),
                                 ),
-                                Text(
-                                  '${set.reps} reps × ${set.weight}kg',
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w500,
+                              ),
+                              Text(
+                                '${set.reps} reps × ${set.weight}kg',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                '${set.time.inMinutes}:${(set.time.inSeconds % 60).toString().padLeft(2, '0')}',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.5,
                                   ),
                                 ),
-                                Text(
-                                  '${set.time.inMinutes}:${(set.time.inSeconds % 60).toString().padLeft(2, '0')}',
-                                  style: AppTextStyles.bodySmall.copyWith(
-                                    color: AppColors.primary.withValues(alpha: 0.5),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

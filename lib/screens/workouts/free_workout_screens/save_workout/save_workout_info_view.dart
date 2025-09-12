@@ -57,27 +57,53 @@ class _SaveWorkoutInfoViewState extends State<SaveWorkoutInfoView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextField(
-          controller: _nameCtrl,
-          textInputAction: TextInputAction.next,
-          decoration: InputDecoration(
-            labelText: 'Workout Name',
-            border: const OutlineInputBorder(),
-            errorText: widget.nameError,
+        Text(
+          'Workout details',
+          style: AppTextStyles.titleMedium.copyWith(
+            color: AppColors.primary,
+            fontWeight: FontWeight.bold,
           ),
-          onChanged: widget.onNameChanged,
         ),
         const SizedBox(height: 12),
-        TextField(
-          controller: _descCtrl,
-          maxLines: 4,
-          minLines: 2,
-          decoration: InputDecoration(
-            labelText: 'Workout Description',
-            border: const OutlineInputBorder(),
-            errorText: widget.descriptionError,
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.accent.withValues(alpha: 0.25)),
           ),
-          onChanged: widget.onDescriptionChanged,
+          child: Column(
+            children: [
+              TextField(
+                controller: _nameCtrl,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  labelText: 'Workout Name',
+                  labelStyle: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  border: const OutlineInputBorder(),
+                  errorText: widget.nameError,
+                ),
+                onChanged: widget.onNameChanged,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _descCtrl,
+                maxLines: 5,
+                minLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Workout Description',
+                  labelStyle: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  border: const OutlineInputBorder(),
+                  errorText: widget.descriptionError,
+                ),
+                onChanged: widget.onDescriptionChanged,
+              ),
+            ],
+          ),
         ),
       ],
     );

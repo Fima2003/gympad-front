@@ -34,12 +34,12 @@ class MigrationResult {
   });
 
   factory MigrationResult.empty({bool skipped = false}) => MigrationResult(
-        succeeded: 0,
-        failed: 0,
-        failedIds: const [],
-        elapsed: Duration.zero,
-        skipped: skipped,
-      );
+    succeeded: 0,
+    failed: 0,
+    failedIds: const [],
+    elapsed: Duration.zero,
+    skipped: skipped,
+  );
 }
 
 /// Use case to migrate guest-created workouts (createdWhileGuest && !isUploaded)
@@ -55,11 +55,13 @@ class MigrateGuestWorkoutsUseCase {
     WorkoutHistoryLocalStorageService? history,
     WorkoutService? workoutService,
     CapabilitiesProvider? capabilitiesProvider,
-  })  : _history = history ?? WorkoutHistoryLocalStorageService(),
-        _workoutService = workoutService ?? WorkoutService(),
-        _caps = capabilitiesProvider ?? (() => Capabilities.guest);
+  }) : _history = history ?? WorkoutHistoryLocalStorageService(),
+       _workoutService = workoutService ?? WorkoutService(),
+       _caps = capabilitiesProvider ?? (() => Capabilities.guest);
 
-  Future<MigrationResult> run({void Function(MigrationProgress p)? onProgress}) async {
+  Future<MigrationResult> run({
+    void Function(MigrationProgress p)? onProgress,
+  }) async {
     final start = DateTime.now();
     if (!_caps().canUpload) {
       return MigrationResult.empty(skipped: true);
@@ -71,7 +73,9 @@ class MigrateGuestWorkoutsUseCase {
       _logger.warning('Migration: failed to load history', e, st);
       return MigrationResult.empty(skipped: true);
     }
-    final targets = all.where((w) => !w.isUploaded && w.createdWhileGuest).toList(growable: false);
+    final targets = all
+        .where((w) => !w.isUploaded && w.createdWhileGuest)
+        .toList(growable: false);
     if (targets.isEmpty) {
       return MigrationResult.empty();
     }
@@ -89,12 +93,14 @@ class MigrateGuestWorkoutsUseCase {
         } else {
           failedIds.add(w.id);
         }
-        onProgress?.call(MigrationProgress(
-          total: targets.length,
-          processed: processed,
-          succeeded: succeeded,
-          failed: failedIds.length,
-        ));
+        onProgress?.call(
+          MigrationProgress(
+            total: targets.length,
+            processed: processed,
+            succeeded: succeeded,
+            failed: failedIds.length,
+          ),
+        );
       }
       if (i + batchSize < targets.length) {
         await Future.delayed(Duration(milliseconds: (i ~/ batchSize) * 150));
@@ -107,7 +113,9 @@ class MigrateGuestWorkoutsUseCase {
       failedIds: failedIds,
       elapsed: DateTime.now().difference(start),
     );
-    _logger.info('Guest migration finished: total=${targets.length} succeeded=$succeeded failed=${failedIds.length} elapsed=${result.elapsed.inMilliseconds}ms');
+    _logger.info(
+      'Guest migration finished: total=${targets.length} succeeded=$succeeded failed=${failedIds.length} elapsed=${result.elapsed.inMilliseconds}ms',
+    );
     return result;
   }
 
@@ -119,7 +127,10 @@ class MigrateGuestWorkoutsUseCase {
       await _workoutService.uploadPendingWorkouts();
       // Check if it flipped to uploaded
       final refreshed = await _history.getAll();
-      final updated = refreshed.firstWhere((x) => x.id == w.id, orElse: () => w);
+      final updated = refreshed.firstWhere(
+        (x) => x.id == w.id,
+        orElse: () => w,
+      );
       return updated.isUploaded;
     } catch (e, st) {
       _logger.warning('Migration: upload attempt failed id=${w.id}', e, st);

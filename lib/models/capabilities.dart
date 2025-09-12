@@ -2,12 +2,9 @@
 /// Keep intentionally small; extend cautiously (additive) to avoid churn.
 class Capabilities {
   final bool canUpload; // Can send workouts to backend
-  final bool canSync;   // Can perform background sync / migrations
+  final bool canSync; // Can perform background sync / migrations
 
-  const Capabilities._({
-    required this.canUpload,
-    required this.canSync,
-  });
+  const Capabilities._({required this.canUpload, required this.canSync});
 
   static const Capabilities guest = Capabilities._(
     canUpload: false,

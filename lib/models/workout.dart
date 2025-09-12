@@ -24,7 +24,7 @@ class Workout {
     this.endTime,
     this.isUploaded = false,
     this.isOngoing = true,
-  this.createdWhileGuest = false,
+    this.createdWhileGuest = false,
   });
 
   Duration get totalDuration {
@@ -46,7 +46,7 @@ class Workout {
       'endTime': endTime?.toIso8601String(),
       'isUploaded': isUploaded,
       'isOngoing': isOngoing,
-  'createdWhileGuest': createdWhileGuest,
+      'createdWhileGuest': createdWhileGuest,
     };
   }
 
@@ -63,7 +63,7 @@ class Workout {
       endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
       isUploaded: json['isUploaded'] ?? false,
       isOngoing: json['isOngoing'] ?? true,
-  createdWhileGuest: json['createdWhileGuest'] ?? false,
+      createdWhileGuest: json['createdWhileGuest'] ?? false,
     );
   }
 

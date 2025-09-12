@@ -38,13 +38,13 @@ class HivePersonalWorkoutExercise extends HiveObject {
       );
 
   PersonalWorkoutExercise toDomain() => PersonalWorkoutExercise(
-        exerciseId: exerciseId,
-        name: name,
-        sets: sets,
-        reps: reps,
-        weight: weight,
-        restTime: restTime,
-      );
+    exerciseId: exerciseId,
+    name: name,
+    sets: sets,
+    reps: reps,
+    weight: weight,
+    restTime: restTime,
+  );
 }
 
 @HiveType(typeId: 1)
@@ -62,17 +62,17 @@ class HivePersonalWorkout extends HiveObject {
     required this.exercises,
   });
 
-  factory HivePersonalWorkout.fromDomain(PersonalWorkout w) => HivePersonalWorkout(
+  factory HivePersonalWorkout.fromDomain(PersonalWorkout w) =>
+      HivePersonalWorkout(
         name: w.name,
         description: w.description,
-        exercises: w.exercises
-            .map(HivePersonalWorkoutExercise.fromDomain)
-            .toList(),
+        exercises:
+            w.exercises.map(HivePersonalWorkoutExercise.fromDomain).toList(),
       );
 
   PersonalWorkout toDomain() => PersonalWorkout(
-        name: name,
-        description: description,
-        exercises: exercises.map((e) => e.toDomain()).toList(),
-      );
+    name: name,
+    description: description,
+    exercises: exercises.map((e) => e.toDomain()).toList(),
+  );
 }
