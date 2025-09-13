@@ -22,7 +22,7 @@ class SaveWorkoutExercisesView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-  ...exercises.asMap().entries.map((e) {
+        ...exercises.asMap().entries.map((e) {
           final ex = e.value;
           return Container(
             margin: const EdgeInsets.only(bottom: 12),

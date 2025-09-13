@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:gympad/services/api/i_api_service.dart';
 import 'package:gympad/services/logger_service.dart';
 
@@ -18,8 +17,6 @@ class ApiService implements IApiService {
 
   // Base domain for Firebase Functions
   static const String _baseDomain = 'ocycwbq2ka-uc.a.run.app';
-  // static const String _baseDomainLocal =
-  // 'http://127.0.0.1:5001/gympad-e44fc/us-central1/';
 
   void initialize() {
     // Note: baseUrl will be set dynamically per request
@@ -58,14 +55,8 @@ class ApiService implements IApiService {
     );
   }
 
-  final String _baseDomainLocal =
-      "http://127.0.0.1:5001/gympad-e44fc/us-central1/";
-
   /// Build Firebase Function URL for the given function name
   String _buildFunctionUrl(String functionName) {
-    // if (kDebugMode) {
-    //   return '$_baseDomainLocal$functionName';
-    // }
     return 'https://$functionName-$_baseDomain/';
   }
 

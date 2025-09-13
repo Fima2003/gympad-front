@@ -1,0 +1,134 @@
+<questionnaire>
+    <title>Questionnaire for new users</title>
+    <description>When the user first opens an app — he should be introduced with a questionnaire to
+        assess better his goals, fitness level, etc. He has an ability to skip the questionnaire</description>
+    <flow>
+        <on-start>
+            When the app starts, it should check if the user has answered questionnaire in the local
+            storage(hive) or if he decided to skip it. if he has answered or if he decided to skip -
+            navigate to main screen. Otherwise - navigate to questionnaire page. Doesn't matter if
+            the user is logged in or no - this should be the first screen he sees
+        </on-start>
+        <on-questionnaire-begin-view>
+            The first screen the user should see should have a brief explanation of why the
+            questionnaire is important and how it will help tailor the app experience to his needs.
+            Say that it contains 12 questions including this one, and takes 3-5 minutes on average.
+            Then, at the bottom there should be two buttons: "Start" or "do it later". Update the choice in local storage
+        </on-questionnaire-begin-view>
+        <questionnaire-view>
+            <section> Goals &amp; Experience <question>
+                    <title>
+                        What is your primary fitness goal? (Select one)
+                    </title>
+                    <options>
+                        <option>
+                            Increase muscle size (Hypertrophy)
+                        </option>
+                        <option>
+                            Increase strength (Lifting heavier weights)
+                        </option>
+                        <option>
+                            Improve cardiovascular endurance
+                        </option>
+                        <option>
+                            Lose weight / Fat loss
+                        </option>
+                        <option>
+                            Improve overall health and fitness
+                        </option>
+                        <option>
+                            Recover from an injury (Rehabilitation)
+                        </option>
+                    </options>
+                </question>
+                <question>
+                    <title>What is your current level of workout experience? (Select one)</title>
+                    <options>
+                        <option>Beginner (Little to no experience)</option>
+                        <option>Intermediate (I have been working out consistently for at least 6
+                months.)</option>
+                        <option>Advanced (I have been consistently training for over 2 years.)</option>
+                    </options>
+                </question>
+            </section>
+            <section> Health &amp; Safety <question>
+                    <title>Have you been diagnosed with any of the following health conditions?
+                (Select all that apply):</title>
+                    <options>
+                        <option>Heart disease</option>
+                        <option>High blood pressure</option>
+                        <option>Diabetes</option>
+                        <option>Joint conditions (e.g., arthritis)</option>
+                        <option>Respiratory issues (e.g., asthma)</option>
+                        <option>Prefer not to say</option>
+                        <option>I have none of the above</option>
+                    </options>
+                </question>
+                <question>
+                    <title>Do you have any current or past injuries that affect your ability to
+                exercise?</title>
+                    <options>
+                        <option>Shoulder</option>
+                        <option>Lower back</option>
+                        <option>Knee</option>
+                        <option>Ankle</option>
+                        <option>Wrist</option>
+                        <option>Prefer not to say</option>
+                        <option>I have no injuries</option>
+                    </options>
+                </question>
+            </section>
+            <section> Availability &amp; Preferences <question>
+                    <title>How many days per week can you commit to working out?</title>
+                    <options>
+                        <option>1-2 days</option>
+                        <option>3-4 days</option>
+                        <option>5-7 days</option>
+                    </options>
+                </question>
+                <question>
+                    <title>How long are your typical workout sessions?</title>
+                    <options>
+                        <option>Less than 30 minutes</option>
+                        <option>30-60 minutes</option>
+                        <option>60-90 minutes</option>
+                        <option>More than 90 minutes</option>
+                    </options>
+                </question>
+                <question>
+                    <title>Which types of exercise do you enjoy?</title>
+                    <options>
+                        <option>Weightlifting / Strength training</option>
+                        <option>Bodyweight exercises</option>
+                        <option>Running / Jogging</option>
+                        <option>Swimming</option>
+                        <option>Cycling</option>
+                        <option>Yoga / Pilates</option>
+                        <option>Team sports</option>
+                    </options>
+                </question>
+            </section>
+            <section>
+                <question>
+                    <title>Do you have access to a gym or workout equipment?</title>
+                    <options>
+                        <option>Yes, I have access to a fully equipped gym</option>
+                        <option>Yes, I have some basic equipment at home (e.g., dumbbells,
+                            resistance bands)</option>
+                        <option>No, I prefer bodyweight exercises or outdoor activities</option>
+                    </options>
+                </question>
+            </section>
+        </questionnaire-view>
+        <on-completion>
+            After the user completes the questionnaire or decides to skip it - save his choice in
+            local storage(hive), send it over api to back end and navigate to main screen
+        </on-completion>
+    </flow>
+    <UI>
+        Don't put everything on one screen - split it into multiple sections with one question per
+        view; with a progress indicator at the top. Each section should have a "Next" button to
+        proceed to the next question and "Back" button to return to the previous one. At the end of
+        the questionnaire, provide a "Submit" button to finalize the responses.
+    </UI>
+</questionnaire>

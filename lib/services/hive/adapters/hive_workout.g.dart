@@ -119,7 +119,7 @@ class HiveWorkoutAdapter extends TypeAdapter<HiveWorkout> {
       endTime: fields[4] as DateTime?,
       isUploaded: fields[5] as bool,
       isOngoing: fields[6] as bool,
-      createdWhileGuest: (fields[7] as bool?) ?? false,
+      createdWhileGuest: fields[7] as bool,
     );
   }
 

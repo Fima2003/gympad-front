@@ -20,7 +20,7 @@ class HiveUserAuthAdapter extends TypeAdapter<HiveUserAuth> {
       userId: fields[0] as String?,
       gymId: fields[1] as String?,
       authToken: fields[2] as String?,
-      isGuest: (fields[3] as bool?) ?? false,
+      isGuest: fields[3] as bool,
     );
   }
 

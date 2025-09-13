@@ -32,6 +32,8 @@ import 'blocs/audio/audio_bloc.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
 import 'models/workout.dart';
+import 'screens/questionnaire/questionnaire_screen.dart';
+import 'services/hive/questionnaire_lss.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -85,6 +87,13 @@ class _MyAppState extends State<MyApp> {
       initialLocation: '/',
       routes: [
         GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+        GoRoute(
+          path: '/questionnaire',
+          builder: (context, state) {
+            final force = state.uri.queryParameters['force'] == 'true';
+            return QuestionnaireScreen(force: force);
+          },
+        ),
         GoRoute(path: '/main', builder: (context, state) => const MainScreen()),
         GoRoute(
           path: '/login',
@@ -258,6 +267,28 @@ class _SplashScreenState extends State<SplashScreen> {
   final AppLogger _logger = AppLogger();
   bool _isLoading = true;
   bool _navigated = false;
+  final _questionnaireLss = QuestionnaireLocalStorageService();
+  final _questionnaireApi = QuestionnaireApiService();
+
+  Future<void> _retryQuestionnaireUploadIfPending() async {
+    try {
+      final q = await _questionnaireLss.load();
+      if (q != null && (q.completed || q.skipped) && !(q.uploaded)) {
+        final req = QuestionnaireSubmitRequest(
+          skipped: q.skipped,
+          completed: q.completed,
+          completedAt: q.completedAt,
+          answers: q.answers,
+        );
+        final resp = await _questionnaireApi.submit(req);
+        if (resp.success) {
+          await _questionnaireLss.save(q.copyWith(uploaded: true));
+        }
+      }
+    } catch (_) {
+      // ignore
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -301,12 +332,34 @@ class _SplashScreenState extends State<SplashScreen> {
             if (state is AuthAuthenticated || state is AuthGuest) {
               _navigated = true;
               if (!mounted) return;
-              // Use GoRouter for navigation (page-based Navigator) instead of imperative pushReplacement
-              context.go('/main');
+              // fire-and-forget retry of questionnaire upload if pending
+              unawaited(_retryQuestionnaireUploadIfPending());
+              // Before navigating to main/login, ensure questionnaire flow is satisfied
+              () async {
+                final q = await _questionnaireLss.load();
+                final shouldShowQ =
+                    !(q?.completed == true || q?.skipped == true);
+                if (!mounted) return;
+                if (shouldShowQ) {
+                  context.go('/questionnaire');
+                } else {
+                  context.go('/main');
+                }
+              }();
             } else if (state is AuthUnauthenticated) {
               _navigated = true;
               if (!mounted) return;
-              context.go('/login');
+              () async {
+                final q = await _questionnaireLss.load();
+                final shouldShowQ =
+                    !(q?.completed == true || q?.skipped == true);
+                if (!mounted) return;
+                if (shouldShowQ) {
+                  context.go('/questionnaire');
+                } else {
+                  context.go('/login');
+                }
+              }();
             } else if (state is AuthError) {
               ScaffoldMessenger.of(
                 context,

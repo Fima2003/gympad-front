@@ -282,10 +282,7 @@ class _SaveWorkoutEditExerciseWidgetState
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        ...List.generate(
-                          _sets.length,
-                          (i) => _buildSetRow(i),
-                        ),
+                        ...List.generate(_sets.length, (i) => _buildSetRow(i)),
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,

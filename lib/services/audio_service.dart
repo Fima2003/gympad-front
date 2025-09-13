@@ -1,6 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:audio_session/audio_session.dart';
+import 'package:gympad/services/logger_service.dart';
 
 /// Centralized audio service to play UI sounds.
 ///
@@ -14,41 +13,24 @@ class AudioService {
 
   final AudioPlayer _tickPlayer = AudioPlayer();
   final AudioPlayer _startPlayer = AudioPlayer();
-  bool _sessionConfigured = false;
+  final AppLogger _logger = AppLogger();
 
-  Future<void> _setupAudioSession() async {
-    if (_sessionConfigured) return;
+  Future<void> playTick() async {
+    // TODO: Wire actual sound once assets are finalized.
+    // Keeping method to avoid breaking call sites.
     try {
-      final session = await AudioSession.instance;
-      await session.configure(AudioSessionConfiguration.music());
-      _sessionConfigured = true;
+      // Placeholder no-op; intentionally not playing audio yet.
     } catch (e, st) {
-      debugPrint('AudioSession setup error: $e\n$st');
+      _logger.error('playTick error', e, st);
     }
   }
 
-  Future<void> playTick() async {
-    print("World");
-    // if (kIsWeb) return;
-    // await _setupAudioSession();
-    // try {
-    //   await _tickPlayer.setAsset('assets/sounds/tick.wav');
-    //   await _tickPlayer.play();
-    // } catch (e, st) {
-    //   debugPrint('playTick error: $e\n$st');
-    // }
-  }
-
   Future<void> playStart() async {
-    print("Hello");
-    //   if (kIsWeb) return;
-    //   await _setupAudioSession();
-    //   try {
-    //     await _startPlayer.setAsset('assets/sounds/start.wav');
-    //     await _startPlayer.play();
-    //   } catch (e, st) {
-    // debugPrint('playStart error: $e\n$st');
-    //   }
+    try {
+      // Placeholder no-op; intentionally not playing audio yet.
+    } catch (e, st) {
+      _logger.error('playStart error', e, st);
+    }
   }
 
   Future<void> dispose() async {

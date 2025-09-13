@@ -3,6 +3,7 @@ import 'adapters/hive_personal_workout.dart';
 import 'adapters/hive_workout.dart';
 import 'adapters/hive_user.dart';
 import 'adapters/hive_custom_workout.dart';
+import 'adapters/hive_questionnaire.dart';
 
 /// Central place to initialize Hive & register all adapters exactly once.
 class HiveInitializer {
@@ -42,6 +43,10 @@ class HiveInitializer {
     }
     if (!Hive.isAdapterRegistered(HiveCustomWorkoutAdapter().typeId)) {
       Hive.registerAdapter<HiveCustomWorkout>(HiveCustomWorkoutAdapter());
+    }
+    // The one below is 8(started from 0)
+    if (!Hive.isAdapterRegistered(HiveQuestionnaireAdapter().typeId)) {
+      Hive.registerAdapter<HiveQuestionnaire>(HiveQuestionnaireAdapter());
     }
 
     _initialized = true;

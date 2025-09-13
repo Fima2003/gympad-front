@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gympad/blocs/auth/auth_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:gympad/constants/app_styles.dart';
 
 class MeScreen extends StatefulWidget {
   const MeScreen({super.key});
@@ -15,20 +17,44 @@ class _MeScreenState extends State<MeScreen> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {},
       builder: (context, state) {
+        Widget content;
         if (state is AuthAuthenticated) {
-          return Center(child: Text('User ID: ${state.userId}'));
+          content = Center(child: Text('User ID: ${state.userId}'));
         } else if (state is AuthGuest) {
-          return Center(
+          content = Center(
             child: Text('Guest User - Device ID: ${state.deviceId}'),
           );
         } else if (state is AuthUnauthenticated) {
-          return const Center(child: Text('Not signed in'));
+          content = const Center(child: Text('Not signed in'));
         } else if (state is AuthLoading) {
-          return const Center(child: CircularProgressIndicator());
+          content = const Center(child: CircularProgressIndicator());
         } else if (state is AuthError) {
-          return Center(child: Text('Error: ${state.message}'));
+          content = Center(child: Text('Error: ${state.message}'));
+        } else {
+          content = const SizedBox.shrink();
         }
-        return const SizedBox.shrink();
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => context.go('/questionnaire?force=true'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    shape: const StadiumBorder(),
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                  child: const Text('Fill out questionnaire'),
+                ),
+              ),
+            ),
+            Expanded(child: content),
+          ],
+        );
       },
     );
   }
