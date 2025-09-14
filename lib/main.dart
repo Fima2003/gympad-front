@@ -275,8 +275,6 @@ class _SplashScreenState extends State<SplashScreen> {
       final q = await _questionnaireLss.load();
       if (q != null && (q.completed || q.skipped) && !(q.uploaded)) {
         final req = QuestionnaireSubmitRequest(
-          skipped: q.skipped,
-          completed: q.completed,
           completedAt: q.completedAt,
           answers: q.answers,
         );

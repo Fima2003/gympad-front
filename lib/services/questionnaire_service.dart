@@ -32,8 +32,6 @@ class QuestionnaireService {
   Future<void> markCompletedAndSubmit() async {
     final stored = await _lss.markCompleted();
     final req = QuestionnaireSubmitRequest(
-      skipped: stored.skipped,
-      completed: true,
       completedAt: stored.completedAt,
       answers: stored.answers,
     );
@@ -50,8 +48,6 @@ class QuestionnaireService {
     if (stored == null) return;
     if (stored.completed && !stored.uploaded) {
       final req = QuestionnaireSubmitRequest(
-        skipped: stored.skipped,
-        completed: stored.completed,
         completedAt: stored.completedAt,
         answers: stored.answers,
       );

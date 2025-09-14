@@ -21,7 +21,7 @@ class QuestionnaireApiService {
     return await _api.post<QuestionnaireSubmitRequest, void>(
       'questionnaireSubmit',
       body: request,
-      auth: false, // Questionnaire may be shown before auth
+      auth: true,
     );
   }
 }
