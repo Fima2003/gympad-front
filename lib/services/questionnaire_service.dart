@@ -5,15 +5,15 @@ import 'package:gympad/services/hive/questionnaire_lss.dart';
 /// Service facade that coordinates questionnaire persistence (Hive) and network (API).
 /// BLoC should depend only on this service, not on storage or API directly.
 class QuestionnaireService {
-  final QuestionnaireLocalStorageService _lss;
-  final QuestionnaireApiService _api;
-  final HiveQuestionnaire q = HiveQuestionnaire();
+  static final QuestionnaireService _instance =
+      QuestionnaireService._internal();
+  factory QuestionnaireService() => _instance;
+  QuestionnaireService._internal();
 
-  QuestionnaireService({
-    QuestionnaireLocalStorageService? lss,
-    QuestionnaireApiService? api,
-  }) : _lss = lss ?? QuestionnaireLocalStorageService(),
-       _api = api ?? QuestionnaireApiService();
+  final QuestionnaireLocalStorageService _lss =
+      QuestionnaireLocalStorageService();
+  final QuestionnaireApiService _api = QuestionnaireApiService();
+  final HiveQuestionnaire q = HiveQuestionnaire();
 
   // Load current questionnaire state from local storage
   Future<HiveQuestionnaire?> load() => _lss.load();
