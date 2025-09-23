@@ -15,3 +15,10 @@ class AuthSignOutRequested extends AuthEvent {}
 class AuthRefreshRequested extends AuthEvent {}
 
 class AuthGuestRequested extends AuthEvent {}
+
+class AuthQuestionnaireCompleted extends AuthEvent {
+  final bool completed;
+  const AuthQuestionnaireCompleted(this.completed);
+  @override
+  List<Object?> get props => [completed];
+}

@@ -457,8 +457,17 @@ class WorkoutService {
     }
   }
 
-  Future savePersonalWorkout(CreatePersonalWorkoutRequest req) async {
+  Future<bool> savePersonalWorkout(CreatePersonalWorkoutRequest req) async {
     final resp = await WorkoutApiService().createPersonalWorkout(req);
     return resp.success;
+  }
+
+  Future<void> clearAll() async {
+    await _currentWorkoutStorage.clear();
+    await _historyStorage.clear();
+    await _personalLocal.clear();
+    _currentWorkout = null;
+    _workoutToFollow = null;
+    _logger.info('Cleared all workout data');
   }
 }

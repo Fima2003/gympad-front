@@ -4,6 +4,8 @@ import 'package:gympad/blocs/questionnaire/questionnaire_bloc.dart';
 import 'package:gympad/constants/app_styles.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../blocs/auth/auth_bloc.dart';
+
 part 'begin_view.dart';
 part 'single_choice_question.dart';
 part 'multi_choice_question.dart';
@@ -42,14 +44,10 @@ class _QuestionnaireManagerState extends State<_QuestionnaireManager> {
       body: SafeArea(
         child: BlocConsumer<QuestionnaireBloc, QuestionnaireState>(
           listener: (context, state) {
-            // If user pressed "Do it later", always navigate away.
-            if (state.skipped && mounted) {
-              context.go('/main');
-              return;
-            }
-            // If completed navigate away.
-            if (state.completed && mounted) {
-              context.go('/main');
+            // If user pressed "Do it later" or the user completed the questionnaire, navigate to main.
+            if ((state.skipped || state.completed) && mounted) {
+              context.read<AuthBloc>().add(AuthQuestionnaireCompleted(true));
+              context.go('/workout');
             }
           },
           builder: (context, state) {
@@ -268,6 +266,7 @@ class _QuestionnaireManagerState extends State<_QuestionnaireManager> {
       final selected = state.answers[qid] ?? const <String>[];
       final canProceed =
           multiIds.contains(qid) ? selected.isNotEmpty : selected.length == 1;
+      final submitting = isLast && state.loading;
       return _QuestionWrapper(
         onBack: () async {
           if (index == 0) {
@@ -297,6 +296,7 @@ class _QuestionnaireManagerState extends State<_QuestionnaireManager> {
         },
         isLast: isLast,
         enabled: canProceed,
+        submitting: submitting,
         child: item,
       );
     });
@@ -331,12 +331,14 @@ class _QuestionWrapper extends StatelessWidget {
   final VoidCallback onNext;
   final bool isLast;
   final bool enabled;
+  final bool submitting;
   const _QuestionWrapper({
     required this.child,
     required this.onBack,
     required this.onNext,
     required this.isLast,
     required this.enabled,
+    required this.submitting,
   });
 
   @override
@@ -350,7 +352,7 @@ class _QuestionWrapper extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: onBack,
+                  onPressed: submitting ? null : onBack,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: BorderSide(
@@ -365,14 +367,36 @@ class _QuestionWrapper extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: enabled ? onNext : null,
+                  onPressed: enabled && !submitting ? onNext : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.white,
                     shape: const StadiumBorder(),
                     minimumSize: const Size.fromHeight(48),
                   ),
-                  child: Text(isLast ? 'Submit' : 'Next'),
+                  child:
+                      isLast
+                          ? (submitting
+                              ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Text('Submitting...'),
+                                ],
+                              )
+                              : const Text('Submit'))
+                          : const Text('Next'),
                 ),
               ),
             ],

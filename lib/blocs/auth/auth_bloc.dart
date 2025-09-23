@@ -21,6 +21,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignOutRequested>(_onSignOutRequested);
     on<AuthRefreshRequested>(_onRefreshRequested);
     on<AuthGuestRequested>(_onGuestRequested);
+    on<AuthQuestionnaireCompleted>(_onQuestionnaireCompleted);
   }
 
   Future<void> _onAppStarted(
@@ -35,13 +36,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
       final local = await _authService.getLocalUserData();
       final userId = local['userId'];
-      final isGuest = local['is_guest'] == 'true';
+      final isGuest = local['isGuest'] == 'true';
       if (userId != null) {
         emit(
           AuthAuthenticated(
             userId: userId,
             gymId: local['gymId'],
-            authToken: local['auth_token'],
+            authToken: local['authToken'],
+            completedQuestionnaire: local['completedQuestionnaire'] == 'true',
           ),
         );
       } else if (isGuest) {
@@ -75,7 +77,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           AuthAuthenticated(
             userId: result['userId'] as String,
             gymId: result['gymId'] as String?,
-            authToken: (await _authService.getLocalUserData())['auth_token'],
+            authToken: (await _authService.getLocalUserData())['authToken'],
+            completedQuestionnaire: result['completedQuestionnaire'],
           ),
         );
       } else {
@@ -108,7 +111,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           AuthAuthenticated(
             userId: userId,
             gymId: local['gymId'],
-            authToken: local['auth_token'],
+            authToken: local['authToken'],
           ),
         );
       } else {
@@ -130,7 +133,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           AuthAuthenticated(
             userId: userId,
             gymId: local['gymId'],
-            authToken: local['auth_token'],
+            authToken: local['authToken'],
           ),
         );
       }
@@ -151,6 +154,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _logger.warning('Failed to obtain device id for guest mode', e, st);
       // Fallback to placeholder (not ideal but keeps app functional)
       emit(const AuthGuest(deviceId: 'unknown-device'));
+    }
+  }
+
+  Future<void> _onQuestionnaireCompleted(
+    AuthQuestionnaireCompleted event,
+    Emitter<AuthState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is AuthAuthenticated) {
+      emit(
+        AuthAuthenticated(
+          userId: currentState.userId,
+          gymId: currentState.gymId,
+          authToken: currentState.authToken,
+          completedQuestionnaire: event.completed,
+        ),
+      );
     }
   }
 }

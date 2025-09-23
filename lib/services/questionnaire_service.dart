@@ -28,6 +28,13 @@ class QuestionnaireService {
     await _lss.markSkipped();
   }
 
+  Future<void> markCompleted(bool completed) async {
+    final cur = await _lss.load();
+    if (cur != null) {
+      await _lss.save(cur.copyWith(completed: completed));
+    }
+  }
+
   // Mark completed locally and attempt to submit; mark uploaded flag accordingly
   Future<void> markCompletedAndSubmit() async {
     final stored = await _lss.markCompleted();
@@ -56,5 +63,9 @@ class QuestionnaireService {
         await _lss.save(stored.copyWith(uploaded: true));
       }
     }
+  }
+
+  Future<void> clear() async {
+    await _lss.clear();
   }
 }

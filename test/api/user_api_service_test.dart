@@ -38,7 +38,11 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => ApiResponse.success(
-            data: UserPartialResponse(name: 'John Doe', gymId: '123'),
+            data: UserPartialResponse(
+              name: 'John Doe',
+              gymId: '123',
+              completedQuestionnaire: false,
+            ),
           ),
         );
 
@@ -108,7 +112,11 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => ApiResponse.success(
-          data: UserPartialResponse(name: 'John Doe', gymId: '123'),
+          data: UserPartialResponse(
+            name: 'John Doe',
+            gymId: '123',
+            completedQuestionnaire: false,
+          ),
         ),
       );
 

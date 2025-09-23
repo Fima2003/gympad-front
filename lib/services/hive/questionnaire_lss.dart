@@ -1,21 +1,19 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'adapters/hive_questionnaire.dart';
-import 'hive_initializer.dart';
 import 'package:gympad/services/logger_service.dart';
 
 class QuestionnaireLocalStorageService {
   static const String _boxName = 'questionnaire_box';
   static const String _key = 'status';
+  final logger = AppLogger();
 
   Future<Box<HiveQuestionnaire>> _box() async {
-    await HiveInitializer.init();
     try {
       return Hive.isBoxOpen(_boxName)
           ? Hive.box<HiveQuestionnaire>(_boxName)
           : await Hive.openBox<HiveQuestionnaire>(_boxName);
     } catch (e, st) {
       // Attempt recovery from incompatible/corrupted box by deleting and reopening
-      final logger = AppLogger();
       logger.error('Questionnaire box open failed, recovering', e, st);
       try {
         await Hive.deleteBoxFromDisk(_boxName);

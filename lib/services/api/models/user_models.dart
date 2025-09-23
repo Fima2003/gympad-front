@@ -2,12 +2,18 @@
 class UserPartialResponse {
   final String name;
   final String? gymId;
+  final bool completedQuestionnaire;
 
-  UserPartialResponse({required this.name, this.gymId});
+  UserPartialResponse({
+    required this.name,
+    required this.completedQuestionnaire,
+    this.gymId,
+  });
 
   factory UserPartialResponse.fromJson(Map<String, dynamic> json) {
     return UserPartialResponse(
       name: json['name'] as String,
+      completedQuestionnaire: json['completedQuestionnaire'] as bool,
       gymId: json['gymId'] as String?,
     );
   }

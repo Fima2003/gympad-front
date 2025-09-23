@@ -5,13 +5,15 @@ import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gympad/blocs/analytics/analytics_bloc.dart';
-import 'package:gympad/firebase_options.dart';
-import 'package:gympad/models/workout_exercise.dart';
-import 'package:gympad/services/api/api.dart';
+
+import 'blocs/analytics/analytics_bloc.dart';
 import 'blocs/personal_workouts/personal_workout_bloc.dart';
+import 'firebase_options.dart';
 import 'models/custom_workout.dart';
 import 'models/personal_workout.dart';
+import 'models/workout_exercise.dart';
+import 'screens/intro/intro_screen.dart';
+import 'screens/splash.dart';
 import 'screens/workouts/free_workout_screens/save_workout/save_workout_screen.dart';
 import 'screens/workouts/well_done_workout_screen.dart';
 import 'screens/workouts/custom_workout_screens/custom_workout_detail_screen.dart';
@@ -19,6 +21,7 @@ import 'screens/workouts/custom_workout_screens/cworkout_run/cworkout_run_screen
 import 'screens/workouts/custom_workout_screens/prepare_to_start_workout_screen.dart';
 import 'screens/workouts/free_workout_screens/free_workout_run/free_workout_run_screen.dart';
 import 'screens/workouts/personal_workout_screens/personal_workout_detail_screen.dart';
+import 'services/api/api_service.dart';
 import 'services/hive/hive_initializer.dart';
 import 'services/logger_service.dart';
 import 'constants/app_styles.dart';
@@ -33,7 +36,6 @@ import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
 import 'models/workout.dart';
 import 'screens/questionnaire/questionnaire_screen.dart';
-import 'services/hive/questionnaire_lss.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -86,7 +88,11 @@ class _MyAppState extends State<MyApp> {
     _router = GoRouter(
       initialLocation: '/',
       routes: [
-        GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+        GoRoute(path: '/', builder: (context, state) => const Splash()),
+        GoRoute(
+          path: '/intro',
+          builder: (context, state) => const IntroScreen(),
+        ),
         GoRoute(
           path: '/questionnaire',
           builder: (context, state) {
@@ -250,162 +256,6 @@ class _MyAppState extends State<MyApp> {
             scaffoldBackgroundColor: AppColors.background,
           ),
           routerConfig: _router,
-        ),
-      ),
-    );
-  }
-}
-
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  final AppLogger _logger = AppLogger();
-  bool _isLoading = true;
-  bool _navigated = false;
-  final _questionnaireLss = QuestionnaireLocalStorageService();
-  final _questionnaireApi = QuestionnaireApiService();
-
-  Future<void> _retryQuestionnaireUploadIfPending() async {
-    try {
-      final q = await _questionnaireLss.load();
-      if (q != null && (q.completed || q.skipped) && !(q.uploaded)) {
-        final req = QuestionnaireSubmitRequest(
-          completedAt: q.completedAt,
-          answers: q.answers,
-        );
-        final resp = await _questionnaireApi.submit(req);
-        if (resp.success) {
-          await _questionnaireLss.save(q.copyWith(uploaded: true));
-        }
-      }
-    } catch (_) {
-      // ignore
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Handle hot reload scenario: if data already loaded, kick auth.
-    final dataState = context.read<DataBloc>().state;
-    if (_isLoading) {
-      // Schedule after build to avoid setState during build warnings.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _maybeKickAuth(dataState);
-      });
-    }
-  }
-
-  void _maybeKickAuth(DataState dataState) {
-    if (dataState is DataReady) {
-      if (_isLoading) {
-        _logger.debug('Splash: data ready, triggering auth');
-        context.read<AuthBloc>().add(AuthAppStarted());
-        setState(() => _isLoading = false);
-      }
-    } else if (dataState is DataError) {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  // No deep-link error dialogs needed; keeping UI clean.
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<DataBloc, DataState>(
-          listener: (context, dataState) {
-            _maybeKickAuth(dataState);
-          },
-        ),
-        BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (_navigated) return;
-            if (state is AuthAuthenticated || state is AuthGuest) {
-              _navigated = true;
-              if (!mounted) return;
-              // fire-and-forget retry of questionnaire upload if pending
-              unawaited(_retryQuestionnaireUploadIfPending());
-              // Before navigating to main/login, ensure questionnaire flow is satisfied
-              () async {
-                final q = await _questionnaireLss.load();
-                final shouldShowQ =
-                    !(q?.completed == true || q?.skipped == true);
-                if (!mounted) return;
-                if (shouldShowQ) {
-                  context.go('/questionnaire');
-                } else {
-                  context.go('/main');
-                }
-              }();
-            } else if (state is AuthUnauthenticated) {
-              _navigated = true;
-              if (!mounted) return;
-              () async {
-                final q = await _questionnaireLss.load();
-                final shouldShowQ =
-                    !(q?.completed == true || q?.skipped == true);
-                if (!mounted) return;
-                if (shouldShowQ) {
-                  context.go('/questionnaire');
-                } else {
-                  context.go('/login');
-                }
-              }();
-            } else if (state is AuthError) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            }
-          },
-        ),
-      ],
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: Center(
-          child: BlocBuilder<DataBloc, DataState>(
-            builder: (context, dataState) {
-              final authState = context.watch<AuthBloc>().state;
-              final loading =
-                  dataState is! DataReady ||
-                  authState is AuthLoading ||
-                  _isLoading;
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'GymPad',
-                    style: AppTextStyles.titleLarge.copyWith(
-                      fontSize: 48,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  if (loading)
-                    CircularProgressIndicator(color: AppColors.primary)
-                  else
-                    Icon(Icons.nfc, size: 64, color: AppColors.primary),
-                  const SizedBox(height: 16),
-                  Text(
-                    dataState is DataError
-                        ? 'Failed to load data'
-                        : loading
-                        ? 'Loading gym data...'
-                        : 'Initializing...',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
         ),
       ),
     );

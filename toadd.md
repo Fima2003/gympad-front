@@ -7,4 +7,5 @@
 | Feat | Show weight in break screen                            | Low        | Done        |
 | Feat | Split UI layer to Screen and View manager              | High       | Done        |
 | Bug  | In a new exercise, repeats the previous weight         | High       | Not Started |
-| Bug  | When app loads, even if there is an incomplete workout, it later loads Personal Workouts, and the workoutState gets overwritten. So the user won't be able to continue his workout. | High | Done |
+| Bug  | When app loads, even if there is an incomplete workout, it later loads Personal Workouts, and the workoutState gets overwritten. So the user won't be able to continue his workout.                                   | High       | Done        |
+| Flow | Questionnaire should go after the login                | High       | Testing     |

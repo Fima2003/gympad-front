@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'logger_service.dart';
 import 'hive/user_auth_lss.dart';
 import './api/user_api_service.dart';
+import 'questionnaire_service.dart';
+import 'workout_service.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -14,6 +16,8 @@ class AuthService {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final UserApiService _userApiService = UserApiService();
+  final QuestionnaireService _questionnaireService = QuestionnaireService();
+  final WorkoutService _workoutService = WorkoutService();
 
   final AppLogger _logger = AppLogger();
 
@@ -21,13 +25,15 @@ class AuthService {
 
   /// Check locally saved user data (userId and gymId exist)
   Future<Map<String, String?>> getLocalUserData() async {
-    final hive = await _userAuthStorage.load();
-    _logger.debug('Retrieved userId from Hive: ${hive?.userId}');
+    final hiveUser = await _userAuthStorage.load();
+    final hiveQuestionnaire = await _questionnaireService.load();
+    _logger.debug('Retrieved userId from Hive: ${hiveUser?.userId}');
     return {
-      'userId': hive?.userId,
-      'gymId': hive?.gymId,
-      'auth_token': hive?.authToken,
-      'is_guest': hive?.isGuest == true ? 'true' : null,
+      'userId': hiveUser?.userId,
+      'gymId': hiveUser?.gymId,
+      'authToken': hiveUser?.authToken,
+      'isGuest': hiveUser?.isGuest == true ? 'true' : null,
+      'completedQuestionnaire': hiveQuestionnaire?.completed.toString(),
     };
   }
 
@@ -37,6 +43,7 @@ class AuthService {
     String? gymId,
     String? idToken,
     bool? isGuest,
+    bool? completedQuestionnaire,
   }) async {
     await _userAuthStorage.save(
       userId: userId,
@@ -44,6 +51,9 @@ class AuthService {
       authToken: idToken,
       isGuest: isGuest,
     );
+    if (completedQuestionnaire != null) {
+      await _questionnaireService.markCompleted(completedQuestionnaire);
+    }
   }
 
   Future<void> markGuestSelected(String deviceId) async {
@@ -54,6 +64,8 @@ class AuthService {
   /// Clear local user data
   Future<void> clearLocalUserData() async {
     await _userAuthStorage.clear();
+    await _questionnaireService.clear();
+    await _workoutService.clearAll();
   }
 
   /// Sign in with Google and register/login with backend
@@ -93,12 +105,15 @@ class AuthService {
           userId: user.uid,
           gymId: backendResponse.data?.gymId,
           idToken: idToken,
+          completedQuestionnaire: backendResponse.data?.completedQuestionnaire,
         );
         return {
           'success': true,
           'userId': user.uid,
           'gymId': backendResponse.data?.gymId,
           'user': user,
+          'completedQuestionnaire':
+              backendResponse.data?.completedQuestionnaire,
         };
       }
       throw Exception('Registration failed. Try again later.');
@@ -141,6 +156,7 @@ class AuthService {
             userId: user.uid,
             gymId: res.data?.gymId,
             idToken: token,
+            completedQuestionnaire: res.data?.completedQuestionnaire,
           );
         }
         return true;
@@ -163,6 +179,7 @@ class AuthService {
             userId: user.uid,
             gymId: retry.data?.gymId,
             idToken: fresh,
+            completedQuestionnaire: retry.data?.completedQuestionnaire,
           );
           return true;
         }

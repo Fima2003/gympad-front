@@ -16,10 +16,11 @@ class AuthAuthenticated extends AuthState {
   final String userId;
   final String? gymId;
   final String? authToken;
-  const AuthAuthenticated({required this.userId, this.gymId, this.authToken});
+  final bool? completedQuestionnaire;
+  const AuthAuthenticated({required this.userId, this.gymId, this.authToken, this.completedQuestionnaire});
 
   @override
-  List<Object?> get props => [userId, gymId, authToken];
+  List<Object?> get props => [userId, gymId, authToken, completedQuestionnaire];
 }
 
 class AuthGuest extends AuthState {

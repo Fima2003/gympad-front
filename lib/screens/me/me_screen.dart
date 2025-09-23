@@ -14,8 +14,7 @@ class MeScreen extends StatefulWidget {
 class _MeScreenState extends State<MeScreen> {
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
-      listener: (context, state) {},
+    return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         Widget content;
         if (state is AuthAuthenticated) {
@@ -40,16 +39,22 @@ class _MeScreenState extends State<MeScreen> {
               padding: const EdgeInsets.all(16),
               child: SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => context.go('/questionnaire?force=true'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.white,
-                    shape: const StadiumBorder(),
-                    minimumSize: const Size.fromHeight(48),
-                  ),
-                  child: const Text('Fill out questionnaire'),
-                ),
+                child:
+                    (state is AuthAuthenticated &&
+                            (state.completedQuestionnaire == null ||
+                                state.completedQuestionnaire == false))
+                        ? ElevatedButton(
+                          onPressed:
+                              () => context.go('/questionnaire?force=true'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.white,
+                            shape: const StadiumBorder(),
+                            minimumSize: const Size.fromHeight(48),
+                          ),
+                          child: const Text('Fill out questionnaire'),
+                        )
+                        : const SizedBox(),
               ),
             ),
             Expanded(child: content),

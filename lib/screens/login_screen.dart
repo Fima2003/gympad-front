@@ -44,7 +44,15 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: AppColors.background,
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated || state is AuthGuest) {
+          if (state is AuthGuest) {
+            // if guest - no reason to make questionnaire
+            context.pushReplacement('/main');
+          } else if (state is AuthAuthenticated) {
+            if (state.completedQuestionnaire == null ||
+                state.completedQuestionnaire == false) {
+              context.pushReplacement('/questionnaire');
+              return;
+            }
             context.pushReplacement('/main');
           } else if (state is AuthError) {
             _showErrorDialog(state.message);
