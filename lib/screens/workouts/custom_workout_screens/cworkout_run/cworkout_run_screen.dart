@@ -96,8 +96,9 @@ class _CWorkoutRunScreenState extends State<CWorkoutRunScreen> {
                 () => context.read<WorkoutBloc>().add(const RunExtendRest()),
             onSkip: () => context.read<WorkoutBloc>().add(const RunSkipRest()),
             onFinishWorkout: () async {
-              if (context.read<WorkoutBloc>().state is WorkoutRunFinishing)
+              if (context.read<WorkoutBloc>().state is WorkoutRunFinishing) {
                 return;
+              }
               final confirmed = await showDialog<bool>(
                 context: context,
                 barrierDismissible: true,

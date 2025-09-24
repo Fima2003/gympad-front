@@ -152,7 +152,9 @@ class _IntroScreenState extends State<IntroScreen> {
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
                                     side: BorderSide(
-                                      color: AppColors.white.withOpacity(0.5),
+                                      color: AppColors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
                                     ),
                                     foregroundColor: AppColors.white,
                                     shape: const StadiumBorder(),
@@ -231,7 +233,7 @@ class _IntroText extends StatelessWidget {
         Text(
           description,
           style: AppTextStyles.bodyLarge.copyWith(
-            color: Colors.white.withOpacity(0.82),
+            color: Colors.white.withValues(alpha: 0.82),
           ),
         ),
       ],
@@ -255,7 +257,10 @@ class _DotsIndicator extends StatelessWidget {
           height: 10,
           width: active ? 28 : 10,
           decoration: BoxDecoration(
-            color: active ? AppColors.accent : Colors.white.withOpacity(0.35),
+            color:
+                active
+                    ? AppColors.accent
+                    : Colors.white.withValues(alpha: 0.35),
             borderRadius: BorderRadius.circular(20),
           ),
         );

@@ -60,7 +60,7 @@ class _MultiChoiceQuestionState extends State<_MultiChoiceQuestion> {
               },
               title: Text(o),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

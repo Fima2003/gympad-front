@@ -200,6 +200,7 @@ class PersonalWorkoutResponse extends CreatePersonalWorkoutRequest {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return CreatePersonalWorkoutRequest(
       name: name,

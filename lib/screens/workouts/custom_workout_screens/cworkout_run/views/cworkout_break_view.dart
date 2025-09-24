@@ -674,12 +674,12 @@ class _ReorderUpcomingRowState extends State<_ReorderUpcomingRow> {
   Widget _buildDropZone(int index) {
     final isActive = _draggingIndex != null;
     return DragTarget<int>(
-      onWillAccept:
-          (from) => from != null && from != index && from != index - 1,
-      onAccept: (from) {
+      onWillAcceptWithDetails:
+          (from) => from.data != index && from.data != index - 1,
+      onAcceptWithDetails: (from) {
         setState(() {
-          final item = _working.removeAt(from);
-          final insertIndex = from < index ? index - 1 : index;
+          final item = _working.removeAt(from.data);
+          final insertIndex = from.data < index ? index - 1 : index;
           _working.insert(insertIndex, item);
           _draggingIndex = null;
         });

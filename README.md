@@ -1,152 +1,180 @@
-# gympad
-
-A new Flutter project.
-
-## Getting Started
-
-# GymPad
-
-A Flutter application that enables gym-goers to track their workout performance using NFC technology. This MVP saves workout data locally.
-
-## Features
-
-### Current Implementation
-- **Exercise Tracking**: Timer, weight selection, and rep counting
-- **Local Data Storage**: Saves workout data using SharedPreferences
-- **Clean UI**: Follows the specified design system with Bebas Neue and Kanit fonts
-- **Cross-Platform**: Works on Android, iOS, and Web
-
-### App Flow
-1. **Home Screen**: Shows "Ready to scan" interface
-2. **Exercise Screen**: 
-   - Displays gym info and exercise name
-   - Timer functionality (start/stop)
-   - Weight selector (2.5kg increments, default 15kg)
-   - Reps selector modal after stopping timer
-   - Workout sets table
-   - Start new set / Finish exercise buttons
-3. **Well Done Screen**: 
-   - Shows completed workout summary
-   - WhatsApp review button
-   - Local data disclaimer
-
-## Design System
-
-### Colors
-- Primary: `#0B4650` (Dark teal)
-- Accent: `#E6FF2B` (Bright yellow-green)
-- Background: `#F9F7F2` (Light cream)
-- Text Secondary: `#898A8D` (Gray)
-
-### Typography
-- **Titles**: Bebas Neue (italics for big titles)
-- **Body Text**: Kanit
-- **No gradients**: Solid colors only
-
-## Technical Stack
-
-- **Flutter**: Cross-platform framework
-- **shared_preferences**: Local data storage
- 
-- **google_fonts**: Typography
-- **url_launcher**: WhatsApp integration
-
-## Setup & Installation
-
-1. **Prerequisites**:
-   ```bash
-   flutter --version  # Ensure Flutter is installed
-   ```
-
-2. **Install Dependencies**:
-   ```bash
-   cd gympad
-   flutter pub get
-   ```
-
-3. **Run the App**:
-   ```bash
-   # For Android/iOS (with device connected)
-   flutter run
-   
-   # For Web
-   flutter run -d chrome
-   
-   # For macOS
-   flutter run -d macos
-   ```
-
- 
-
-## Data Structure
-
-### Mock Data Files
-- `assets/mock_data/gyms.json`: Gym information (name, image)
-- `assets/mock_data/exercises.json`: Exercise details (name, description, image)
-- `assets/mock_data/equipment.json`: Equipment to exercise mapping
-
-### Local Storage
-- Workout data is saved locally using SharedPreferences
-- Key format: `workout_data`
-- Data includes: set number, reps, weight, time per set
-
-## Development
-
-### Project Structure
-```
-lib/
-├── constants/
-│   └── app_styles.dart          # Colors, typography, theme
-├── models/
-│   ├── gym.dart                 # Gym data model
-│   ├── exercise.dart            # Exercise data model
-│   ├── equipment.dart           # Equipment data model
-│   └── workout_set.dart         # Workout set data model
-├── screens/
-│   ├── exercise_screen.dart     # Main workout interface
-│   └── well_done_screen.dart    # Completion screen
-├── services/
-│   ├── data_service.dart        # Mock data loading
-│   ├── storage_service.dart     # Local data persistence
-│   └── storage_service.dart     # Local data persistence
-├── widgets/
-│   ├── reps_selector.dart       # Modal rep counter
-│   ├── weight_selector.dart     # Horizontal weight picker
-│   ├── workout_sets_table.dart  # Completed sets display
-│   └── workout_timer.dart       # Set timer widget
-└── main.dart                    # App entry point
-```
-
-### Running Tests
-```bash
-flutter test
-```
-
-## Future Enhancements
-
-1. **NFC Integration**: Add actual NFC reading capability
-2. **Backend Integration**: Connect to real gym/exercise database
-3. **User Accounts**: Authentication and cloud data sync
-4. **Analytics**: Track usage and send metrics
-5. **Offline Support**: Better offline functionality
-6. **Exercise Instructions**: Video guides and form tips
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Deep links not working**: Ensure proper URL format and app_links configuration
-2. **Fonts not loading**: Run `flutter pub get` and restart the app
-3. **Data not persisting**: Check SharedPreferences permissions
-4. **Timer issues**: Ensure proper state management in WorkoutTimer widget
-
-### Development Tips
-
-1. **Hot Reload**: Use `r` in terminal for quick development iterations
-2. **Debug Mode**: Check console logs for deep link parsing
-3. **Asset Loading**: Verify asset paths in pubspec.yaml
-4. **State Management**: Use setState carefully in timer components
+<div align="center">
+   <img src="assets/icon/icon.png" alt="GymPad" width="96" />
+   <h1>GymPad</h1>
+   <p><em>Your unified hub for structured training, personalized programming, and tracking progress.</em></p>
+</div>
 
 ---
 
-**Built with ❤️ for gym enthusiasts**
+## 🚀 Overview
+GymPad is a Flutter application for tracking workouts, running structured or custom sessions, managing personalization data, and (soon) enabling social & intelligent coaching experiences. It targets **Android, iOS, and Web** using a consistent design system and a layered architecture (see below).
+
+Current scope focuses on:
+- Personalized onboarding via a multi-step questionnaire (with offline persistence + background submit retry)
+- Workout session flows (free / custom / saved)
+- Local-first data with Hive + API sync patterns
+- Clean separation of UI, BLoC state management, services, and storage layers
+- Polished interaction components (velocity-based weight selector, progress bars, animated onboarding, etc.)
+
+---
+
+## ✨ Key Features
+
+### Training & Sessions
+- Start free workouts or run structured/custom ones
+- Track sets: weight, reps, timing, and execution flow
+- In‑session controls for breaks, next exercise, and wrap-up
+
+### Personalized Questionnaire
+- Multi-screen guided questionnaire (goals, experience, constraints)
+- Skippable but re-openable in “force” mode from profile
+- Local persistence (Hive) + deferred upload with retry on app start
+- Submit button with loading state + non-blocking network errors (UX-first)
+
+### Velocity-Inspired Weight Selector
+- Horizontal scroll-based selector using inertia
+- Snaps to logical plate/weight increments
+- Adaptive styling using `AppTextStyles` + high contrast for active selection
+- Easily extensible for velocity tracking add‑ons
+
+### Robust Local Storage (Hive)
+- Version-safe adapters with recovery logic (box corruption fallback)
+- Clear separation: domain models vs. Hive adapters
+- Services own all box logic; no UI direct access
+
+### State Management (flutter_bloc)
+- One BLoC per feature (e.g., `QuestionnaireBloc`, `WorkoutBloc` etc.)
+- Events drive state transitions; immutable states emitted (copyWith pattern)
+- UI = passive renderer + event dispatcher
+
+### Navigation
+- GoRouter-based strongly-typed route patterns
+- Guarded flows (e.g., redirect if questionnaire incomplete unless forced)
+
+### Logging & Resilience
+- Central `AppLogger` (expansion point) instead of `print`
+- Non-fatal failure strategies
+
+---
+
+## 🧱 Architecture
+
+Layered approach (top → bottom):
+1. **Screens / Widgets** – Presentation only; minimal logic; rely on BLoC
+2. **BLoC (Events + States)** – Pure state orchestration, no IO
+3. **Services** – Coordinate API + local persistence + domain logic
+4. **API DTOs** – Serialization layer for network boundaries
+5. **Domain Models** – Internal rich types used by app logic
+6. **Hive Adapters** – Storage-specific representations
+7. **Utilities** – Formatting, timers, etc.
+
+Design rules:
+- UI never calls API or Hive directly
+- Services are the sole orchestrators of persistence/network
+- BLoC uses services only; emits new immutable states (no in-place mutations)
+- Mapping (domain ↔ storage ↔ DTO) remains explicit and testable
+- Navigation decisions based on BLoC states
+
+---
+
+## 🗂 Project Structure (Excerpt)
+
+```
+lib/
+   main.dart
+   firebase_options.dart
+   constants/
+      app_styles.dart
+   blocs/
+      questionnaire/
+         questionnaire_bloc.dart
+         questionnaire_event.dart
+         questionnaire_state.dart
+      workout/ ...
+   models/
+   services/
+      api/
+         api_service.dart
+         models/
+      hive/
+         hive_initializer.dart
+         adapters/
+            hive_questionnaire.dart
+         questionnaire_lss.dart
+      questionnaire_service.dart
+   screens/
+      intro/
+         intro_screen.dart
+      questionnaire/
+         questionnaire_screen.dart
+      workouts/...
+   widgets/
+      velocity_weight_selector.dart
+```
+
+---
+
+## 🛠 Tech Stack
+
+| Concern            | Choice / Notes |
+|--------------------|---------------|
+| UI Framework       | Flutter (stable channel) |
+| State Management   | `flutter_bloc` |
+| Local Storage      | Hive (adapters + recovery) |
+| Auth / Backend     | Firebase |
+| HTTP               | Dio (inside API service) |
+| Fonts / Styling    | Google Fonts (Bebas Neue, Kanit) |
+| Navigation         | GoRouter |
+| Logging            | AppLogger abstraction |
+| Audio / Feedback   | (Pluggable service pattern) |
+
+---
+
+## 📥 Setup
+
+```bash
+git clone <repo-url>
+cd gympad
+flutter pub get
+```
+
+Run (mobile/web):
+```bash
+flutter run          # auto-selects a device
+flutter run -d chrome
+./run-web.sh         # custom web convenience script
+```
+
+Code quality:
+```bash
+flutter analyze
+dart format .
+```
+
+If Firebase not initialized locally, ensure `firebase_options.dart` exists (already tracked) and required platform config (GoogleServices / plist) is in place.
+
+---
+
+## 🔄 Data & Persistence
+
+| Layer | Responsibility |
+|-------|----------------|
+| Hive Local Storage Service | CRUD + resilient open (questionnaire, workouts) |
+| Service Facade | Merge local + remote intent; schedule retries |
+| API Service | Typed methods returning wrapper objects (success/data/message) |
+
+Recovery snippet (conceptual): delete incompatible box on open failure → reopen empty.
+
+---
+
+## 🧩 Velocity Weight Selector (Highlight)
+
+| Feature | Detail |
+|---------|--------|
+| Input   | Horizontal drag / fling |
+| Snap    | Rounds to nearest valid increment |
+| Visual  | Enlarged active weight, dim neighbors |
+| Extensible | Hook in bar speed / velocity-based recommendations later |
+---
+
+Built with ❤️ for athletes, builders, and future you.
