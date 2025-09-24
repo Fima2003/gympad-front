@@ -17,7 +17,12 @@ class AuthAuthenticated extends AuthState {
   final String? gymId;
   final String? authToken;
   final bool? completedQuestionnaire;
-  const AuthAuthenticated({required this.userId, this.gymId, this.authToken, this.completedQuestionnaire});
+  const AuthAuthenticated({
+    required this.userId,
+    this.gymId,
+    this.authToken,
+    this.completedQuestionnaire,
+  });
 
   @override
   List<Object?> get props => [userId, gymId, authToken, completedQuestionnaire];
