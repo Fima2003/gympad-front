@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:gympad/services/api/i_api_service.dart';
-import 'package:gympad/services/logger_service.dart';
 
 import '../hive/user_auth_lss.dart';
+import '../logger_service.dart';
+import 'i_api_service.dart';
 
 class ApiService implements IApiService {
   static final ApiService _instance = ApiService._internal();
@@ -18,6 +18,7 @@ class ApiService implements IApiService {
 
   // Base domain for Firebase Functions
   static const String _baseDomain = 'ocycwbq2ka-uc.a.run.app';
+  static const String _localDomain = 'http://127.0.0.1:5001/gympad-e44fc/us-central1/';
 
   void initialize() {
     // Note: baseUrl will be set dynamically per request
@@ -49,7 +50,7 @@ class ApiService implements IApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onError: (error, handler) {
-          _logError('HTTP Error', error);
+          _logError("Error: ${error.response?.statusCode ?? ""}", error);
           handler.next(error);
         },
       ),
@@ -59,7 +60,7 @@ class ApiService implements IApiService {
   /// Build Firebase Function URL for the given function name
   String _buildFunctionUrl(String functionName) {
     if (kDebugMode) {
-      return 'http://127.0.0.1:5001/gympad-e44fc/us-central1/$functionName/';
+      return '$_localDomain$functionName/';
     }
     return 'https://$functionName-$_baseDomain/';
   }
@@ -364,7 +365,6 @@ class ApiService implements IApiService {
 
   /// Handle errors
   ApiResponse<K> _handleError<K>(dynamic error) {
-    _logError('Request failed', error);
 
     if (error is DioException) {
       switch (error.type) {
@@ -427,6 +427,6 @@ class ApiService implements IApiService {
   }
 
   void _logError(String message, dynamic error) {
-    _logger.error('$message: $error');
+    _logger.error('$message');
   }
 }

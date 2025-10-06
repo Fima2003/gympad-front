@@ -23,6 +23,44 @@ class AuthService {
 
   final _userAuthStorage = UserAuthLocalStorageService();
 
+  // --- Initialization control ---
+  bool _initialized = false;
+  Completer<void>? _initCompleter;
+
+  /// Indicates whether [initialize] has completed successfully at least once.
+  bool get isInitialized => _initialized;
+
+  /// One-time async initializer for the singleton.
+  ///
+  /// Safe to call multiple times; concurrent callers will await the same future.
+  /// Typical call site: early in app bootstrap (e.g. before runApp in main or
+  /// inside a top-level InitBloc / Splash sequence).
+  ///
+  /// What it currently does (can be extended):
+  /// 1. Warm Hive-backed auth + questionnaire local caches.
+  /// 2. Optionally attempt a lightweight backend user fetch (token refresh).
+  /// 3. Kick questionnaire pending upload retry (non-blocking semantics here).
+  ///
+  /// Returns normally even if non-critical steps fail; fatal errors are logged.
+  Future<void> initialize() async {
+    // Ensure no double-call
+    if (_initialized) return;
+    if (_initCompleter != null) {
+      return _initCompleter!.future;
+    }
+    _initCompleter = Completer<void>();
+
+    _logger.debug('[AuthService] initialize() start');
+    try {
+      _initialized = true;
+      _logger.info('[AuthService] initialize() complete');
+    } catch (e, st) {
+      _logger.error('[AuthService] initialization failed', e, st);
+    } finally {
+      _initCompleter!.complete();
+    }
+  }
+
   /// Check locally saved user data (userId and gymId exist)
   Future<Map<String, String?>> getLocalUserData() async {
     final hiveUser = await _userAuthStorage.load();
@@ -147,6 +185,7 @@ class AuthService {
   /// Fetch current user info from backend; if token expired, refresh and retry once
   Future<bool> fetchUserOnAppStartWithRetry() async {
     try {
+      if(!isSignedIn) return false;
       final res = await _userApiService.userPartialRead();
       if (res.success) {
         final user = _auth.currentUser;

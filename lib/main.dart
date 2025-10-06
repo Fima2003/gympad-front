@@ -22,6 +22,7 @@ import 'screens/workouts/custom_workout_screens/prepare_to_start_workout_screen.
 import 'screens/workouts/free_workout_screens/free_workout_run/free_workout_run_screen.dart';
 import 'screens/workouts/personal_workout_screens/personal_workout_detail_screen.dart';
 import 'services/api/api_service.dart';
+import 'services/auth_service.dart';
 import 'services/hive/hive_initializer.dart';
 import 'services/logger_service.dart';
 import 'constants/app_styles.dart';
@@ -68,6 +69,8 @@ Future<void> main() async {
   // Initialize Hive & register all adapters centrally
   await HiveInitializer.init();
 
+  await AuthService().initialize();
+
   runApp(const MyApp());
 }
 
@@ -84,7 +87,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Build router once to avoid resetting to '/' on hot reload.
     _router = GoRouter(
       initialLocation: '/',
       routes: [
@@ -179,7 +181,9 @@ class _MyAppState extends State<MyApp> {
                     body: Center(child: Text('No workout to prepare.')),
                   );
                 }
-                return PrepareToStartWorkoutScreen(workout: workout);
+                return PrepareToStartWorkoutScreen(
+                  workout: workout,
+                );
               },
             ),
             GoRoute(
@@ -213,6 +217,7 @@ class _MyAppState extends State<MyApp> {
             final bloc = WorkoutBloc();
             WorkoutService().configureCapabilitiesProvider(() {
               final authState = context.read<AuthBloc>().state;
+              print("Auth State at the beginning: ${authState}");
               if (authState is AuthAuthenticated) {
                 return Capabilities.authenticated;
               }

@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 import '../models/custom_workout.dart';
 import '../models/gym.dart';
 import '../models/exercise.dart';
 import '../models/equipment.dart';
+import 'api/custom_workout_api_service.dart';
+import 'logger_service.dart';
 
 class DataService {
   static final DataService _instance = DataService._internal();
@@ -15,6 +18,8 @@ class DataService {
   Map<String, Exercise>? _exercises;
   Map<String, Equipment>? _equipment;
   Map<String, CustomWorkout>? _customWorkouts;
+  final CustomWorkoutApiService _customWorkoutApiService =
+      CustomWorkoutApiService();
 
   // Read-only access for BLoC
   Map<String, Exercise> get exercisesMap => _exercises ?? const {};
@@ -66,15 +71,25 @@ class DataService {
   }
 
   Future<void> _loadCustomWorkouts() async {
-    final String jsonString = await rootBundle.loadString(
-      'assets/mock_data/custom_workouts.json',
-    );
-    final Map<String, dynamic> jsonData = json.decode(jsonString);
+    final List<CustomWorkout> customWorkouts = await _customWorkoutApiService
+        .getCustomWorkouts()
+        .then(
+          (response) =>
+              (response.data ?? [])
+                  .map((e) => CustomWorkout.fromJson(e.toJson()))
+                  .toList(),
+        );
 
     _customWorkouts = {};
-    jsonData['custom_workouts'].forEach((key, value) {
-      _customWorkouts![key] = CustomWorkout.fromJson(key, value);
-    });
+    for (final workout in customWorkouts) {
+      _customWorkouts![workout.id] = workout;
+    }
+    AppLogger()
+        .createLogger('data_s')
+        .log(
+          Level.INFO,
+          "Received ${_customWorkouts?.length ?? 0} workouts from API",
+        );
   }
 
   Gym? getGym(String gymId) {

@@ -15,9 +15,12 @@ class HiveCustomWorkoutExercise extends HiveObject {
   int restTime;
   @HiveField(4)
   int? suggestedReps;
+  @HiveField(5)
+  String name;
 
   HiveCustomWorkoutExercise({
     required this.id,
+    required this.name,
     required this.setsAmount,
     required this.suggestedWeight,
     required this.restTime,
@@ -27,6 +30,7 @@ class HiveCustomWorkoutExercise extends HiveObject {
   factory HiveCustomWorkoutExercise.fromDomain(CustomWorkoutExercise e) =>
       HiveCustomWorkoutExercise(
         id: e.id,
+        name: e.name,
         setsAmount: e.setsAmount,
         suggestedWeight: e.suggestedWeight,
         restTime: e.restTime,
@@ -35,6 +39,7 @@ class HiveCustomWorkoutExercise extends HiveObject {
 
   CustomWorkoutExercise toDomain() => CustomWorkoutExercise(
     id: id,
+    name: name,
     setsAmount: setsAmount,
     suggestedWeight: suggestedWeight,
     restTime: restTime,
@@ -49,21 +54,24 @@ class HiveCustomWorkout extends HiveObject {
   @HiveField(1)
   String name;
   @HiveField(2)
-  String description;
+  String workoutType;
   @HiveField(3)
-  String difficulty;
+  String description;
   @HiveField(4)
-  List<String> muscleGroups;
+  String difficulty;
   @HiveField(5)
-  String? imageUrl;
+  List<String> muscleGroups;
   @HiveField(6)
-  List<HiveCustomWorkoutExercise> exercises;
+  String? imageUrl;
   @HiveField(7)
+  List<HiveCustomWorkoutExercise> exercises;
+  @HiveField(8)
   int? estimatedCalories;
 
   HiveCustomWorkout({
     required this.id,
     required this.name,
+    required this.workoutType,
     required this.description,
     required this.difficulty,
     required this.muscleGroups,
@@ -75,6 +83,7 @@ class HiveCustomWorkout extends HiveObject {
   factory HiveCustomWorkout.fromDomain(CustomWorkout w) => HiveCustomWorkout(
     id: w.id,
     name: w.name,
+    workoutType: w.workoutType.toString(),
     description: w.description,
     difficulty: w.difficulty,
     muscleGroups: w.muscleGroups,
@@ -86,6 +95,10 @@ class HiveCustomWorkout extends HiveObject {
   CustomWorkout toDomain() => CustomWorkout(
     id: id,
     name: name,
+    workoutType: WorkoutType.values.firstWhere(
+      (e) => e.toString() == workoutType,
+      orElse: () => WorkoutType.custom,
+    ),
     description: description,
     difficulty: difficulty,
     muscleGroups: muscleGroups,

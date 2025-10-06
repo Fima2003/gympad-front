@@ -1,7 +1,9 @@
-import 'package:gympad/models/workout.dart';
-import 'package:gympad/models/workout_exercise.dart';
-import 'package:gympad/models/workout_set.dart';
 import 'package:hive/hive.dart';
+
+import '../../../models/custom_workout.dart';
+import '../../../models/workout.dart';
+import '../../../models/workout_exercise.dart';
+import '../../../models/workout_set.dart';
 
 part 'hive_workout.g.dart';
 
@@ -95,21 +97,24 @@ class HiveWorkout extends HiveObject {
   @HiveField(1)
   final String? name;
   @HiveField(2)
-  final List<HiveWorkoutExercise> exercises;
+  final String workoutType;
   @HiveField(3)
-  final DateTime startTime;
+  final List<HiveWorkoutExercise> exercises;
   @HiveField(4)
-  DateTime? endTime;
+  final DateTime startTime;
   @HiveField(5)
-  final bool isUploaded;
+  DateTime? endTime;
   @HiveField(6)
-  final bool isOngoing;
+  final bool isUploaded;
   @HiveField(7)
+  final bool isOngoing;
+  @HiveField(8)
   final bool createdWhileGuest;
 
   HiveWorkout({
     required this.id,
     required this.name,
+    required this.workoutType,
     required this.exercises,
     required this.startTime,
     this.endTime,
@@ -122,6 +127,7 @@ class HiveWorkout extends HiveObject {
     return HiveWorkout(
       id: workout.id,
       name: workout.name,
+      workoutType: workout.workoutType.toString().split('.').last,
       exercises:
           workout.exercises
               .map((exercise) => HiveWorkoutExercise.fromDomain(exercise))
@@ -137,6 +143,10 @@ class HiveWorkout extends HiveObject {
   Workout toDomain() => Workout(
     id: id,
     name: name,
+    workoutType: WorkoutType.values.firstWhere(
+      (e) => e.toString() == workoutType,
+      orElse: () => WorkoutType.custom,
+    ),
     exercises: exercises.map((exercise) => exercise.toDomain()).toList(),
     startTime: startTime,
     endTime: endTime,

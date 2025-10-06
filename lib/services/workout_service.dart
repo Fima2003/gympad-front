@@ -13,8 +13,6 @@ import '../models/capabilities.dart';
 import 'hive/current_workout_lss.dart';
 import 'hive/workout_history_lss.dart';
 
-enum WorkoutType { custom, free, personal }
-
 class WorkoutService {
   static final WorkoutService _instance = WorkoutService._internal();
   factory WorkoutService() => _instance;
@@ -53,10 +51,22 @@ class WorkoutService {
       _workoutToFollow = null;
     }
 
+    String idType;
+    switch (type) {
+      case (WorkoutType.custom):
+        idType = 'custom';
+        break;
+      case (WorkoutType.free):
+        idType = 'free';
+        break;
+      default:
+        idType = 'personal';
+    }
+
     _currentWorkout = Workout(
-      id:
-          "${type == WorkoutType.free ? 'free' : 'custom'}_${DateTime.now().millisecondsSinceEpoch.toString()}",
+      id: "${idType}_${DateTime.now().millisecondsSinceEpoch.toString()}",
       name: workoutToFollow?.name,
+      workoutType: workoutToFollow?.workoutType ?? type,
       exercises: [],
       startTime: DateTime.now(),
       createdWhileGuest: !_capabilitiesProvider().canUpload,
@@ -312,37 +322,11 @@ class WorkoutService {
       _logger.info(endTimeUtc.toString());
 
       // Build DTO request from domain model
-      final request = WorkoutCreateRequest(
-        id: workout.id,
-        name: workout.name,
-        exercises:
-            workout.exercises
-                .map(
-                  (e) => WorkoutExerciseDto(
-                    exerciseId: e.exerciseId,
-                    name: e.name,
-                    muscleGroup: e.muscleGroup,
-                    sets:
-                        e.sets
-                            .map(
-                              (s) => WorkoutSetDto(
-                                setNumber: s.setNumber,
-                                reps: s.reps,
-                                weight: s.weight,
-                                time: s.time.inSeconds,
-                              ),
-                            )
-                            .toList(),
-                    startTime: e.startTime.toUtc(),
-                    endTime: e.endTime?.toUtc(),
-                  ),
-                )
-                .toList(),
-        startTime: startTimeUtc,
-        endTime: endTimeUtc,
+      final request = WorkoutCreateRequest.fromWorkout(
+        workout.copyWith(startTime: startTimeUtc, endTime: endTimeUtc),
       );
 
-      final response = await _workoutApiService.createWorkout(request);
+      final response = await _workoutApiService.logNewWorkout(request);
       _logger.info(response.success.toString());
 
       if (response.success) {

@@ -19,6 +19,7 @@ class HiveCustomWorkoutExerciseAdapter
     };
     return HiveCustomWorkoutExercise(
       id: fields[0] as String,
+      name: fields[5] as String,
       setsAmount: fields[1] as int,
       suggestedWeight: fields[2] as double?,
       restTime: fields[3] as int,
@@ -29,7 +30,7 @@ class HiveCustomWorkoutExerciseAdapter
   @override
   void write(BinaryWriter writer, HiveCustomWorkoutExercise obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -39,7 +40,9 @@ class HiveCustomWorkoutExerciseAdapter
       ..writeByte(3)
       ..write(obj.restTime)
       ..writeByte(4)
-      ..write(obj.suggestedReps);
+      ..write(obj.suggestedReps)
+      ..writeByte(5)
+      ..write(obj.name);
   }
 
   @override
@@ -66,34 +69,37 @@ class HiveCustomWorkoutAdapter extends TypeAdapter<HiveCustomWorkout> {
     return HiveCustomWorkout(
       id: fields[0] as String,
       name: fields[1] as String,
-      description: fields[2] as String,
-      difficulty: fields[3] as String,
-      muscleGroups: (fields[4] as List).cast<String>(),
-      imageUrl: fields[5] as String?,
-      exercises: (fields[6] as List).cast<HiveCustomWorkoutExercise>(),
-      estimatedCalories: fields[7] as int?,
+      workoutType: fields[2] as String,
+      description: fields[3] as String,
+      difficulty: fields[4] as String,
+      muscleGroups: (fields[5] as List).cast<String>(),
+      imageUrl: fields[6] as String?,
+      exercises: (fields[7] as List).cast<HiveCustomWorkoutExercise>(),
+      estimatedCalories: fields[8] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, HiveCustomWorkout obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.description)
+      ..write(obj.workoutType)
       ..writeByte(3)
-      ..write(obj.difficulty)
+      ..write(obj.description)
       ..writeByte(4)
-      ..write(obj.muscleGroups)
+      ..write(obj.difficulty)
       ..writeByte(5)
-      ..write(obj.imageUrl)
+      ..write(obj.muscleGroups)
       ..writeByte(6)
-      ..write(obj.exercises)
+      ..write(obj.imageUrl)
       ..writeByte(7)
+      ..write(obj.exercises)
+      ..writeByte(8)
       ..write(obj.estimatedCalories);
   }
 

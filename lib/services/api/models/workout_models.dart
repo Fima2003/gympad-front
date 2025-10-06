@@ -1,3 +1,6 @@
+import '../../../models/custom_workout.dart';
+import '../../../models/workout.dart';
+
 /// Models for Workout Cloud Functions API
 class WorkoutListItem {
   final String id;
@@ -246,6 +249,7 @@ class CreatePersonalWorkoutRequest {
 class WorkoutCreateRequest {
   final String id;
   final String? name;
+  final WorkoutType workoutType;
   final List<WorkoutExerciseDto> exercises;
   final DateTime startTime;
   final DateTime endTime;
@@ -253,6 +257,7 @@ class WorkoutCreateRequest {
   WorkoutCreateRequest({
     required this.id,
     this.name,
+    required this.workoutType,
     required this.exercises,
     required this.startTime,
     required this.endTime,
@@ -261,10 +266,44 @@ class WorkoutCreateRequest {
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
+    'workoutType':
+        '${workoutType.toString().split('.').last[0].toUpperCase()}${workoutType.toString().split('.').last.substring(1).toLowerCase()}',
     'exercises': exercises.map((e) => e.toJson()).toList(),
     'startTime': startTime.toIso8601String(),
     'endTime': endTime.toIso8601String(),
   };
+
+  factory WorkoutCreateRequest.fromWorkout(Workout workout) {
+    return WorkoutCreateRequest(
+      id: workout.id,
+      workoutType: workout.workoutType,
+      exercises:
+          workout.exercises
+              .map(
+                (e) => WorkoutExerciseDto(
+                  exerciseId: e.exerciseId,
+                  name: e.name,
+                  muscleGroup: e.muscleGroup,
+                  sets:
+                      e.sets
+                          .map(
+                            (s) => WorkoutSetDto(
+                              setNumber: s.setNumber,
+                              reps: s.reps,
+                              weight: s.weight,
+                              time: s.time.inSeconds,
+                            ),
+                          )
+                          .toList(),
+                  startTime: e.startTime.toUtc(),
+                  endTime: e.endTime?.toUtc(),
+                ),
+              )
+              .toList(),
+      startTime: workout.startTime,
+      endTime: workout.endTime ?? DateTime.now(),
+    );
+  }
 }
 
 class WorkoutDeleteRequest {

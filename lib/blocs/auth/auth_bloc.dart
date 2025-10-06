@@ -31,9 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       // Attempt remote fetch if already signed in (Firebase session present)
-      if (_authService.isSignedIn) {
-        await _authService.fetchUserOnAppStartWithRetry();
-      }
+      await _authService.fetchUserOnAppStartWithRetry();
       final local = await _authService.getLocalUserData();
       final userId = local['userId'];
       final isGuest = local['isGuest'] == 'true';

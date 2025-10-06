@@ -1,8 +1,10 @@
+import 'custom_workout.dart';
 import 'workout_exercise.dart';
 
 class Workout {
   final String id;
   final String? name;
+  final WorkoutType workoutType;
   final List<WorkoutExercise> exercises;
   final DateTime startTime;
   DateTime? endTime;
@@ -19,6 +21,7 @@ class Workout {
   Workout({
     required this.id,
     this.name,
+    required this.workoutType,
     required this.exercises,
     required this.startTime,
     this.endTime,
@@ -54,6 +57,10 @@ class Workout {
     return Workout(
       id: json['id'] ?? '',
       name: json['name'],
+      workoutType: WorkoutType.values.firstWhere(
+        (e) => e.toString() == 'WorkoutType.${json['workoutType']}',
+        orElse: () => WorkoutType.custom,
+      ),
       exercises:
           (json['exercises'] as List?)
               ?.map((exerciseJson) => WorkoutExercise.fromJson(exerciseJson))
@@ -70,6 +77,7 @@ class Workout {
   Workout copyWith({
     String? id,
     String? name,
+    WorkoutType? workoutType,
     List<WorkoutExercise>? exercises,
     DateTime? startTime,
     DateTime? endTime,
@@ -80,6 +88,7 @@ class Workout {
     return Workout(
       id: id ?? this.id,
       name: name ?? this.name,
+      workoutType: workoutType ?? this.workoutType,
       exercises: exercises ?? this.exercises,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,

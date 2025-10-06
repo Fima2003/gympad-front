@@ -6,7 +6,6 @@ import '../../../blocs/analytics/analytics_bloc.dart';
 import '../../../blocs/workout/workout_bloc.dart';
 import '../../../constants/app_styles.dart';
 import '../../../models/custom_workout.dart';
-import '../../../services/workout_service.dart';
 import '../../../blocs/data/data_bloc.dart';
 import '../../../blocs/audio/audio_bloc.dart';
 
@@ -48,7 +47,10 @@ class _PrepareToStartWorkoutScreenState
       setState(() {
         if (_countdown == 3) {
           context.read<WorkoutBloc>().add(
-            WorkoutStarted(WorkoutType.custom, workoutToFollow: widget.workout),
+            WorkoutStarted(
+              widget.workout.workoutType,
+              workoutToFollow: widget.workout,
+            ),
           );
         }
         if (_countdown > 1) {

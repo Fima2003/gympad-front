@@ -15,8 +15,6 @@ class QuestionnaireApiService {
 
   IApiService _api = ApiService();
 
-  IApiService get exposedApi => _api;
-
   Future<ApiResponse<void>> submit(QuestionnaireSubmitRequest request) async {
     return await _api.post<QuestionnaireSubmitRequest, void>(
       'questionnaireSubmit',

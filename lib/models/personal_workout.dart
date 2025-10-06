@@ -1,6 +1,6 @@
-import 'package:gympad/models/custom_workout.dart';
-import 'package:gympad/services/api/models/workout_models.dart';
 import '../blocs/data/data_bloc.dart';
+import '../services/api/models/workout_models.dart';
+import 'custom_workout.dart';
 import 'exercise.dart';
 
 class PersonalWorkout {
@@ -43,6 +43,7 @@ class PersonalWorkout {
     return CustomWorkout(
       id: name.toLowerCase().replaceAll(' ', '_'),
       name: name,
+      workoutType: WorkoutType.personal,
       description: description ?? "",
       difficulty: 'none',
       muscleGroups: getMuscleGroups(state),
@@ -51,6 +52,7 @@ class PersonalWorkout {
           exercises.map((e) {
             return CustomWorkoutExercise(
               id: e.exerciseId,
+              name: e.name,
               setsAmount: e.sets,
               suggestedWeight: e.weight,
               restTime: e.restTime,

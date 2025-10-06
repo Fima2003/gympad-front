@@ -11,15 +11,23 @@ class AnalyticsService {
 
   /// Increments the number of times the app has been opened
   Future<void> incrementStartedWorkout() {
-    return _counterDoc.set({
-      'startsWorkout': FieldValue.increment(1),
-    }, SetOptions(merge: true));
+    try {
+      return _counterDoc.set({
+        'startsWorkout': FieldValue.increment(1),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      return Future.value();
+    }
   }
 
   /// Increments the number of exercises completed
   Future<void> incrementWorkoutCompleted() {
-    return _counterDoc.set({
-      'exerciseCompletions': FieldValue.increment(1),
-    }, SetOptions(merge: true));
+    try {
+      return _counterDoc.set({
+        'exerciseCompletions': FieldValue.increment(1),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      return Future.value();
+    }
   }
 }

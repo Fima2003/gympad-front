@@ -69,6 +69,7 @@ class WorkoutHistoryLocalStorageService {
         final updated = HiveWorkout(
           id: existing.id,
           name: existing.name,
+          workoutType: existing.workoutType,
           exercises: existing.exercises,
           startTime: existing.startTime,
           endTime: existing.endTime,

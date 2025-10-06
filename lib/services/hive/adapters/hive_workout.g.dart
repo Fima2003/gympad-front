@@ -114,34 +114,37 @@ class HiveWorkoutAdapter extends TypeAdapter<HiveWorkout> {
     return HiveWorkout(
       id: fields[0] as String,
       name: fields[1] as String?,
-      exercises: (fields[2] as List).cast<HiveWorkoutExercise>(),
-      startTime: fields[3] as DateTime,
-      endTime: fields[4] as DateTime?,
-      isUploaded: fields[5] as bool,
-      isOngoing: fields[6] as bool,
-      createdWhileGuest: fields[7] as bool,
+      workoutType: fields[2] as String,
+      exercises: (fields[3] as List).cast<HiveWorkoutExercise>(),
+      startTime: fields[4] as DateTime,
+      endTime: fields[5] as DateTime?,
+      isUploaded: fields[6] as bool,
+      isOngoing: fields[7] as bool,
+      createdWhileGuest: fields[8] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, HiveWorkout obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.exercises)
+      ..write(obj.workoutType)
       ..writeByte(3)
-      ..write(obj.startTime)
+      ..write(obj.exercises)
       ..writeByte(4)
-      ..write(obj.endTime)
+      ..write(obj.startTime)
       ..writeByte(5)
-      ..write(obj.isUploaded)
+      ..write(obj.endTime)
       ..writeByte(6)
-      ..write(obj.isOngoing)
+      ..write(obj.isUploaded)
       ..writeByte(7)
+      ..write(obj.isOngoing)
+      ..writeByte(8)
       ..write(obj.createdWhileGuest);
   }
 

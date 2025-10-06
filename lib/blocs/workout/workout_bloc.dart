@@ -328,6 +328,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       final realExercise = currentWorkout.exercises.last;
       plannedExercise = CustomWorkoutExercise(
         id: realExercise.exerciseId,
+        name: realExercise.name,
         setsAmount: realExercise.sets.length + 1, // unknown future
         restTime: 60,
         suggestedReps: null,
@@ -513,6 +514,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
         // Fallback if out of range
         currentPlanned = CustomWorkoutExercise(
           id: w.exercises.isNotEmpty ? w.exercises.last.exerciseId : 'unknown',
+          name: w.exercises.isNotEmpty ? w.exercises.last.name : 'Unknown',
           setsAmount: 1,
           restTime: 60,
           suggestedReps: null,
@@ -523,6 +525,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       // Free workout fallback
       currentPlanned = CustomWorkoutExercise(
         id: w.exercises.isNotEmpty ? w.exercises.last.exerciseId : 'unknown',
+        name: w.exercises.isNotEmpty ? w.exercises.last.name : 'Unknown',
         setsAmount: 1,
         restTime: 60,
         suggestedReps: null,

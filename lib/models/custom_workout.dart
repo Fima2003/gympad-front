@@ -1,6 +1,9 @@
+enum WorkoutType { custom, free, personal }
+
 class CustomWorkout {
   final String id;
   final String name;
+  final WorkoutType workoutType;
   final String description;
   final String difficulty;
   final List<String> muscleGroups;
@@ -11,6 +14,7 @@ class CustomWorkout {
   CustomWorkout({
     required this.id,
     required this.name,
+    required this.workoutType,
     required this.description,
     required this.difficulty,
     required this.muscleGroups,
@@ -19,87 +23,31 @@ class CustomWorkout {
     this.estimatedCalories,
   });
 
-  factory CustomWorkout.fromJson(String id, Map<String, dynamic> json) {
+  factory CustomWorkout.fromJson(Map<String, dynamic> json, {WorkoutType workoutType = WorkoutType.custom}) {
     List<CustomWorkoutExercise> exercisesList = [];
     if (json['exercises'] is List) {
       for (final item in (json['exercises'] as List)) {
-        if (item is Map<String, dynamic>) {
-          try {
-            exercisesList.add(CustomWorkoutExercise.fromMap(item));
-          } catch (_) {
-            // Skip invalid exercises but continue parsing
-          }
-        }
-      }
-    } else {
-      // Backward compatibility: collect any unknown keys as exercises
-      json.forEach((key, value) {
-        if (key != 'name' &&
-            key != 'description' &&
-            key != 'difficulty' &&
-            key != 'muscle_groups' &&
-            key != 'image_url' &&
-            key != 'estimated_calories') {
-          try {
-            exercisesList.add(CustomWorkoutExercise.fromLegacy(key, value));
-          } catch (_) {}
-        }
-      });
-    }
-
-    // estimated_calories in the JSON is inconsistent: sometimes an int, sometimes a
-    // list like ["300-350 kcal"]. We normalize to an approximate integer (average
-    // of numbers found) or null if unparseable.
-    int? parsedCalories;
-    final dynamic rawCalories = json['estimated_calories'];
-    if (rawCalories is int) {
-      parsedCalories = rawCalories;
-    } else if (rawCalories is String) {
-      final nums =
-          RegExp(r'(\d+)')
-              .allMatches(rawCalories)
-              .map((m) => int.tryParse(m.group(1)!))
-              .whereType<int>()
-              .toList();
-      if (nums.isNotEmpty) {
-        parsedCalories = (nums.reduce((a, b) => a + b) / nums.length).round();
-      }
-    } else if (rawCalories is List) {
-      if (rawCalories.isNotEmpty) {
-        final first = rawCalories.first;
-        if (first is int) {
-          parsedCalories = first;
-        } else if (first is String) {
-          final nums =
-              RegExp(r'(\d+)')
-                  .allMatches(first)
-                  .map((m) => int.tryParse(m.group(1)!))
-                  .whereType<int>()
-                  .toList();
-          if (nums.isNotEmpty) {
-            parsedCalories =
-                (nums.reduce((a, b) => a + b) / nums.length).round();
-          }
-        }
+        exercisesList.add(CustomWorkoutExercise.fromMap(item));
       }
     }
 
     return CustomWorkout(
-      id: id,
-      name: json['name'] ?? id.replaceAll('_', ' '),
+      id: json["customWorkoutId"] ?? '',
+      name: json['name'] ?? '',
+      workoutType: json['workoutType'] ?? workoutType,
       description: json['description'] ?? '',
       difficulty: json['difficulty'] ?? 'Beginner',
       muscleGroups:
           (json['muscle_groups'] as List<dynamic>?)?.cast<String>() ?? [],
-      imageUrl: json['image_url'],
       exercises: exercisesList,
-      estimatedCalories: parsedCalories,
+      estimatedCalories: json['estimatedCalories'] ?? 150,
     );
   }
 
   CustomWorkout copyWith({
     String? id,
     String? name,
+    WorkoutType? workoutType,
     String? description,
     String? difficulty,
     List<String>? muscleGroups,
@@ -110,6 +58,7 @@ class CustomWorkout {
     return CustomWorkout(
       id: id ?? this.id,
       name: name ?? this.name,
+      workoutType: workoutType ?? this.workoutType,
       description: description ?? this.description,
       difficulty: difficulty ?? this.difficulty,
       muscleGroups: muscleGroups ?? this.muscleGroups,
@@ -136,6 +85,7 @@ class CustomWorkout {
 
 class CustomWorkoutExercise {
   final String id;
+  final String name;
   final int setsAmount;
   final double? suggestedWeight;
   final int restTime; // in seconds
@@ -143,6 +93,7 @@ class CustomWorkoutExercise {
 
   CustomWorkoutExercise({
     required this.id,
+    required this.name,
     required this.setsAmount,
     this.suggestedWeight,
     required this.restTime,
@@ -151,17 +102,21 @@ class CustomWorkoutExercise {
 
   factory CustomWorkoutExercise.fromMap(Map<String, dynamic> json) {
     return CustomWorkoutExercise(
-      id: json['id'] as String,
-      setsAmount: json['sets_amount'] ?? 3,
+      id: json['exerciseId'] as String,
+      name: json['name'] as String,
+      setsAmount: json['setsAmount'] ?? 3,
       suggestedWeight:
-          json['weight'] == null ? null : (json['weight'] as num).toDouble(),
-      restTime: json['rest_time'] ?? 90,
-      suggestedReps: json['suggested_reps'],
+          json['suggestedWeight'] == null
+              ? null
+              : (json['suggestedWeight'] as num).toDouble(),
+      restTime: json['restTime'] ?? 90,
+      suggestedReps: json['suggestedReps'],
     );
   }
 
   CustomWorkoutExercise copyWith({
     String? id,
+    String? name,
     int? setsAmount,
     double? suggestedWeight,
     int? restTime,
@@ -169,25 +124,11 @@ class CustomWorkoutExercise {
   }) {
     return CustomWorkoutExercise(
       id: id ?? this.id,
+      name: name ?? this.name,
       setsAmount: setsAmount ?? this.setsAmount,
       suggestedWeight: suggestedWeight ?? this.suggestedWeight,
       restTime: restTime ?? this.restTime,
       suggestedReps: suggestedReps ?? this.suggestedReps,
-    );
-  }
-
-  // Legacy support when workout JSON used top-level exercise keys
-  factory CustomWorkoutExercise.fromLegacy(
-    String id,
-    Map<String, dynamic> json,
-  ) {
-    return CustomWorkoutExercise(
-      id: id,
-      setsAmount: json['sets_amount'] ?? 3,
-      suggestedWeight:
-          json['weight'] == null ? null : (json['weight'] as num).toDouble(),
-      restTime: json['rest_time'] ?? 90,
-      suggestedReps: json['suggested_reps'],
     );
   }
 
