@@ -1,3 +1,5 @@
+import '../../../models/custom_workout.dart';
+
 class CustomWorkoutR {
   final String customWorkoutId;
   final String name;
@@ -19,9 +21,10 @@ class CustomWorkoutR {
 
   factory CustomWorkoutR.fromJson(Map<String, dynamic> json) {
     var exercisesFromJson = json['exercises'] as List;
-    List<CustomWorkoutExerciseR> exerciseList = exercisesFromJson
-        .map((exercise) => CustomWorkoutExerciseR.fromJson(exercise))
-        .toList();
+    List<CustomWorkoutExerciseR> exerciseList =
+        exercisesFromJson
+            .map((exercise) => CustomWorkoutExerciseR.fromJson(exercise))
+            .toList();
 
     return CustomWorkoutR(
       customWorkoutId: json['customWorkoutId'],
@@ -31,6 +34,18 @@ class CustomWorkoutR {
       difficulty: json['difficulty'],
       muscleGroups: List<String>.from(json['muscleGroups']),
       estimatedCalories: json['estimatedCalories'],
+    );
+  }
+
+  CustomWorkout toDomain() {
+    return CustomWorkout(
+      id: customWorkoutId,
+      name: name,
+      description: description,
+      difficulty: difficulty,
+      muscleGroups: muscleGroups,
+      estimatedCalories: estimatedCalories,
+      exercises: exercises.map((e) => e.toDomain()).toList(),
     );
   }
 
@@ -77,6 +92,17 @@ class CustomWorkoutExerciseR {
     );
   }
 
+  CustomWorkoutExercise toDomain() {
+    return CustomWorkoutExercise(
+      id: exerciseId,
+      name: name,
+      setsAmount: setsAmount,
+      suggestedWeight: suggestedWeight,
+      suggestedReps: suggestedReps,
+      restTime: restTime,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'exerciseId': exerciseId,
@@ -85,6 +111,6 @@ class CustomWorkoutExerciseR {
       'suggestedWeight': suggestedWeight,
       'suggestedReps': suggestedReps,
       'restTime': restTime,
-    };  
+    };
   }
 }

@@ -7,12 +7,16 @@ import '../models/gym.dart';
 import '../models/exercise.dart';
 import '../models/equipment.dart';
 import 'api/custom_workout_api_service.dart';
+import 'api/exercise_api_service.dart';
+import 'hive/custom_workout_lss.dart';
+import 'hive/exercise_lss.dart';
 import 'logger_service.dart';
 
 class DataService {
   static final DataService _instance = DataService._internal();
   factory DataService() => _instance;
   DataService._internal();
+  final _logger = AppLogger().createLogger('DataService');
 
   Map<String, Gym>? _gyms;
   Map<String, Exercise>? _exercises;
@@ -20,6 +24,9 @@ class DataService {
   Map<String, CustomWorkout>? _customWorkouts;
   final CustomWorkoutApiService _customWorkoutApiService =
       CustomWorkoutApiService();
+  final CustomWorkoutLss _customWorkoutLssService = CustomWorkoutLss();
+  final ExerciseApiService _exerciseApiService = ExerciseApiService();
+  final ExerciseLss _exerciseLssService = ExerciseLss();
 
   // Read-only access for BLoC
   Map<String, Exercise> get exercisesMap => _exercises ?? const {};
@@ -47,15 +54,40 @@ class DataService {
   }
 
   Future<void> _loadExercises() async {
-    final String jsonString = await rootBundle.loadString(
-      'assets/mock_data/exercises.json',
-    );
-    final Map<String, dynamic> jsonData = json.decode(jsonString);
+    final response = await _exerciseApiService.getExercises();
+    if (response.error != null) {
+      _logger.log(
+        Level.WARNING,
+        "Failed to fetch exercises: ${response.error}",
+      );
+      final localExercises = await _exerciseLssService.getAll();
+      if (localExercises.isNotEmpty) {
+        _exercises = {
+          for (var exercise in localExercises) exercise.id: exercise,
+        };
+        _logger.log(
+          Level.INFO,
+          "Loaded ${_customWorkouts?.length ?? 0} exercises from local storage",
+        );
+      } else {
+        _customWorkouts = {};
+        _logger.log(Level.WARNING, "No local exercise available");
+      }
+      return;
+    }
+
+    final exercises = response.data!.map((e) => e.toDomain()).toList();
 
     _exercises = {};
-    jsonData['exercises'].forEach((key, value) {
-      _exercises![key] = Exercise.fromJson(key, value);
-    });
+    for (final exercise in exercises) {
+      _exercises![exercise.id] = exercise;
+    }
+    AppLogger()
+        .createLogger('data_s')
+        .log(
+          Level.INFO,
+          "Received ${_customWorkouts?.length ?? 0} exercise from API",
+        );
   }
 
   Future<void> _loadEquipment() async {
@@ -71,14 +103,29 @@ class DataService {
   }
 
   Future<void> _loadCustomWorkouts() async {
-    final List<CustomWorkout> customWorkouts = await _customWorkoutApiService
-        .getCustomWorkouts()
-        .then(
-          (response) =>
-              (response.data ?? [])
-                  .map((e) => CustomWorkout.fromJson(e.toJson()))
-                  .toList(),
+    final response = await _customWorkoutApiService.getCustomWorkouts();
+    if (response.error != null) {
+      _logger.log(
+        Level.WARNING,
+        "Failed to fetch custom workouts: ${response.error}",
+      );
+      final localCustomWorkouts = await _customWorkoutLssService.getAll();
+      if (localCustomWorkouts.isNotEmpty) {
+        _customWorkouts = {
+          for (var workout in localCustomWorkouts) workout.id: workout,
+        };
+        _logger.log(
+          Level.INFO,
+          "Loaded ${_customWorkouts?.length ?? 0} workouts from local storage",
         );
+      } else {
+        _customWorkouts = {};
+        _logger.log(Level.WARNING, "No local custom workouts available");
+      }
+      return;
+    }
+
+    final customWorkouts = response.data!.map((e) => e.toDomain()).toList();
 
     _customWorkouts = {};
     for (final workout in customWorkouts) {

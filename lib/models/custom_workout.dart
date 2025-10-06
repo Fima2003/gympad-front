@@ -14,7 +14,7 @@ class CustomWorkout {
   CustomWorkout({
     required this.id,
     required this.name,
-    required this.workoutType,
+    this.workoutType = WorkoutType.custom,
     required this.description,
     required this.difficulty,
     required this.muscleGroups,

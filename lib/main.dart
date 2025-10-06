@@ -181,9 +181,7 @@ class _MyAppState extends State<MyApp> {
                     body: Center(child: Text('No workout to prepare.')),
                   );
                 }
-                return PrepareToStartWorkoutScreen(
-                  workout: workout,
-                );
+                return PrepareToStartWorkoutScreen(workout: workout);
               },
             ),
             GoRoute(
@@ -217,7 +215,6 @@ class _MyAppState extends State<MyApp> {
             final bloc = WorkoutBloc();
             WorkoutService().configureCapabilitiesProvider(() {
               final authState = context.read<AuthBloc>().state;
-              print("Auth State at the beginning: ${authState}");
               if (authState is AuthAuthenticated) {
                 return Capabilities.authenticated;
               }

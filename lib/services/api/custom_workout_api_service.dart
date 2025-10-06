@@ -15,9 +15,9 @@ class CustomWorkoutApiService {
 
   IApiService _api = ApiService();
 
-  Future<ApiResponse<List<CustomWorkoutR>>> getCustomWorkouts(
-    [String? userLevel]
-  ) async {
+  Future<ApiResponse<List<CustomWorkoutR>>> getCustomWorkouts([
+    String? userLevel,
+  ]) async {
     final queryParameters = {
       'field': 'difficulty',
       'value': userLevel ?? "Beginner",
