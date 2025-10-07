@@ -10,6 +10,7 @@ import '../models/workout_set.dart';
 import '../services/api/api.dart';
 import '../services/logger_service.dart';
 import '../models/capabilities.dart';
+import 'api/models/personal_workout.model.dart';
 import 'hive/current_workout_lss.dart';
 import 'hive/workout_history_lss.dart';
 
@@ -220,7 +221,9 @@ class WorkoutService {
 
     // Try to upload to backend (fire and forget)
     if (finished != null) {
-      unawaited(_uploadWorkout(finished));
+      unawaited(
+        _uploadWorkout(finished, workoutToFollowId: _workoutToFollow?.id),
+      );
     }
 
     _logger.info('Workout finished and saved');
@@ -261,7 +264,7 @@ class WorkoutService {
     final pendingWorkouts = workouts.where((w) => !w.isUploaded).toList();
 
     for (final workout in pendingWorkouts) {
-      unawaited(_uploadWorkout(workout));
+      unawaited(_uploadWorkout(workout, updateExercises: false));
     }
   }
 
@@ -305,7 +308,11 @@ class WorkoutService {
     }
   }
 
-  Future<void> _uploadWorkout(Workout workout) async {
+  Future<void> _uploadWorkout(
+    Workout workout, {
+    bool updateExercises = true,
+    String? workoutToFollowId,
+  }) async {
     try {
       final caps = _capabilitiesProvider();
       if (!caps.canUpload) {
@@ -322,14 +329,27 @@ class WorkoutService {
       _logger.info(endTimeUtc.toString());
 
       // Build DTO request from domain model
-      final request = WorkoutCreateRequest.fromWorkout(
+      final request = WorkoutCreateRequest.fromWorkoutAndWorkoutToFollowId(
         workout.copyWith(startTime: startTimeUtc, endTime: endTimeUtc),
+        workoutToFollowId,
       );
 
       final response = await _workoutApiService.logNewWorkout(request);
+      if (updateExercises &&
+          workout.workoutType == WorkoutType.personal &&
+          response.success &&
+          response.data != null &&
+          response.data!.nextWorkoutExercises != null &&
+          workoutToFollowId != null) {
+        final exercises = response.data!.nextWorkoutExercises!;
+        await _personalLocal.updateExercises(
+          workoutToFollowId,
+          exercises.map((e) => e.toDomain()).toList(),
+        );
+      }
       _logger.info(response.success.toString());
 
-      if (response.success) {
+      if (response.success || response.status == 409) {
         // Mark as uploaded in history
         await _markWorkoutAsUploaded(workout.id);
         _logger.info('Successfully uploaded workout ${workout.id}');
@@ -342,6 +362,8 @@ class WorkoutService {
       _logger.warning('Failed to upload workout ${workout.id}', e, st);
     }
   }
+
+  // Future<void> _updateExercisesOfPersonalWorkout(){}
 
   Future<void> _markWorkoutAsUploaded(String workoutId) async {
     await _historyStorage.markUploaded(workoutId);

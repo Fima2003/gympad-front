@@ -1,7 +1,7 @@
 import '../../../models/custom_workout.dart';
 import '../../../models/workout.dart';
+import 'personal_workout.model.dart';
 
-/// Models for Workout Cloud Functions API
 class WorkoutListItem {
   final String id;
   final String? name;
@@ -54,44 +54,6 @@ class WorkoutSetDto {
     'reps': reps,
     'weight': weight,
     'time': time,
-  };
-}
-
-class PersonalWorkoutExerciseDto {
-  final String exerciseId;
-  final String name;
-  final int sets;
-  final double weight;
-  final int reps;
-  final int restTime;
-
-  PersonalWorkoutExerciseDto({
-    required this.exerciseId,
-    required this.name,
-    required this.sets,
-    required this.reps,
-    required this.weight,
-    required this.restTime,
-  });
-
-  factory PersonalWorkoutExerciseDto.fromJson(Map<String, dynamic> json) {
-    return PersonalWorkoutExerciseDto(
-      exerciseId: json['exerciseId'] as String,
-      name: json['name'] as String,
-      sets: (json['sets'] as num).toInt(),
-      weight: (json['weight'] as num).toDouble(),
-      reps: (json['reps'] as num).toInt(),
-      restTime: (json['restTime'] as num).toInt(),
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'exerciseId': exerciseId,
-    'name': name,
-    'sets': sets,
-    'reps': reps,
-    'weight': weight,
-    'restTime': restTime,
   };
 }
 
@@ -181,74 +143,10 @@ class WorkoutDetailResponse {
   };
 }
 
-class PersonalWorkoutResponse extends CreatePersonalWorkoutRequest {
-  PersonalWorkoutResponse({
-    required super.name,
-    super.description,
-    required super.exercises,
-  });
-
-  factory PersonalWorkoutResponse.fromJson(Map<String, dynamic> json) {
-    return PersonalWorkoutResponse(
-      name: json['name'] as String,
-      description: json['description'] as String?,
-      exercises:
-          (json['exercises'] as List<dynamic>? ?? const [])
-              .map(
-                (e) => PersonalWorkoutExerciseDto.fromJson(
-                  e as Map<String, dynamic>,
-                ),
-              )
-              .toList(),
-    );
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return CreatePersonalWorkoutRequest(
-      name: name,
-      description: description,
-      exercises: exercises,
-    ).toJson();
-  }
-}
-
-class CreatePersonalWorkoutRequest {
-  final String name;
-  final String? description;
-  final List<PersonalWorkoutExerciseDto> exercises;
-
-  CreatePersonalWorkoutRequest({
-    required this.exercises,
-    required this.name,
-    required this.description,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'description': description,
-    'exercises': exercises.map((e) => e.toJson()).toList(),
-  };
-
-  factory CreatePersonalWorkoutRequest.fromJson(Map<String, dynamic> json) {
-    return CreatePersonalWorkoutRequest(
-      name: json['name'] as String,
-      description: json['description'] as String?,
-      exercises:
-          (json['exercises'] as List<dynamic>? ?? const [])
-              .map(
-                (e) => PersonalWorkoutExerciseDto.fromJson(
-                  e as Map<String, dynamic>,
-                ),
-              )
-              .toList(),
-    );
-  }
-}
-
 class WorkoutCreateRequest {
   final String id;
   final String? name;
+  final String? workoutToFollowId;
   final WorkoutType workoutType;
   final List<WorkoutExerciseDto> exercises;
   final DateTime startTime;
@@ -257,6 +155,7 @@ class WorkoutCreateRequest {
   WorkoutCreateRequest({
     required this.id,
     this.name,
+    this.workoutToFollowId,
     required this.workoutType,
     required this.exercises,
     required this.startTime,
@@ -268,15 +167,20 @@ class WorkoutCreateRequest {
     'name': name,
     'workoutType':
         '${workoutType.toString().split('.').last[0].toUpperCase()}${workoutType.toString().split('.').last.substring(1).toLowerCase()}',
+    'workoutToFollowId': workoutToFollowId,
     'exercises': exercises.map((e) => e.toJson()).toList(),
     'startTime': startTime.toIso8601String(),
     'endTime': endTime.toIso8601String(),
   };
 
-  factory WorkoutCreateRequest.fromWorkout(Workout workout) {
+  factory WorkoutCreateRequest.fromWorkoutAndWorkoutToFollowId(
+    Workout workout,
+    String? workoutToFollowId,
+  ) {
     return WorkoutCreateRequest(
       id: workout.id,
       workoutType: workout.workoutType,
+      workoutToFollowId: workoutToFollowId,
       exercises:
           workout.exercises
               .map(
@@ -302,6 +206,27 @@ class WorkoutCreateRequest {
               .toList(),
       startTime: workout.startTime,
       endTime: workout.endTime ?? DateTime.now(),
+    );
+  }
+}
+
+class WorkoutCreateResponse {
+  final String? level;
+  final List<PersonalWorkoutExerciseDto>? nextWorkoutExercises;
+
+  WorkoutCreateResponse({this.level, this.nextWorkoutExercises});
+
+  factory WorkoutCreateResponse.fromJson(Map<String, dynamic> json) {
+    return WorkoutCreateResponse(
+      level: json['level'] as String?,
+      nextWorkoutExercises:
+          (json['nextWorkoutExercises'] as List<dynamic>?)
+              ?.map(
+                (e) => PersonalWorkoutExerciseDto.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
+              .toList(),
     );
   }
 }

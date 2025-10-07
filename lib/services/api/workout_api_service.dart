@@ -1,5 +1,6 @@
 import 'i_api_service.dart';
 import 'api_service.dart';
+import 'models/personal_workout.model.dart';
 import 'models/workout_models.dart';
 
 /// Workout API service providing typed wrappers around Cloud Functions
@@ -60,23 +61,26 @@ class WorkoutApiService {
 
   /// POST createWorkout
   /// Input is full workout payload, returns success only
-  Future<ApiResponse<void>> logNewWorkout(WorkoutCreateRequest request) async {
-    return _api.post<WorkoutCreateRequest, void>(
+  Future<ApiResponse<WorkoutCreateResponse>> logNewWorkout(WorkoutCreateRequest request) async {
+    return _api.post<WorkoutCreateRequest, WorkoutCreateResponse>(
       'logNewWorkout',
       body: request,
       auth: true,
+      parser: (data) =>
+          WorkoutCreateResponse.fromJson(data as Map<String, dynamic>),
     );
   }
 
   /// POST createCustomWorkout
-  /// Input is custom workout payload, returns sucess only
-  Future<ApiResponse<void>> createPersonalWorkout(
+  /// Input is custom workout payload, returns Personal Workout id
+  Future<ApiResponse<String>> createPersonalWorkout(
     CreatePersonalWorkoutRequest request,
   ) async {
-    return _api.post<CreatePersonalWorkoutRequest, void>(
+    return _api.post<CreatePersonalWorkoutRequest, String>(
       'createPersonalWorkout',
       body: request,
       auth: true,
+      parser: (data) => data as String,
     );
   }
 

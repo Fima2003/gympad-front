@@ -67,20 +67,6 @@ class CustomWorkout {
       estimatedCalories: estimatedCalories ?? this.estimatedCalories,
     );
   }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> json = {
-      'name': name,
-      'description': description,
-      'difficulty': difficulty,
-      'muscle_groups': muscleGroups,
-      'image_url': imageUrl,
-      'estimated_calories': estimatedCalories,
-    };
-
-    json['exercises'] = exercises.map((e) => e.toJson()).toList();
-    return json;
-  }
 }
 
 class CustomWorkoutExercise {

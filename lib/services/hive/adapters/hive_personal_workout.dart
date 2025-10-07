@@ -45,18 +45,37 @@ class HivePersonalWorkoutExercise extends HiveObject {
     weight: weight,
     restTime: restTime,
   );
+
+  PersonalWorkoutExercise copyWith({
+    String? exerciseId,
+    String? name,
+    int? sets,
+    int? reps,
+    double? weight,
+    int? restTime,
+  }) => PersonalWorkoutExercise(
+    exerciseId: exerciseId ?? this.exerciseId,
+    name: name ?? this.name,
+    sets: sets ?? this.sets,
+    reps: reps ?? this.reps,
+    weight: weight ?? this.weight,
+    restTime: restTime ?? this.restTime,
+  );
 }
 
 @HiveType(typeId: 1)
 class HivePersonalWorkout extends HiveObject {
   @HiveField(0)
-  String name;
+  String workoutId;
   @HiveField(1)
-  String? description;
+  String name;
   @HiveField(2)
+  String? description;
+  @HiveField(3)
   List<HivePersonalWorkoutExercise> exercises;
 
   HivePersonalWorkout({
+    required this.workoutId,
     required this.name,
     required this.description,
     required this.exercises,
@@ -64,6 +83,7 @@ class HivePersonalWorkout extends HiveObject {
 
   factory HivePersonalWorkout.fromDomain(PersonalWorkout w) =>
       HivePersonalWorkout(
+        workoutId: w.workoutId,
         name: w.name,
         description: w.description,
         exercises:
@@ -71,8 +91,21 @@ class HivePersonalWorkout extends HiveObject {
       );
 
   PersonalWorkout toDomain() => PersonalWorkout(
+    workoutId: workoutId,
     name: name,
     description: description,
     exercises: exercises.map((e) => e.toDomain()).toList(),
+  );
+
+  HivePersonalWorkout copyWith({
+    String? workoutId,
+    String? name,
+    String? description,
+    List<HivePersonalWorkoutExercise>? exercises,
+  }) => HivePersonalWorkout(
+    workoutId: workoutId ?? this.workoutId,
+    name: name ?? this.name,
+    description: description ?? this.description,
+    exercises: exercises ?? this.exercises,
   );
 }

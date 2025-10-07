@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../models/workout_exercise.dart';
 import '../../models/workout_set.dart';
-import '../../services/api/models/workout_models.dart';
+import '../../services/api/models/personal_workout.model.dart';
 import '../../services/workout_service.dart';
 
 part 'save_workout_events.dart';

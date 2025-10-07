@@ -67,21 +67,24 @@ class HivePersonalWorkoutAdapter extends TypeAdapter<HivePersonalWorkout> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return HivePersonalWorkout(
-      name: fields[0] as String,
-      description: fields[1] as String?,
-      exercises: (fields[2] as List).cast<HivePersonalWorkoutExercise>(),
+      workoutId: fields[0] as String,
+      name: fields[1] as String,
+      description: fields[2] as String?,
+      exercises: (fields[3] as List).cast<HivePersonalWorkoutExercise>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, HivePersonalWorkout obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
-      ..write(obj.name)
+      ..write(obj.workoutId)
       ..writeByte(1)
-      ..write(obj.description)
+      ..write(obj.name)
       ..writeByte(2)
+      ..write(obj.description)
+      ..writeByte(3)
       ..write(obj.exercises);
   }
 

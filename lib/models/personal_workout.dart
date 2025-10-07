@@ -1,14 +1,16 @@
 import '../blocs/data/data_bloc.dart';
-import '../services/api/models/workout_models.dart';
+import '../services/api/models/personal_workout.model.dart';
 import 'custom_workout.dart';
 import 'exercise.dart';
 
 class PersonalWorkout {
+  final String workoutId;
   final String name;
   final String? description;
   final List<PersonalWorkoutExercise> exercises;
 
   PersonalWorkout({
+    required this.workoutId,
     required this.name,
     this.description = '',
     required this.exercises,
@@ -39,32 +41,31 @@ class PersonalWorkout {
     return set.toList();
   }
 
-  CustomWorkout toCustomWorkout(DataReady? state) {
-    return CustomWorkout(
-      id: name.toLowerCase().replaceAll(' ', '_'),
-      name: name,
-      workoutType: WorkoutType.personal,
-      description: description ?? "",
-      difficulty: 'none',
-      muscleGroups: getMuscleGroups(state),
-      imageUrl: '',
-      exercises:
-          exercises.map((e) {
-            return CustomWorkoutExercise(
-              id: e.exerciseId,
-              name: e.name,
-              setsAmount: e.sets,
-              suggestedWeight: e.weight,
-              restTime: e.restTime,
-              suggestedReps: e.reps,
-            );
-          }).toList(),
-      estimatedCalories: 0,
-    );
-  }
+  CustomWorkout toCustomWorkout(DataReady? state) => CustomWorkout(
+    id: workoutId,
+    name: name,
+    workoutType: WorkoutType.personal,
+    description: description ?? "",
+    difficulty: 'none',
+    muscleGroups: getMuscleGroups(state),
+    imageUrl: '',
+    exercises:
+        exercises.map((e) {
+          return CustomWorkoutExercise(
+            id: e.exerciseId,
+            name: e.name,
+            setsAmount: e.sets,
+            suggestedWeight: e.weight,
+            restTime: e.restTime,
+            suggestedReps: e.reps,
+          );
+        }).toList(),
+    estimatedCalories: 0,
+  );
 
   factory PersonalWorkout.fromJson(Map<String, dynamic> json) {
     return PersonalWorkout(
+      workoutId: json['workoutId'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
       exercises:
@@ -79,6 +80,7 @@ class PersonalWorkout {
 
   factory PersonalWorkout.fromResponse(PersonalWorkoutResponse e) {
     return PersonalWorkout(
+      workoutId: e.workoutId,
       name: e.name,
       exercises:
           e.exercises.map((el) => PersonalWorkoutExercise.fromDto(el)).toList(),
