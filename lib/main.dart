@@ -208,6 +208,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider<DataBloc>(
           create: (_) => DataBloc()..add(const DataLoadRequested()),
+          lazy: false,
         ),
         BlocProvider<AuthBloc>(create: (context) => AuthBloc(), lazy: false),
         BlocProvider<WorkoutBloc>(

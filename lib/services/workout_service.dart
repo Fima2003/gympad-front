@@ -13,6 +13,7 @@ import '../models/capabilities.dart';
 import 'api/models/personal_workout.model.dart';
 import 'hive/current_workout_lss.dart';
 import 'hive/workout_history_lss.dart';
+import 'hive/workout_to_follow_lss.dart';
 
 class WorkoutService {
   static final WorkoutService _instance = WorkoutService._internal();
@@ -40,6 +41,7 @@ class WorkoutService {
   CustomWorkout? get workoutToFollow => _workoutToFollow;
 
   final _currentWorkoutStorage = CurrentWorkoutLocalStorageService();
+  final _workoutToFollowStorage = WorkoutToFollowLss();
   final _historyStorage = WorkoutHistoryLocalStorageService();
 
   Future<void> startWorkout(
@@ -237,7 +239,7 @@ class WorkoutService {
 
   Future<void> loadCurrentWorkout() async {
     try {
-      _currentWorkout = await _currentWorkoutStorage.load();
+      _currentWorkout = await _currentWorkoutStorage.get();
       if (_currentWorkout != null) {
         _logger.info('Loaded current workout with ID: ${_currentWorkout!.id}');
       }
@@ -249,7 +251,7 @@ class WorkoutService {
 
   Future<void> loadWorkoutToFollow() async {
     try {
-      _workoutToFollow = await _currentWorkoutStorage.loadWorkoutToFollow();
+      _workoutToFollow = await _workoutToFollowStorage.get();
       if (_workoutToFollow != null) {
         _logger.info('Loaded workoutToFollow with ID: ${_workoutToFollow!.id}');
       }
@@ -281,11 +283,11 @@ class WorkoutService {
 
   Future<void> _saveWorkoutToFollow() async {
     if (_workoutToFollow == null) {
-      await _currentWorkoutStorage.deleteWorkoutToFollowOnly();
+      await _workoutToFollowStorage.delete();
       return;
     }
     try {
-      await _currentWorkoutStorage.saveWorkoutToFollow(_workoutToFollow!);
+      await _workoutToFollowStorage.save(_workoutToFollow!);
     } catch (e, st) {
       _logger.warning('Failed to persist workoutToFollow', e, st);
     }
@@ -294,7 +296,7 @@ class WorkoutService {
   Future<void> _saveWorkoutToHistory() async {
     if (_currentWorkout == null) return;
     try {
-      await _historyStorage.add(_currentWorkout!);
+      await _historyStorage.save(_currentWorkout!);
     } catch (e, st) {
       _logger.warning('Failed to save workout to history', e, st);
     }

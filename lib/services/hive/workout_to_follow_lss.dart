@@ -2,9 +2,9 @@ import '../../models/custom_workout.dart';
 import 'adapters/hive_custom_workout.dart';
 import 'lss.dart';
 
-/// Local storage service for CustomWorkout domain models.
-class CustomWorkoutLss extends LSS<CustomWorkout, HiveCustomWorkout> {
-  CustomWorkoutLss() : super('custom_workouts');
+class WorkoutToFollowLss extends LSS<CustomWorkout, HiveCustomWorkout> {
+  WorkoutToFollowLss()
+    : super('workout_to_follow_box', defaultKey: 'workout_to_follow');
 
   @override
   HiveCustomWorkout fromDomain(CustomWorkout domain) =>
@@ -14,5 +14,5 @@ class CustomWorkoutLss extends LSS<CustomWorkout, HiveCustomWorkout> {
   CustomWorkout toDomain(HiveCustomWorkout hive) => hive.toDomain();
 
   @override
-  String getKey(CustomWorkout domain) => domain.id;
+  String getKey(CustomWorkout domain) => 'workout_to_follow';
 }
