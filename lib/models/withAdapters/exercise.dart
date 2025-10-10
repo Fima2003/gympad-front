@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 part 'exercise.g.dart';
 
 @HiveType(typeId: 1)
-class Exercise {
+class Exercise extends HiveObject {
   @HiveField(0)
   final String exerciseId;
   @HiveField(1)

@@ -1,11 +1,11 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../models/withAdapters/exercise.dart';
+import '../../models/withAdapters/questionnaire.dart';
 import '../../models/withAdapters/user.dart';
 import '../../models/withAdapters/user_settings.dart';
 import 'adapters/hive_personal_workout.dart';
 import 'adapters/hive_workout.dart';
 import 'adapters/hive_custom_workout.dart';
-import 'adapters/hive_questionnaire.dart';
 
 /// Central place to initialize Hive & register all adapters exactly once.
 class HiveInitializer {
@@ -49,8 +49,8 @@ class HiveInitializer {
     if (!Hive.isAdapterRegistered(HiveCustomWorkoutAdapter().typeId)) {
       Hive.registerAdapter<HiveCustomWorkout>(HiveCustomWorkoutAdapter());
     }
-    if (!Hive.isAdapterRegistered(HiveQuestionnaireAdapter().typeId)) {
-      Hive.registerAdapter<HiveQuestionnaire>(HiveQuestionnaireAdapter());
+    if (!Hive.isAdapterRegistered(QuestionnaireAdapter().typeId)) {
+      Hive.registerAdapter<Questionnaire>(QuestionnaireAdapter());
     }
     // The one below is 9(started from 0)
     if (!Hive.isAdapterRegistered(UserSettingsAdapter().typeId)) {

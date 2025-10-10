@@ -1,8 +1,18 @@
-class Questionnaire {
+import 'package:hive/hive.dart';
+
+part 'questionnaire.g.dart';
+
+@HiveType(typeId: 8)
+class Questionnaire extends HiveObject {
+  @HiveField(0)
   final bool skipped;
+  @HiveField(1)
   final bool completed;
+  @HiveField(2)
   final DateTime? completedAt;
+  @HiveField(3)
   final Map<String, List<String>> answers;
+  @HiveField(4)
   final bool uploaded;
 
   Questionnaire({

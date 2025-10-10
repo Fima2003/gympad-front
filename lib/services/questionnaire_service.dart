@@ -1,6 +1,7 @@
 import 'package:gympad/services/api/api.dart';
-import 'package:gympad/services/hive/adapters/hive_questionnaire.dart';
 import 'package:gympad/services/hive/questionnaire_lss.dart';
+
+import '../models/withAdapters/questionnaire.dart';
 
 /// Service facade that coordinates questionnaire persistence (Hive) and network (API).
 /// BLoC should depend only on this service, not on storage or API directly.
@@ -13,10 +14,9 @@ class QuestionnaireService {
   final QuestionnaireLocalStorageService _lss =
       QuestionnaireLocalStorageService();
   final QuestionnaireApiService _api = QuestionnaireApiService();
-  final HiveQuestionnaire q = HiveQuestionnaire();
 
   // Load current questionnaire state from local storage
-  Future<HiveQuestionnaire?> load() => _lss.load();
+  Future<Questionnaire?> load() => _lss.get();
 
   // Update answers locally
   Future<void> upsertAnswers(Map<String, List<String>> answers) async {
@@ -29,7 +29,7 @@ class QuestionnaireService {
   }
 
   Future<void> markCompleted(bool completed) async {
-    final cur = await _lss.load();
+    final cur = await _lss.get();
     if (cur != null) {
       await _lss.save(cur.copyWith(completed: completed));
     }
@@ -43,7 +43,7 @@ class QuestionnaireService {
       answers: stored.answers,
     );
     final resp = await _api.submit(req);
-    final cur = await _lss.load();
+    final cur = await _lss.get();
     if (cur != null) {
       await _lss.save(cur.copyWith(uploaded: resp.success));
     }
@@ -51,7 +51,7 @@ class QuestionnaireService {
 
   // Retry upload if locally completed/skipped and not uploaded yet
   Future<void> retryIfPendingUpload() async {
-    final stored = await _lss.load();
+    final stored = await _lss.get();
     if (stored == null) return;
     if (stored.completed && !stored.uploaded) {
       final req = QuestionnaireSubmitRequest(
