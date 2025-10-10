@@ -1,9 +1,9 @@
 import 'package:hive/hive.dart';
 
-part 'hive_user.g.dart';
+part 'user.g.dart';
 
 @HiveType(typeId: 5)
-class HiveUserAuth extends HiveObject {
+class User extends HiveObject {
   @HiveField(0)
   final String? userId;
   @HiveField(1)
@@ -13,14 +13,14 @@ class HiveUserAuth extends HiveObject {
   @HiveField(3)
   final bool isGuest;
 
-  HiveUserAuth({this.userId, this.gymId, this.authToken, this.isGuest = false});
+  User({this.userId, this.gymId, this.authToken, this.isGuest = false});
 
-  HiveUserAuth copyWith({
+  User copyWith({
     String? userId,
     String? gymId,
     String? authToken,
     bool? isGuest,
-  }) => HiveUserAuth(
+  }) => User(
     userId: userId ?? this.userId,
     gymId: gymId ?? this.gymId,
     authToken: authToken ?? this.authToken,
@@ -29,5 +29,5 @@ class HiveUserAuth extends HiveObject {
 
   @override
   String toString() =>
-      'HiveUserAuth(userId: $userId, gymId: $gymId, isGuest: $isGuest)';
+      'User(userId: $userId, gymId: $gymId, isGuest: $isGuest)';
 }

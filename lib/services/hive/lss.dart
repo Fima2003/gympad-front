@@ -177,14 +177,28 @@ abstract class LSS<T, H> {
   }
 
   /// Update an existing item. Throws if item does not exist.
-  Future<void> update(T item) async {
+  Future<void> update({
+    dynamic key,
+    required T Function(T current) copyWithFn,
+  }) async {
     try {
+      key ??= defaultKey ??
+          (throw ArgumentError('Key cannot be null if no defaultKey is set'));
+
       final box = await _box();
-      final key = getKey(item);
       if (!box.containsKey(key)) {
         throw ArgumentError('Item with key $key does not exist for update');
       }
-      final hiveModel = fromDomain(item);
+
+      final existingHive = box.get(key);
+      if (existingHive == null) {
+        throw StateError('Existing item for key $key is null');
+      }
+
+      final current = toDomain(existingHive as H);
+      final updated = copyWithFn(current);
+      final hiveModel = fromDomain(updated);
+
       await box.put(key, hiveModel);
       _logger.fine('Updated item with key: $key');
     } catch (e, st) {

@@ -1,8 +1,8 @@
 import 'package:gympad/services/hive/adapters/hive_user_settings.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../../models/withAdapters/user.dart';
 import 'adapters/hive_personal_workout.dart';
 import 'adapters/hive_workout.dart';
-import 'adapters/hive_user.dart';
 import 'adapters/hive_custom_workout.dart';
 import 'adapters/hive_questionnaire.dart';
 
@@ -34,8 +34,8 @@ class HiveInitializer {
     if (!Hive.isAdapterRegistered(HiveWorkoutSetAdapter().typeId)) {
       Hive.registerAdapter<HiveWorkoutSet>(HiveWorkoutSetAdapter());
     }
-    if (!Hive.isAdapterRegistered(HiveUserAuthAdapter().typeId)) {
-      Hive.registerAdapter<HiveUserAuth>(HiveUserAuthAdapter());
+    if (!Hive.isAdapterRegistered(UserAdapter().typeId)) {
+      Hive.registerAdapter<User>(UserAdapter());
     }
     if (!Hive.isAdapterRegistered(HiveCustomWorkoutAdapter().typeId)) {
       Hive.registerAdapter<HiveCustomWorkoutExercise>(

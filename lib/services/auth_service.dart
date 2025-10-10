@@ -1,8 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 
+import '../models/withAdapters/user.dart';
 import 'logger_service.dart';
 import 'hive/user_auth_lss.dart';
 import './api/user_api_service.dart';
@@ -14,7 +15,7 @@ class AuthService {
   factory AuthService() => _instance;
   AuthService._internal();
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final fb_auth.FirebaseAuth _auth = fb_auth.FirebaseAuth.instance;
   final UserApiService _userApiService = UserApiService();
   final QuestionnaireService _questionnaireService = QuestionnaireService();
   final WorkoutService _workoutService = WorkoutService();
@@ -63,7 +64,7 @@ class AuthService {
 
   /// Check locally saved user data (userId and gymId exist)
   Future<Map<String, String?>> getLocalUserData() async {
-    final hiveUser = await _userAuthStorage.load();
+    final hiveUser = await _userAuthStorage.get();
     final hiveQuestionnaire = await _questionnaireService.load();
     _logger.debug('Retrieved userId from Hive: ${hiveUser?.userId}');
     return {
@@ -83,11 +84,14 @@ class AuthService {
     bool? isGuest,
     bool? completedQuestionnaire,
   }) async {
-    await _userAuthStorage.save(
-      userId: userId,
-      gymId: gymId,
-      authToken: idToken,
-      isGuest: isGuest,
+    await _userAuthStorage.update(
+      copyWithFn:
+          (User u) => u.copyWith(
+            userId: userId,
+            gymId: gymId,
+            authToken: idToken,
+            isGuest: isGuest,
+          ),
     );
     if (completedQuestionnaire != null) {
       await _questionnaireService.markCompleted(completedQuestionnaire);
@@ -96,7 +100,9 @@ class AuthService {
 
   Future<void> markGuestSelected(String deviceId) async {
     // DeviceId not stored here (kept by DeviceIdentityService), just set guest flag.
-    await _userAuthStorage.save(isGuest: true);
+    await _userAuthStorage.update(
+      copyWithFn: (User u) => u.copyWith(isGuest: true),
+    );
   }
 
   /// Clear local user data
@@ -110,10 +116,10 @@ class AuthService {
   Future<Map<String, dynamic>?> signInWithGoogle() async {
     try {
       // Sign in via Google
-      UserCredential userCredential;
+      fb_auth.UserCredential userCredential;
       if (kIsWeb) {
         // Web: use Firebase Auth popup
-        final provider = GoogleAuthProvider();
+        final provider = fb_auth.GoogleAuthProvider();
         provider.addScope('email');
         provider.addScope('profile');
         userCredential = await _auth.signInWithPopup(provider);
@@ -123,7 +129,7 @@ class AuthService {
         final googleUser = await GoogleSignIn.instance.authenticate();
         final googleAuth = googleUser.authentication;
         // Create credential with ID token
-        final credential = GoogleAuthProvider.credential(
+        final credential = fb_auth.GoogleAuthProvider.credential(
           idToken: googleAuth.idToken,
         );
         userCredential = await _auth.signInWithCredential(credential);
@@ -177,7 +183,7 @@ class AuthService {
   }
 
   /// Get current Firebase user
-  User? get currentUser => _auth.currentUser;
+  fb_auth.User? get currentUser => _auth.currentUser;
 
   /// Check if user is signed in
   bool get isSignedIn => _auth.currentUser != null;
@@ -185,7 +191,7 @@ class AuthService {
   /// Fetch current user info from backend; if token expired, refresh and retry once
   Future<bool> fetchUserOnAppStartWithRetry() async {
     try {
-      if(!isSignedIn) return false;
+      if (!isSignedIn) return false;
       final res = await _userApiService.userPartialRead();
       if (res.success) {
         final user = _auth.currentUser;
@@ -210,7 +216,9 @@ class AuthService {
         if (user == null) return false;
         final fresh = await user.getIdToken(true);
         if (fresh == null) return false;
-        await _userAuthStorage.save(authToken: fresh);
+        await _userAuthStorage.update(
+          copyWithFn: (u) => u.copyWith(authToken: fresh),
+        );
 
         final retry = await _userApiService.userPartialRead();
         if (retry.success) {

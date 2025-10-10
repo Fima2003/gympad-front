@@ -1,22 +1,22 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'hive_user.dart';
+part of 'user.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class HiveUserAuthAdapter extends TypeAdapter<HiveUserAuth> {
+class UserAdapter extends TypeAdapter<User> {
   @override
   final int typeId = 5;
 
   @override
-  HiveUserAuth read(BinaryReader reader) {
+  User read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return HiveUserAuth(
+    return User(
       userId: fields[0] as String?,
       gymId: fields[1] as String?,
       authToken: fields[2] as String?,
@@ -25,7 +25,7 @@ class HiveUserAuthAdapter extends TypeAdapter<HiveUserAuth> {
   }
 
   @override
-  void write(BinaryWriter writer, HiveUserAuth obj) {
+  void write(BinaryWriter writer, User obj) {
     writer
       ..writeByte(4)
       ..writeByte(0)
@@ -44,7 +44,7 @@ class HiveUserAuthAdapter extends TypeAdapter<HiveUserAuth> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is HiveUserAuthAdapter &&
+      other is UserAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

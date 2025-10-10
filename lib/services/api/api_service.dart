@@ -18,7 +18,8 @@ class ApiService implements IApiService {
 
   // Base domain for Firebase Functions
   static const String _baseDomain = 'ocycwbq2ka-uc.a.run.app';
-  static const String _localDomain = 'http://127.0.0.1:5001/gympad-e44fc/us-central1/';
+  static const String _localDomain =
+      'http://127.0.0.1:5001/gympad-e44fc/us-central1/';
 
   void initialize() {
     // Note: baseUrl will be set dynamically per request
@@ -215,7 +216,9 @@ class ApiService implements IApiService {
         _logWarning('Token refresh returned null token');
         return false;
       }
-      await _userAuthStorage.save(authToken: freshToken.token!);
+      await _userAuthStorage.update(
+        copyWithFn: (u) => u.copyWith(authToken: freshToken.token!),
+      );
       _logger.info('Auth token refreshed and cached');
       return true;
     } catch (e) {
@@ -248,7 +251,7 @@ class ApiService implements IApiService {
   Future<String?> _getAuthToken() async {
     try {
       // First try to get token from local storage
-      final hive = await _userAuthStorage.load();
+      final hive = await _userAuthStorage.get();
       String? cachedToken = hive?.authToken;
 
       if (cachedToken != null) {
@@ -262,7 +265,9 @@ class ApiService implements IApiService {
           final token = await user.getIdToken();
           // Cache the token in local storage for future use
           if (token != null) {
-            await _userAuthStorage.save(authToken: token);
+            await _userAuthStorage.update(
+              copyWithFn: (u) => u.copyWith(authToken: token),
+            );
             _logger.info('Retrieved and cached auth token from Firebase');
             return token;
           }
@@ -276,7 +281,9 @@ class ApiService implements IApiService {
             if (reloadedUser != null) {
               final token = await reloadedUser.getIdToken();
               if (token != null) {
-                await _userAuthStorage.save(authToken: token);
+                await _userAuthStorage.update(
+                  copyWithFn: (u) => u.copyWith(authToken: token),
+                );
                 _logger.info(
                   'Retrieved and cached auth token after user reload',
                 );
@@ -365,7 +372,6 @@ class ApiService implements IApiService {
 
   /// Handle errors
   ApiResponse<K> _handleError<K>(dynamic error) {
-
     if (error is DioException) {
       switch (error.type) {
         case DioExceptionType.connectionTimeout:

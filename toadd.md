@@ -11,5 +11,5 @@
 | Flow | Questionnaire should go after the login                | High       | Done        |
 | Feat | Translate kg to lb                                     | Medium     | Not Started |
 | Arch | `personal_workouts_screen.dart` — remove storage usage | High       | Not Started |
-| Arch | Create a questionnaire model not to use Hive one.      | High       | Not Started |
+| Arch | Create a questionnaire model not to use Hive one.      | High       | Done        |
 | Arch | Create a User model not to use Hive one.               | High       | Not Started |

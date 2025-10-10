@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+import '../../../models/questionnaire.dart';
+
 part 'hive_questionnaire.g.dart';
 
 /// Manual Hive adapter for storing questionnaire status and answers.
@@ -38,6 +40,24 @@ class HiveQuestionnaire extends HiveObject {
       completedAt: completedAt ?? this.completedAt,
       answers: answers ?? this.answers,
       uploaded: uploaded ?? this.uploaded,
+    );
+  }
+
+  Questionnaire toDomain() => Questionnaire(
+    skipped: skipped,
+    completed: completed,
+    completedAt: completedAt,
+    answers: answers,
+    uploaded: uploaded,
+  );
+
+  factory HiveQuestionnaire.fromDomain(Questionnaire q) {
+    return HiveQuestionnaire(
+      skipped: q.skipped,
+      completed: q.completed,
+      completedAt: q.completedAt,
+      answers: q.answers,
+      uploaded: q.uploaded,
     );
   }
 }
