@@ -61,13 +61,16 @@ class WorkoutApiService {
 
   /// POST createWorkout
   /// Input is full workout payload, returns success only
-  Future<ApiResponse<WorkoutCreateResponse>> logNewWorkout(WorkoutCreateRequest request) async {
+  Future<ApiResponse<WorkoutCreateResponse>> logNewWorkout(
+    WorkoutCreateRequest request,
+  ) async {
     return _api.post<WorkoutCreateRequest, WorkoutCreateResponse>(
       'logNewWorkout',
       body: request,
       auth: true,
-      parser: (data) =>
-          WorkoutCreateResponse.fromJson(data as Map<String, dynamic>),
+      parser:
+          (data) =>
+              WorkoutCreateResponse.fromJson(data as Map<String, dynamic>),
     );
   }
 

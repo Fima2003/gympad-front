@@ -9,6 +9,7 @@ import 'api/custom_workout_api_service.dart';
 import 'api/exercise_api_service.dart';
 import 'hive/custom_workout_lss.dart';
 import 'hive/exercise_lss.dart';
+import 'hive/user_auth_lss.dart';
 import 'logger_service.dart';
 
 class DataService {
@@ -25,6 +26,8 @@ class DataService {
   final CustomWorkoutLss _customWorkoutLssService = CustomWorkoutLss();
   final ExerciseApiService _exerciseApiService = ExerciseApiService();
   final ExerciseLss _exerciseLssService = ExerciseLss();
+  final UserAuthLocalStorageService _userAuthStorage =
+      UserAuthLocalStorageService();
 
   // Read-only access for BLoC
   Map<String, Exercise> get exercisesMap => _exercises ?? const {};
@@ -88,7 +91,13 @@ class DataService {
   }
 
   Future<void> _loadCustomWorkouts() async {
-    final response = await _customWorkoutApiService.getCustomWorkouts();
+    final level = _userAuthStorage.get().then((user) => user?.level);
+    String userLevel = (await level)?.name ?? "Beginner";
+    userLevel =
+        userLevel[0].toUpperCase() + userLevel.substring(1).toLowerCase();
+    final response = await _customWorkoutApiService.getCustomWorkouts(
+      userLevel,
+    );
     if (response.error != null) {
       _logger.log(
         Level.WARNING,

@@ -1,7 +1,6 @@
 import '../../../models/withAdapters/exercise.dart';
 
 class ExerciseR extends Exercise {
-  
   ExerciseR({
     required super.exerciseId,
     required super.name,
@@ -40,6 +39,6 @@ class ExerciseR extends Exercise {
     muscleGroup: muscleGroup,
     restTime: restTime,
     minReps: minReps,
-    maxReps: maxReps
+    maxReps: maxReps,
   );
 }

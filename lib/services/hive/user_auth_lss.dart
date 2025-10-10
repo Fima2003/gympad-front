@@ -9,6 +9,7 @@ class UserAuthLocalStorageService extends LSS<User, User> {
 
   @override
   User fromDomain(User domain) => domain;
+
   @override
   User toDomain(User hive) => hive;
 

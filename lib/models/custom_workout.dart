@@ -23,7 +23,10 @@ class CustomWorkout {
     this.estimatedCalories,
   });
 
-  factory CustomWorkout.fromJson(Map<String, dynamic> json, {WorkoutType workoutType = WorkoutType.custom}) {
+  factory CustomWorkout.fromJson(
+    Map<String, dynamic> json, {
+    WorkoutType workoutType = WorkoutType.custom,
+  }) {
     List<CustomWorkoutExercise> exercisesList = [];
     if (json['exercises'] is List) {
       for (final item in (json['exercises'] as List)) {

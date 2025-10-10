@@ -11,7 +11,6 @@ class PersonalWorkoutResponse extends CreatePersonalWorkoutRequest {
   });
 
   factory PersonalWorkoutResponse.fromJson(Map<String, dynamic> json) {
-    print("Got Personal Workout with id: ${json['id']}, name: ${json['name']}");
     return PersonalWorkoutResponse(
       workoutId: json['id'] as String,
       name: json['name'] as String,

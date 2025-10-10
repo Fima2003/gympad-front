@@ -182,7 +182,8 @@ abstract class LSS<T, H> {
     required T Function(T current) copyWithFn,
   }) async {
     try {
-      key ??= defaultKey ??
+      key ??=
+          defaultKey ??
           (throw ArgumentError('Key cannot be null if no defaultKey is set'));
 
       final box = await _box();

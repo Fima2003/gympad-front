@@ -20,8 +20,10 @@ class QuestionnaireAdapter extends TypeAdapter<Questionnaire> {
       skipped: fields[0] as bool,
       completed: fields[1] as bool,
       completedAt: fields[2] as DateTime?,
-      answers: (fields[3] as Map?)?.map((dynamic k, dynamic v) =>
-          MapEntry(k as String, (v as List).cast<String>())),
+      answers: (fields[3] as Map?)?.map(
+        (dynamic k, dynamic v) =>
+            MapEntry(k as String, (v as List).cast<String>()),
+      ),
       uploaded: fields[4] as bool,
     );
   }

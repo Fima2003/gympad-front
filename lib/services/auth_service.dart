@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../models/withAdapters/user.dart';
 import 'logger_service.dart';
@@ -20,7 +21,7 @@ class AuthService {
   final QuestionnaireService _questionnaireService = QuestionnaireService();
   final WorkoutService _workoutService = WorkoutService();
 
-  final AppLogger _logger = AppLogger();
+  final Logger _logger = AppLogger().createLogger('AuthService');
 
   final _userAuthStorage = UserAuthLocalStorageService();
 
@@ -51,12 +52,12 @@ class AuthService {
     }
     _initCompleter = Completer<void>();
 
-    _logger.debug('[AuthService] initialize() start');
+    _logger.config('initialize() start');
     try {
       _initialized = true;
-      _logger.info('[AuthService] initialize() complete');
+      _logger.info('initialize() complete');
     } catch (e, st) {
-      _logger.error('[AuthService] initialization failed', e, st);
+      _logger.severe('initialization failed', e, st);
     } finally {
       _initCompleter!.complete();
     }
@@ -66,7 +67,7 @@ class AuthService {
   Future<Map<String, String?>> getLocalUserData() async {
     final hiveUser = await _userAuthStorage.get();
     final hiveQuestionnaire = await _questionnaireService.load();
-    _logger.debug('Retrieved userId from Hive: ${hiveUser?.userId}');
+    _logger.config('Retrieved userId from Hive: ${hiveUser?.userId}');
     return {
       'userId': hiveUser?.userId,
       'gymId': hiveUser?.gymId,
@@ -83,6 +84,7 @@ class AuthService {
     String? idToken,
     bool? isGuest,
     bool? completedQuestionnaire,
+    UserLevel? level,
   }) async {
     await _userAuthStorage.update(
       copyWithFn:
@@ -90,6 +92,7 @@ class AuthService {
             userId: userId,
             gymId: gymId,
             authToken: idToken,
+            level: level,
             isGuest: isGuest,
           ),
     );
@@ -149,6 +152,7 @@ class AuthService {
           userId: user.uid,
           gymId: backendResponse.data?.gymId,
           idToken: idToken,
+          level: backendResponse.data?.level,
           completedQuestionnaire: backendResponse.data?.completedQuestionnaire,
         );
         return {
@@ -164,10 +168,10 @@ class AuthService {
     } on GoogleSignInException catch (e) {
       // User canceled or other sign-in error
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
-      _logger.error('GoogleSignIn error: ${e.code}', e);
+      _logger.severe('GoogleSignIn error: ${e.code}', e);
       return {'success': false, 'error': e.description ?? e.code};
     } catch (e) {
-      _logger.error('Sign in error', e);
+      _logger.severe('Sign in error', e);
       return {'success': false, 'error': e.toString()};
     }
   }
@@ -201,6 +205,7 @@ class AuthService {
             userId: user.uid,
             gymId: res.data?.gymId,
             idToken: token,
+            level: res.data?.level,
             completedQuestionnaire: res.data?.completedQuestionnaire,
           );
         }
@@ -226,6 +231,7 @@ class AuthService {
             userId: user.uid,
             gymId: retry.data?.gymId,
             idToken: fresh,
+            level: retry.data?.level,
             completedQuestionnaire: retry.data?.completedQuestionnaire,
           );
           return true;
@@ -237,7 +243,7 @@ class AuthService {
       );
       return false;
     } catch (e, st) {
-      _logger.error('fetchUserOnAppStartWithRetry error', e, st);
+      _logger.severe('fetchUserOnAppStartWithRetry error', e, st);
       return false;
     }
   }

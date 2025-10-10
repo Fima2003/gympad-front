@@ -12,4 +12,7 @@
 | Feat | Translate kg to lb                                     | Medium     | Not Started |
 | Arch | `personal_workouts_screen.dart` — remove storage usage | High       | Not Started |
 | Arch | Create a questionnaire model not to use Hive one.      | High       | Done        |
-| Arch | Create a User model not to use Hive one.               | High       | Not Started |
+| Arch | Create a User model not to use Hive one.               | High       | Done        |
+| Bug  | Questionnaire when left midway does not appear anymore | Medium     | Not Started |
+| Bug  | When selected Intermediate lvl in questionnaire, 
+custom workouts still show up as beginner                       | Medium     | Done        |

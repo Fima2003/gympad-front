@@ -41,7 +41,7 @@ class HiveInitializer {
     if (!Hive.isAdapterRegistered(UserAdapter().typeId)) {
       Hive.registerAdapter<User>(UserAdapter());
     }
-    if (!Hive.isAdapterRegistered(HiveCustomWorkoutAdapter().typeId)) {
+    if (!Hive.isAdapterRegistered(HiveCustomWorkoutExerciseAdapter().typeId)) {
       Hive.registerAdapter<HiveCustomWorkoutExercise>(
         HiveCustomWorkoutExerciseAdapter(),
       );
@@ -52,9 +52,12 @@ class HiveInitializer {
     if (!Hive.isAdapterRegistered(QuestionnaireAdapter().typeId)) {
       Hive.registerAdapter<Questionnaire>(QuestionnaireAdapter());
     }
-    // The one below is 9(started from 0)
     if (!Hive.isAdapterRegistered(UserSettingsAdapter().typeId)) {
       Hive.registerAdapter<UserSettings>(UserSettingsAdapter());
+    }
+    // The one below is 11 (started from 0)
+    if (!Hive.isAdapterRegistered(UserLevelAdapter().typeId)) {
+      Hive.registerAdapter<UserLevel>(UserLevelAdapter());
     }
 
     _initialized = true;

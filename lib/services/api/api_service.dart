@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:flutter/foundation.dart';
 
+import '../../models/withAdapters/user.dart';
 import '../hive/user_auth_lss.dart';
 import '../logger_service.dart';
 import 'i_api_service.dart';
@@ -206,7 +207,7 @@ class ApiService implements IApiService {
   /// Force refresh auth token and cache it
   Future<bool> _forceRefreshAuthToken() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = fb_auth.FirebaseAuth.instance.currentUser;
       if (user == null) {
         _logWarning('No authenticated user for token refresh');
         return false;
@@ -259,15 +260,17 @@ class ApiService implements IApiService {
       }
 
       // If no cached token, try to get from Firebase
-      final user = FirebaseAuth.instance.currentUser;
+      final user = fb_auth.FirebaseAuth.instance.currentUser;
       if (user != null) {
         try {
           final token = await user.getIdToken();
+          final localUser =
+              await _userAuthStorage.get() ??
+              User(userId: user.uid, authToken: token, isGuest: false);
+          await _userAuthStorage.save(localUser);
           // Cache the token in local storage for future use
           if (token != null) {
-            await _userAuthStorage.update(
-              copyWithFn: (u) => u.copyWith(authToken: token),
-            );
+            await _userAuthStorage.update(copyWithFn: (u) => localUser);
             _logger.info('Retrieved and cached auth token from Firebase');
             return token;
           }
@@ -277,7 +280,7 @@ class ApiService implements IApiService {
           // Try to reload user and get token again
           try {
             await user.reload();
-            final reloadedUser = FirebaseAuth.instance.currentUser;
+            final reloadedUser = fb_auth.FirebaseAuth.instance.currentUser;
             if (reloadedUser != null) {
               final token = await reloadedUser.getIdToken();
               if (token != null) {

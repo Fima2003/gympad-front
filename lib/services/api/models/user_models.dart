@@ -1,12 +1,16 @@
+import '../../../models/withAdapters/user.dart';
+
 /// User partial read response model
 class UserPartialResponse {
   final String name;
   final String? gymId;
+  final UserLevel level;
   final bool completedQuestionnaire;
 
   UserPartialResponse({
     required this.name,
     required this.completedQuestionnaire,
+    required this.level,
     this.gymId,
   });
 
@@ -14,6 +18,15 @@ class UserPartialResponse {
     return UserPartialResponse(
       name: json['name'] as String,
       completedQuestionnaire: json['completedQuestionnaire'] as bool,
+      level:
+          json['level'] != null
+              ? UserLevel.values.firstWhere(
+                (e) =>
+                    e.toString() ==
+                    'UserLevel.${(json['level'] as String).toLowerCase()}',
+                orElse: () => UserLevel.beginner,
+              )
+              : UserLevel.beginner,
       gymId: json['gymId'] as String?,
     );
   }
