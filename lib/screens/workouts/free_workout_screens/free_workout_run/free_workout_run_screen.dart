@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../blocs/workout/workout_bloc.dart';
 import '../../../../blocs/data/data_bloc.dart';
 import '../../../../constants/app_styles.dart';
-import '../../../../models/exercise.dart';
+import '../../../../models/withAdapters/exercise.dart';
 import '../../../../models/workout_exercise.dart';
 import 'views/free_workout_selection_view.dart';
 import 'views/free_workout_set_view.dart';
@@ -50,9 +50,9 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
   void _focusExercise(Exercise ex) {
     context.read<WorkoutBloc>().add(
       FreeWorkoutFocusExercise(
-        exerciseId: ex.id,
+        exerciseId: ex.exerciseId,
         name: ex.name,
-        muscleGroup: ex.muscleGroup,
+        muscleGroup: ex.muscleGroup[0],
       ),
     );
     // Screen will switch to running once we get a RunInSet state.

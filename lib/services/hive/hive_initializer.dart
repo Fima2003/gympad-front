@@ -1,6 +1,7 @@
-import 'package:gympad/services/hive/adapters/hive_user_settings.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../../models/withAdapters/exercise.dart';
 import '../../models/withAdapters/user.dart';
+import '../../models/withAdapters/user_settings.dart';
 import 'adapters/hive_personal_workout.dart';
 import 'adapters/hive_workout.dart';
 import 'adapters/hive_custom_workout.dart';
@@ -24,6 +25,9 @@ class HiveInitializer {
     }
     if (!Hive.isAdapterRegistered(HivePersonalWorkoutAdapter().typeId)) {
       Hive.registerAdapter<HivePersonalWorkout>(HivePersonalWorkoutAdapter());
+    }
+    if (!Hive.isAdapterRegistered(ExerciseAdapter().typeId)) {
+      Hive.registerAdapter<Exercise>(ExerciseAdapter());
     }
     if (!Hive.isAdapterRegistered(HiveWorkoutAdapter().typeId)) {
       Hive.registerAdapter<HiveWorkout>(HiveWorkoutAdapter());
@@ -49,8 +53,8 @@ class HiveInitializer {
       Hive.registerAdapter<HiveQuestionnaire>(HiveQuestionnaireAdapter());
     }
     // The one below is 9(started from 0)
-    if (!Hive.isAdapterRegistered(HiveUserSettingsAdapter().typeId)) {
-      Hive.registerAdapter<HiveUserSettings>(HiveUserSettingsAdapter());
+    if (!Hive.isAdapterRegistered(UserSettingsAdapter().typeId)) {
+      Hive.registerAdapter<UserSettings>(UserSettingsAdapter());
     }
 
     _initialized = true;

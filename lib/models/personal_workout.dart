@@ -1,7 +1,7 @@
 import '../blocs/data/data_bloc.dart';
 import '../services/api/models/personal_workout.model.dart';
 import 'custom_workout.dart';
-import 'exercise.dart';
+import 'withAdapters/exercise.dart';
 
 class PersonalWorkout {
   final String workoutId;
@@ -24,18 +24,11 @@ class PersonalWorkout {
       final mg =
           state.exercises.values
               .firstWhere(
-                (Exercise e) => e.id == exercise.exerciseId,
-                orElse:
-                    () => Exercise(
-                      id: '',
-                      name: '',
-                      description: '',
-                      muscleGroup: '',
-                      image: '',
-                      equipmentId: '',
-                    ),
+                (Exercise e) => e.exerciseId == exercise.exerciseId,
+                orElse: () => Exercise.empty(),
               )
-              .muscleGroup;
+              // TODO: this takes the first muscle group only, which is fine, because the first one is the most inmportant. but in reality, it should have a functionality of multiple muscle groups, and showing which muscle group works the hardest.
+              .muscleGroup[0];
       if (mg.isNotEmpty) set.add(mg);
     }
     return set.toList();

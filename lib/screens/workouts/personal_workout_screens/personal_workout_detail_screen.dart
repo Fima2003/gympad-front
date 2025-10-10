@@ -12,15 +12,8 @@ class PersonalWorkoutDetailScreen extends StatelessWidget {
 
   List<String> _collectMuscleGroups(BuildContext context) {
     final dataState = BlocProvider.of<DataBloc>(context).state;
-    final set = <String>{};
-    if (dataState is DataReady) {
-      for (final ex in workout.exercises) {
-        final meta = dataState.exercises[ex.exerciseId];
-        final m = meta?.muscleGroup;
-        if (m != null && m.isNotEmpty) set.add(m);
-      }
-    }
-    return set.isEmpty ? const [] : set.toList();
+    final set = workout.getMuscleGroups(dataState);
+    return set;
   }
 
   @override

@@ -39,13 +39,6 @@ class DataError extends DataState {
 extension DataSelectors on DataState {
   Exercise? exerciseById(String id) =>
       this is DataReady ? (this as DataReady).exercises[id] : null;
-  List<String> allMuscleGroups() {
-    if (this is! DataReady) return const [];
-    final set = <String>{};
-    (this as DataReady).exercises.values.forEach((e) => set.add(e.muscleGroup));
-    final list = set.toList()..sort();
-    return list;
-  }
 
   List<Exercise> exercisesForMuscleGroup(String mg) {
     if (this is! DataReady) return const [];

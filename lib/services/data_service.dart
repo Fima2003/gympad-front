@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import '../models/custom_workout.dart';
-import '../models/gym.dart';
-import '../models/exercise.dart';
+import '../models/withAdapters/exercise.dart';
 import '../models/equipment.dart';
 import 'api/custom_workout_api_service.dart';
 import 'api/exercise_api_service.dart';
@@ -18,7 +17,6 @@ class DataService {
   DataService._internal();
   final _logger = AppLogger().createLogger('DataService');
 
-  Map<String, Gym>? _gyms;
   Map<String, Exercise>? _exercises;
   Map<String, Equipment>? _equipment;
   Map<String, CustomWorkout>? _customWorkouts;
@@ -63,7 +61,7 @@ class DataService {
       final localExercises = await _exerciseLssService.getAll();
       if (localExercises.isNotEmpty) {
         _exercises = {
-          for (var exercise in localExercises) exercise.id: exercise,
+          for (var exercise in localExercises) exercise.exerciseId: exercise,
         };
         _logger.log(
           Level.INFO,
@@ -77,29 +75,16 @@ class DataService {
     }
 
     final exercises = response.data!.map((e) => e.toDomain()).toList();
+    _exerciseLssService.saveMany(exercises);
 
     _exercises = {};
     for (final exercise in exercises) {
-      _exercises![exercise.id] = exercise;
+      _exercises![exercise.exerciseId] = exercise;
     }
-    AppLogger()
-        .createLogger('data_s')
-        .log(
-          Level.INFO,
-          "Received ${_customWorkouts?.length ?? 0} exercise from API",
-        );
-  }
-
-  Future<void> _loadEquipment() async {
-    final String jsonString = await rootBundle.loadString(
-      'assets/mock_data/equipment.json',
+    _logger.log(
+      Level.INFO,
+      "Received ${_customWorkouts?.length ?? 0} exercise from API",
     );
-    final Map<String, dynamic> jsonData = json.decode(jsonString);
-
-    _equipment = {};
-    jsonData['equipment'].forEach((key, value) {
-      _equipment![key] = Equipment.fromJson(key, value);
-    });
   }
 
   Future<void> _loadCustomWorkouts() async {
@@ -139,66 +124,15 @@ class DataService {
         );
   }
 
-  Gym? getGym(String gymId) {
-    return _gyms?[gymId];
-  }
+  Future<void> _loadEquipment() async {
+    final String jsonString = await rootBundle.loadString(
+      'assets/mock_data/equipment.json',
+    );
+    final Map<String, dynamic> jsonData = json.decode(jsonString);
 
-  Exercise? getExercise(String exerciseId) {
-    return _exercises?[exerciseId];
-  }
-
-  Equipment? getEquipment(String equipmentId) {
-    return _equipment?[equipmentId];
-  }
-
-  String? getExerciseFromEquipment(String equipmentId) {
-    final equipment = getEquipment(equipmentId);
-    if (equipment == null) return null;
-
-    if (equipment.type == 'direct_exercise') {
-      return equipment.data as String;
-    }
-
-    // For muscle_group_selector, we'll return the first exercise from the first group
-    if (equipment.type == 'muscle_group_selector' && equipment.data is Map) {
-      final Map<String, dynamic> data = equipment.data as Map<String, dynamic>;
-      for (final group in data.values) {
-        if (group is List && group.isNotEmpty) {
-          return group[0]['id'] as String;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  List<Exercise> getAllExercises() {
-    return _exercises?.values.toList() ?? [];
-  }
-
-  List<String> getAllMuscleGroups() {
-    if (_exercises == null) return [];
-
-    final groups = <String>{};
-    for (final exercise in _exercises!.values) {
-      groups.add(exercise.muscleGroup);
-    }
-
-    return groups.toList()..sort();
-  }
-
-  List<Exercise> getExercisesForMuscleGroup(String muscleGroup) {
-    if (_exercises == null) return [];
-
-    return _exercises!.values
-        .where((exercise) => exercise.muscleGroup == muscleGroup)
-        .toList();
-  }
-
-  List<String>? getMuscleGroupForExercise(String exerciseId) {
-    if (_exercises == null) return null;
-    final ex = _exercises![exerciseId];
-    if (ex == null) return null;
-    return [ex.muscleGroup];
+    _equipment = {};
+    jsonData['equipment'].forEach((key, value) {
+      _equipment![key] = Equipment.fromJson(key, value);
+    });
   }
 }

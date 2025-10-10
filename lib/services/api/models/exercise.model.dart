@@ -1,26 +1,17 @@
-import '../../../models/exercise.dart';
+import '../../../models/withAdapters/exercise.dart';
 
-class ExerciseR {
-  final String exerciseId;
-  final String name;
-  final String? description;
-  final String type;
-  final String? equipmentId;
-  final List<String> muscleGroup;
-  final int restTime;
-  final int minReps;
-  final int maxReps;
-
+class ExerciseR extends Exercise {
+  
   ExerciseR({
-    required this.exerciseId,
-    required this.name,
-    this.description,
-    required this.type,
-    this.equipmentId,
-    required this.muscleGroup,
-    required this.restTime,
-    required this.minReps,
-    required this.maxReps,
+    required super.exerciseId,
+    required super.name,
+    super.description,
+    required super.type,
+    super.equipmentId,
+    required super.muscleGroup,
+    required super.restTime,
+    required super.minReps,
+    required super.maxReps,
   });
 
   factory ExerciseR.fromJson(Map<String, dynamic> json) {
@@ -40,14 +31,15 @@ class ExerciseR {
     );
   }
 
-  Exercise toDomain() {
-    return Exercise(
-      id: exerciseId,
-      name: name,
-      description: description ?? '',
-      image: '', // Assuming image is not provided in the API response
-      muscleGroup: muscleGroup.isNotEmpty ? muscleGroup[0] : 'general',
-      equipmentId: equipmentId ?? '',
-    );
-  }
+  Exercise toDomain() => Exercise(
+    exerciseId: exerciseId,
+    name: name,
+    description: description,
+    type: type,
+    equipmentId: equipmentId,
+    muscleGroup: muscleGroup,
+    restTime: restTime,
+    minReps: minReps,
+    maxReps: maxReps
+  );
 }

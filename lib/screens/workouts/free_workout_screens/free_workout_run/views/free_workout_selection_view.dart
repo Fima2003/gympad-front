@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../constants/app_styles.dart';
 import '../../../../../blocs/data/data_bloc.dart';
-import '../../../../../models/exercise.dart';
+import '../../../../../models/withAdapters/exercise.dart';
 
 /// Stateless-ish (internally stateful for filters) selection view for free workout.
 /// Extracted from the legacy `SelectExerciseScreen` to be embedded directly
@@ -51,7 +51,7 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
               .where(
                 (e) =>
                     e.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                    e.muscleGroup.toLowerCase().contains(
+                    e.muscleGroup[0].toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ),
               )
@@ -90,7 +90,7 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
     Set<String> muscleGroups = {};
     if (dataState is DataReady) {
       muscleGroups =
-          dataState.exercises.values.map((e) => e.muscleGroup).toSet();
+          dataState.exercises.values.map((e) => e.muscleGroup[0]).toSet();
     }
 
     return Column(
@@ -324,7 +324,7 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  e.muscleGroup.toUpperCase(),
+                  e.muscleGroup[0].toUpperCase(),
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w500,

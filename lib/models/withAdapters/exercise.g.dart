@@ -1,22 +1,22 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'hive_exercise.dart';
+part of 'exercise.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class HiveExerciseAdapter extends TypeAdapter<HiveExercise> {
+class ExerciseAdapter extends TypeAdapter<Exercise> {
   @override
   final int typeId = 1;
 
   @override
-  HiveExercise read(BinaryReader reader) {
+  Exercise read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return HiveExercise(
+    return Exercise(
       exerciseId: fields[0] as String,
       name: fields[1] as String,
       description: fields[2] as String?,
@@ -30,7 +30,7 @@ class HiveExerciseAdapter extends TypeAdapter<HiveExercise> {
   }
 
   @override
-  void write(BinaryWriter writer, HiveExercise obj) {
+  void write(BinaryWriter writer, Exercise obj) {
     writer
       ..writeByte(9)
       ..writeByte(0)
@@ -59,7 +59,7 @@ class HiveExerciseAdapter extends TypeAdapter<HiveExercise> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is HiveExerciseAdapter &&
+      other is ExerciseAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

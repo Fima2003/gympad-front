@@ -35,13 +35,14 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
     });
   }
 
+  // TODO: weird inference of muscle group here; either move to model but also it returns just one mg???
   String _inferMuscleGroup(PersonalWorkout w) {
     final dataState = context.read<DataBloc>().state;
     if (dataState is! DataReady) return '';
     if (w.exercises.isEmpty) return '';
     final first = w.exercises.first;
     final ex = dataState.exercises[first.exerciseId];
-    return ex?.muscleGroup ?? '';
+    return ex?.muscleGroup[0] ?? '';
   }
 
   @override
