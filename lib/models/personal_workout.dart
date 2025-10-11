@@ -56,36 +56,19 @@ class PersonalWorkout {
     estimatedCalories: 0,
   );
 
-  factory PersonalWorkout.fromJson(Map<String, dynamic> json) {
+  PersonalWorkout copyWith({
+    String? workoutId,
+    String? name,
+    String? description,
+    List<PersonalWorkoutExercise>? exercises,
+  }) {
     return PersonalWorkout(
-      workoutId: json['workoutId'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String?,
-      exercises:
-          (json['exercises'] as List<dynamic>? ?? const [])
-              .map(
-                (e) =>
-                    PersonalWorkoutExercise.fromJson(e as Map<String, dynamic>),
-              )
-              .toList(),
+      workoutId: workoutId ?? this.workoutId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      exercises: exercises ?? this.exercises,
     );
   }
-
-  factory PersonalWorkout.fromResponse(PersonalWorkoutResponse e) {
-    return PersonalWorkout(
-      workoutId: e.workoutId,
-      name: e.name,
-      exercises:
-          e.exercises.map((el) => PersonalWorkoutExercise.fromDto(el)).toList(),
-      description: e.description,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'description': description,
-    'exercises': exercises.map((e) => e.toJson()).toList(),
-  };
 }
 
 class PersonalWorkoutExercise {

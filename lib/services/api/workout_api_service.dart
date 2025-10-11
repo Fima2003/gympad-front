@@ -1,3 +1,4 @@
+import '../../models/personal_workout.dart';
 import 'i_api_service.dart';
 import 'api_service.dart';
 import 'models/personal_workout.model.dart';
@@ -28,9 +29,8 @@ class WorkoutApiService {
 
   /// GET getPersonalWorkouts
   /// Returns: List of { name ,description?,exercises:[{ exerciseId, name,sets,weight,reps,restTime }] }
-  Future<ApiResponse<List<PersonalWorkoutResponse>>>
-  getPersonalWorkouts() async {
-    return _api.get<void, List<PersonalWorkoutResponse>>(
+  Future<ApiResponse<List<PersonalWorkout>>> getPersonalWorkouts() async {
+    return _api.get<void, List<PersonalWorkout>>(
       'getPersonalWorkouts',
       auth: true,
       parser: (data) {
@@ -38,7 +38,9 @@ class WorkoutApiService {
         return list
             .map(
               (e) =>
-                  PersonalWorkoutResponse.fromJson(e as Map<String, dynamic>),
+                  PersonalWorkoutResponse.fromJson(
+                    e as Map<String, dynamic>,
+                  ).toDomain(),
             )
             .toList();
       },

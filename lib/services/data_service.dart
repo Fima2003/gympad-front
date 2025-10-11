@@ -68,11 +68,11 @@ class DataService {
         };
         _logger.log(
           Level.INFO,
-          "Loaded ${_customWorkouts?.length ?? 0} exercises from local storage",
+          "Loaded ${_exercises?.length ?? 0} exercises from local storage",
         );
       } else {
-        _customWorkouts = {};
-        _logger.log(Level.WARNING, "No local exercise available");
+        _exercises = {};
+        _logger.log(Level.WARNING, "No local exercises available");
       }
       return;
     }
@@ -86,7 +86,7 @@ class DataService {
     }
     _logger.log(
       Level.INFO,
-      "Received ${_customWorkouts?.length ?? 0} exercise from API",
+      "Received ${_exercises?.length ?? 0} exercise from API",
     );
   }
 
@@ -125,12 +125,7 @@ class DataService {
     for (final workout in customWorkouts) {
       _customWorkouts![workout.id] = workout;
     }
-    AppLogger()
-        .createLogger('data_s')
-        .log(
-          Level.INFO,
-          "Received ${_customWorkouts?.length ?? 0} workouts from API",
-        );
+    _logger.info("Received ${_customWorkouts?.length ?? 0} workouts from API");
   }
 
   Future<void> _loadEquipment() async {

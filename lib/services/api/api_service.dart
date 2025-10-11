@@ -323,7 +323,19 @@ class ApiService implements IApiService {
     Response response,
     K Function(dynamic)? parser,
   ) {
-    _logger.info('Response received with status: ${response.statusCode}');
+    String funcName;
+    if (kDebugMode) {
+      final path = response.realUri.path.split('/');
+      funcName = path[path.length-2];
+    } else {
+      funcName =
+          response.realUri.pathSegments.isNotEmpty
+              ? response.realUri.pathSegments[1]
+              : 'unknown';
+    }
+    _logger.info(
+      'Response from ${funcName} received with status: ${response.statusCode}',
+    );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final responseData = response.data;

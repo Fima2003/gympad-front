@@ -24,6 +24,7 @@ class PersonalWorkoutBloc
     RequestSync event,
     Emitter<PersonalWorkoutState> emit,
   ) async {
+    emit(const PersonalWorkoutsLoading());
     final List<PersonalWorkout> personalWorkouts =
         await _workoutService.getPersonalWorkouts();
     _logger.info('Loaded ${personalWorkouts.length} personal workouts');

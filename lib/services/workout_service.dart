@@ -344,10 +344,17 @@ class WorkoutService {
           response.data!.nextWorkoutExercises != null &&
           workoutToFollowId != null) {
         final exercises = response.data!.nextWorkoutExercises!;
-        await _personalLocal.updateExercises(
-          workoutToFollowId,
-          exercises.map((e) => e.toDomain()).toList(),
+        await _personalLocal.update(
+          key: workoutToFollowId,
+          copyWithFn: (c) {
+            final newExercises = exercises.map((e) => e.toDomain()).toList();
+            return c.copyWith(exercises: newExercises);
+          },
         );
+        // await _personalLocal.updateExercises(
+        //   workoutToFollowId,
+        //   exercises.map((e) => e.toDomain()).toList(),
+        // );
       }
       _logger.info(response.success.toString());
 
@@ -451,16 +458,16 @@ class WorkoutService {
     final caps = _capabilitiesProvider();
     if (!caps.canSync) {
       _logger.info('Skipping fetching personal workouts (guest mode)');
-      final cached = await _personalLocal.loadAll();
+      final cached = await _personalLocal.getAll();
       return cached;
     }
     final resp = await _workoutApiService.getPersonalWorkouts();
     if (resp.success && resp.data != null) {
       final list = resp.data!;
-      await _personalLocal.saveAll(list);
-      return list.map((e) => PersonalWorkout.fromResponse(e)).toList();
+      await _personalLocal.saveMany(list);
+      return list;
     } else {
-      final cached = await _personalLocal.loadAll();
+      final cached = await _personalLocal.getAll();
       return cached;
     }
   }

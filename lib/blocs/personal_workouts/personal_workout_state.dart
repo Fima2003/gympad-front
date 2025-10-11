@@ -10,6 +10,10 @@ class PersonalWorkoutInitial extends PersonalWorkoutState {
   const PersonalWorkoutInitial();
 }
 
+class PersonalWorkoutsLoading extends PersonalWorkoutState {
+  const PersonalWorkoutsLoading();
+}
+
 class PersonalWorkoutsLoaded extends PersonalWorkoutState {
   final List<PersonalWorkout> workouts;
 

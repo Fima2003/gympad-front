@@ -11,8 +11,6 @@ import 'views/free_workout_selection_view.dart';
 import 'views/free_workout_set_view.dart';
 import 'views/free_workout_break_view.dart';
 
-/// Orchestrates the free workout run-phase using the new bloc run states.
-/// Single route that conditionally shows one of: selection, set, rest.
 class FreeWorkoutRunScreen extends StatefulWidget {
   const FreeWorkoutRunScreen({super.key});
 
@@ -55,7 +53,6 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
         muscleGroup: ex.muscleGroup[0],
       ),
     );
-    // Screen will switch to running once we get a RunInSet state.
   }
 
   @override
@@ -120,9 +117,7 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
           );
         }
 
-        // Running mode: show set or rest or finishing spinner.
         if (state is WorkoutRunInSet) {
-          // Derive exercise display name for free mode:
           final dataBloc = context.read<DataBloc>();
           final dataState = dataBloc.state;
           final exerciseId = state.currentExercise.id;
@@ -213,7 +208,6 @@ class _FreeWorkoutRunScreenState extends State<FreeWorkoutRunScreen> {
           );
         }
 
-        // Fallback: no workout yet => selection
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(

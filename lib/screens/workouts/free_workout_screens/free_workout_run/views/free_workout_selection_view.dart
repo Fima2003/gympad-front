@@ -5,9 +5,6 @@ import '../../../../../constants/app_styles.dart';
 import '../../../../../blocs/data/data_bloc.dart';
 import '../../../../../models/withAdapters/exercise.dart';
 
-/// Stateless-ish (internally stateful for filters) selection view for free workout.
-/// Extracted from the legacy `SelectExerciseScreen` to be embedded directly
-/// inside the upcoming `FreeWorkoutRunScreen` without navigation pushes.
 class FreeWorkoutSelectionView extends StatefulWidget {
   final String? initialMuscleGroup;
   final void Function(Exercise exercise) onExerciseChosen;
@@ -57,7 +54,7 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
               )
               .toList();
     } else if (_selectedGroup != null) {
-      _filtered = all.where((e) => e.muscleGroup == _selectedGroup).toList();
+      _filtered = all.where((e) => e.muscleGroup[0] == _selectedGroup).toList();
     } else {
       _filtered = [];
     }
@@ -179,7 +176,7 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
         itemCount: groups.length,
         itemBuilder: (ctx, i) {
           final g = groups.elementAt(i);
-          final count = all.where((e) => e.muscleGroup == g).length;
+          final count = all.where((e) => e.muscleGroup[0] == g).length;
           return _groupCard(g, count);
         },
       ),

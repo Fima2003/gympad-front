@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../../../constants/app_styles.dart';
 import '../../../models/personal_workout.dart';
-import '../../../services/hive/personal_workout_lss.dart';
 import '../../../blocs/data/data_bloc.dart';
 
 class PersonalWorkoutsScreen extends StatefulWidget {
@@ -15,24 +14,11 @@ class PersonalWorkoutsScreen extends StatefulWidget {
 }
 
 class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
-  final PersonalWorkoutLocalService _local = PersonalWorkoutLocalService();
-
-  List<PersonalWorkout> _workouts = [];
-  bool _loading = true;
-
   @override
   void initState() {
     super.initState();
-    _init();
-  }
-
-  Future<void> _init() async {
-    final items = await _local.loadAll();
-    if (!mounted) return;
-    setState(() {
-      _workouts = items;
-      _loading = false;
-    });
+    // Request workouts via BLoC on screen initialization
+    context.read<PersonalWorkoutBloc>().add(RequestSync());
   }
 
   // TODO: weird inference of muscle group here; either move to model but also it returns just one mg???
@@ -47,11 +33,16 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final content =
-        (_loading)
-            ? const Center(child: CircularProgressIndicator())
-            : (_workouts.isEmpty)
-            ? Center(
+    return BlocBuilder<PersonalWorkoutBloc, PersonalWorkoutState>(
+      builder: (context, state) {
+        // Determine content based on BLoC state
+        final Widget content;
+        if (state is PersonalWorkoutsLoading ||
+            state is PersonalWorkoutInitial) {
+          content = const Center(child: CircularProgressIndicator());
+        } else if (state is PersonalWorkoutsLoaded) {
+          if (state.workouts.isEmpty) {
+            content = Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -69,36 +60,32 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
                   ),
                 ],
               ),
-            )
-            : _list();
+            );
+          } else {
+            content = _list(state.workouts);
+          }
+        } else {
+          content = const Center(child: Text('Unknown state'));
+        }
 
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<PersonalWorkoutBloc, PersonalWorkoutState>(
-          listenWhen: (prev, curr) => curr is PersonalWorkoutsLoaded,
-          listener: (context, state) {
-            if (state is PersonalWorkoutsLoaded) {
-              setState(() {
-                _workouts = state.workouts;
-                _loading = false;
-              });
-            }
-          },
-        ),
-        BlocListener<DataBloc, DataState>(
-          listener: (context, state) {
-            if (state is DataReady && mounted && _loading) {
-              // Data became ready after screen opened; recompute groups via setState
-              setState(() {});
-            }
-          },
-        ),
-      ],
-      child: content,
+        return MultiBlocListener(
+          listeners: [
+            BlocListener<DataBloc, DataState>(
+              listener: (context, dataState) {
+                if (dataState is DataReady && mounted) {
+                  // Data became ready after screen opened; trigger rebuild
+                  setState(() {});
+                }
+              },
+            ),
+          ],
+          child: content,
+        );
+      },
     );
   }
 
-  Widget _list() {
+  Widget _list(List<PersonalWorkout> workouts) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -121,11 +108,13 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
           const SizedBox(height: 20),
           Expanded(
             child: RefreshIndicator(
-              onRefresh: _init,
+              onRefresh: () async {
+                context.read<PersonalWorkoutBloc>().add(RequestSync());
+              },
               child: ListView.builder(
-                itemCount: _workouts.length,
+                itemCount: workouts.length,
                 itemBuilder: (context, index) {
-                  final w = _workouts[index];
+                  final w = workouts[index];
                   final mg = _inferMuscleGroup(w);
                   return Card(
                     margin: const EdgeInsets.only(bottom: 16),
