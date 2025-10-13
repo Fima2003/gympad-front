@@ -25,9 +25,6 @@ class WorkoutService {
       PersonalWorkoutLocalService();
   CapabilitiesProvider _capabilitiesProvider = () => Capabilities.guest;
 
-  /// Allow app layer to inject a dynamic capabilities provider (e.g. derived
-  /// from AuthBloc). Optional; defaults to authenticated so existing behavior
-  /// is preserved until configured.
   void configureCapabilitiesProvider(CapabilitiesProvider provider) {
     _capabilitiesProvider = provider;
   }

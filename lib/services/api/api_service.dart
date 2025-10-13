@@ -36,23 +36,25 @@ class ApiService implements IApiService {
       ),
     );
 
-    // Add interceptors for logging (minimal)
-    // _dio.interceptors.add(
-    //   LogInterceptor(
-    //     request: false,
-    //     requestHeader: false,
-    //     requestBody: false,
-    //     responseHeader: false,
-    //     responseBody: false,
-    //     error: true,
-    //   ),
-    // );
-
-    // Add error interceptor
     _dio.interceptors.add(
       InterceptorsWrapper(
         onError: (error, handler) {
-          _logError("Error: ${error.response?.statusCode ?? ""}", error);
+          final req = error.requestOptions;
+          final res = error.response;
+
+          final details =
+              StringBuffer()
+                ..writeln('HTTP ERROR')
+                ..writeln('→ ${req.method} ${req.uri}')
+                ..writeln('Type: ${error.type}')
+                ..writeln('Message: ${error.message}')
+                ..writeln('Status: ${res?.statusCode}')
+                ..writeln('Request headers: ${req.headers}')
+                ..writeln('Request data: ${req.data}')
+                ..writeln('Response data: ${res?.data}')
+                ..writeln('StackTrace: ${error.stackTrace}');
+
+          _logError(details.toString(), error);
           handler.next(error);
         },
       ),
@@ -326,7 +328,7 @@ class ApiService implements IApiService {
     String funcName;
     if (kDebugMode) {
       final path = response.realUri.path.split('/');
-      funcName = path[path.length-2];
+      funcName = path[path.length - 2];
     } else {
       funcName =
           response.realUri.pathSegments.isNotEmpty

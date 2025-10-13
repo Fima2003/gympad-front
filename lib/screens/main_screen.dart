@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../constants/app_styles.dart';
-import 'me/me_screen.dart';
+import 'me/me.dart';
 import 'workouts/workout_page.dart';
 
 class MainScreen extends StatefulWidget {
@@ -27,9 +27,6 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  void _signOut() => context.read<AuthBloc>().add(AuthSignOutRequested());
-  void _signIn() => context.read<AuthBloc>().add(AuthSignInRequested());
-
   BottomNavigationBar _buildBottomNav() => BottomNavigationBar(
     currentIndex: _bottomIndex,
     onTap: (i) => setState(() => _bottomIndex = i),
@@ -45,23 +42,17 @@ class _MainScreenState extends State<MainScreen> {
     ],
   );
 
-  PreferredSizeWidget _buildAppBar({PreferredSizeWidget? bottom}) {
-    final authState = context.watch<AuthBloc>().state;
+  PreferredSizeWidget _buildAppBar({
+    PreferredSizeWidget? bottom,
+    bool settings = false,
+  }) {
     final actions = <Widget>[];
-    if (authState is AuthGuest) {
+    if (settings) {
       actions.add(
         IconButton(
-          tooltip: 'Sign In',
-          onPressed: _signIn,
-          icon: Icon(Icons.login, color: AppColors.primary),
-        ),
-      );
-    } else if (authState is AuthAuthenticated) {
-      actions.add(
-        IconButton(
-          tooltip: 'Sign Out',
-          onPressed: _signOut,
-          icon: Icon(Icons.logout, color: AppColors.primary),
+          tooltip: 'Settings',
+          onPressed: () => context.push('/settings'),
+          icon: Icon(Icons.settings, color: AppColors.primary),
         ),
       );
     }
@@ -99,7 +90,7 @@ class _MainScreenState extends State<MainScreen> {
     } else {
       page = Scaffold(
         backgroundColor: AppColors.background,
-        appBar: _buildAppBar(),
+        appBar: _buildAppBar(settings: true),
         body: const MeScreen(),
         bottomNavigationBar: _buildBottomNav(),
       );

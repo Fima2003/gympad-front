@@ -8,11 +8,13 @@ import 'package:go_router/go_router.dart';
 
 import 'blocs/analytics/analytics_bloc.dart';
 import 'blocs/personal_workouts/personal_workout_bloc.dart';
+import 'blocs/user_settings/user_settings_bloc.dart';
 import 'firebase_options.dart';
 import 'models/custom_workout.dart';
 import 'models/personal_workout.dart';
 import 'models/workout_exercise.dart';
 import 'screens/intro/intro_screen.dart';
+import 'screens/settings/settings.dart';
 import 'screens/splash.dart';
 import 'screens/workouts/free_workout_screens/save_workout/save_workout_screen.dart';
 import 'screens/workouts/well_done_workout_screen.dart';
@@ -106,6 +108,10 @@ class _MyAppState extends State<MyApp> {
         GoRoute(
           path: '/login',
           builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const Settings(),
         ),
         GoRoute(
           path: '/workout',
@@ -225,6 +231,10 @@ class _MyAppState extends State<MyApp> {
             bloc.add(WorkoutLoaded());
             return bloc;
           },
+        ),
+        BlocProvider<UserSettingsBloc>(
+          create: (context) => UserSettingsBloc()..add(UserSettingsLoad()),
+          lazy: false,
         ),
         BlocProvider<AnalyticsBloc>(create: (context) => AnalyticsBloc()),
         BlocProvider<AudioBloc>(create: (context) => AudioBloc()),

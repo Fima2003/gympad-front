@@ -26,6 +26,7 @@ class UserSettingsService {
 
     final settings = await _userSettingsApiService.getSettings();
     if (!settings.success) throw settings.error ?? "Unknown Error Occurred";
+    await _userSettingsLss.save(settings.data!);
     return settings.data!;
   }
 
