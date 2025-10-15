@@ -744,7 +744,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
   ) async {
     // If a planned workout is active, ignore (feature reserved for free mode only)
     if (_workoutService.workoutToFollow != null) {
-      return; // do nothing silently
+      return;
     }
 
     // Ensure workout started

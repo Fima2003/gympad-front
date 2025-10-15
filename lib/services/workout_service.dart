@@ -224,6 +224,7 @@ class WorkoutService {
         _uploadWorkout(finished, workoutToFollowId: _workoutToFollow?.id),
       );
     }
+    unawaited(_clearWorkoutToFollow());
 
     _logger.info('Workout finished and saved');
     _currentWorkout = null;
@@ -301,9 +302,19 @@ class WorkoutService {
 
   Future<void> _clearCurrentWorkout() async {
     try {
+      _currentWorkout = null;
       await _currentWorkoutStorage.clear();
     } catch (e, st) {
       _logger.warning('Failed to clear current workout', e, st);
+    }
+  }
+
+  Future<void> _clearWorkoutToFollow() async {
+    try {
+      await _workoutToFollowStorage.clear();
+      _workoutToFollow = null;
+    } catch (e, st) {
+      _logger.warning('Failed to clear workoutToFollow', e, st);
     }
   }
 
@@ -476,6 +487,7 @@ class WorkoutService {
 
   Future<void> clearAll() async {
     await _currentWorkoutStorage.clear();
+    await _workoutToFollowStorage.clear();
     await _historyStorage.clear();
     await _personalLocal.clear();
     _currentWorkout = null;

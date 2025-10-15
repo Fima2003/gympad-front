@@ -17,3 +17,4 @@
 custom workouts still show up as beginner                       | Medium     | Done        | |
 | Feat | AI Coach to create a workout and a split               | High       | Not Started | |
 | Feat | Deload week, when the user drops weight for body       | High       | Not Started | |
+| Bug  | Free exercises don't always start                      | High       | Done        | |
