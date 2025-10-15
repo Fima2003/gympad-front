@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../blocs/user_settings/user_settings_bloc.dart';
 import '../../../../../constants/app_styles.dart';
 import '../../../../../models/workout_set.dart';
+import '../../../../../utils/get_weight.dart';
 import '../../../../../widgets/reps_selector.dart';
 import '../../../../../widgets/velocity_weight_selector.dart';
 
@@ -22,7 +25,7 @@ class CWorkoutRunView extends StatefulWidget {
   onFinish;
   final FinishType finishType;
   final Duration elapsed;
-  final bool isRunning; // always true for now (timer managed by bloc)
+  final bool isRunning;
 
   const CWorkoutRunView({
     super.key,
@@ -152,10 +155,21 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
 
               // Weight selector
               Center(
-                child: WeightSelectorVelocity(
-                  initialWeight: _selectedWeight,
-                  onWeightChanged: (weight) {
-                    setState(() => _selectedWeight = weight);
+                child: BlocBuilder<UserSettingsBloc, UserSettingsState>(
+                  builder: (context, state) {
+                    if (state is! UserSettingsLoaded) {
+                      return WeightSelectorVelocity(
+                        initialWeight: _selectedWeight,
+                        onWeightChanged:
+                            (w) => setState(() => _selectedWeight = w),
+                      );
+                    }
+                    return WeightSelectorVelocity(
+                      initialWeight: _selectedWeight,
+                      displayUnit: state.weightUnit,
+                      onWeightChanged:
+                          (w) => setState(() => _selectedWeight = w),
+                    );
                   },
                 ),
               ),
@@ -199,12 +213,23 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
                                   ),
                                 ),
                               ),
-                              Text(
-                                '${set.reps} reps × ${set.weight}kg',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              BlocBuilder<UserSettingsBloc, UserSettingsState>(
+                                builder: (context, state) {
+                                  String text = '';
+                                  if (state is! UserSettingsLoaded) {
+                                    text = '${set.reps} reps × ${set.weight}kg';
+                                  } else {
+                                    text =
+                                        "${set.reps} reps x ${getWeight(set.weight, state.weightUnit)}";
+                                  }
+                                  return Text(
+                                    text,
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  );
+                                },
                               ),
                               Text(
                                 '${set.time.inMinutes}:${(set.time.inSeconds % 60).toString().padLeft(2, '0')}',

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../blocs/user_settings/user_settings_bloc.dart';
 import '../../../../../constants/app_styles.dart';
 import '../../../../../models/workout_set.dart';
 import '../../../../../widgets/reps_selector.dart';
@@ -136,9 +138,22 @@ class _FreeWorkoutSetViewState extends State<FreeWorkoutSetView> {
               const SizedBox(height: 32),
               // Weight selector
               Center(
-                child: WeightSelectorVelocity(
-                  initialWeight: _selectedWeight,
-                  onWeightChanged: (w) => setState(() => _selectedWeight = w),
+                child: BlocBuilder<UserSettingsBloc, UserSettingsState>(
+                  builder: (context, state) {
+                    if (state is! UserSettingsLoaded) {
+                      return WeightSelectorVelocity(
+                        initialWeight: _selectedWeight,
+                        onWeightChanged:
+                            (w) => setState(() => _selectedWeight = w),
+                      );
+                    }
+                    return WeightSelectorVelocity(
+                      initialWeight: _selectedWeight,
+                      displayUnit: state.weightUnit,
+                      onWeightChanged:
+                          (w) => setState(() => _selectedWeight = w),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 24),

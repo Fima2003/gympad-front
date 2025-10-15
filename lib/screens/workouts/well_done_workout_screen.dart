@@ -90,7 +90,6 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
             ),
             const SizedBox(height: 32),
 
-            // Workout Summary Stats
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -136,19 +135,15 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Workout exercises table
             WorkoutExercisesTable(exercises: widget.workout.exercises),
             const SizedBox(height: 32),
 
-            // Action buttons
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigate back to main via GoRouter to keep page-based navigation consistent.
                       if (context.canPop()) {
-                        // If there is intermediate stack (e.g., nested), clear to main.
                         context.go('/main');
                       } else {
                         context.go('/main');

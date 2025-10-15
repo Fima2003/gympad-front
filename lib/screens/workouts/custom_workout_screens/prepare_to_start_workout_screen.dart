@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 import '../../../blocs/analytics/analytics_bloc.dart';
+import '../../../blocs/user_settings/user_settings_bloc.dart';
 import '../../../blocs/workout/workout_bloc.dart';
 import '../../../constants/app_styles.dart';
 import '../../../models/custom_workout.dart';
 import '../../../blocs/data/data_bloc.dart';
 import '../../../blocs/audio/audio_bloc.dart';
+import '../../../utils/get_weight.dart';
 
 class PrepareToStartWorkoutScreen extends StatefulWidget {
   final CustomWorkout workout;
@@ -129,35 +131,42 @@ class _PrepareToStartWorkoutScreenState
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            Text(
-              widget.workout.exercises.isNotEmpty
-                  ? (() {
-                    final dataState = BlocProvider.of<DataBloc>(context).state;
-                    final ex =
-                        (dataState is DataReady)
-                            ? dataState.exercises[widget
-                                .workout
-                                .exercises
-                                .first
-                                .id]
-                            : null;
-                    final weight =
-                        (dataState is DataReady)
-                            ? widget.workout.exercises.first.suggestedWeight
-                            : null;
-                    final showWeight = (weight != null && weight > 0);
-                    final name =
-                        (ex?.name ?? widget.workout.exercises.first.id)
-                            .replaceAll('_', ' ')
-                            .toUpperCase();
-                    return showWeight ? "$name: ${weight}kg" : name;
-                  })()
-                  : 'Exercise',
-              style: AppTextStyles.titleMedium.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
+            BlocBuilder<UserSettingsBloc, UserSettingsState>(
+              builder: (context, state) {
+                return Text(
+                  widget.workout.exercises.isNotEmpty
+                      ? (() {
+                        final dataState =
+                            BlocProvider.of<DataBloc>(context).state;
+                        final ex =
+                            (dataState is DataReady)
+                                ? dataState.exercises[widget
+                                    .workout
+                                    .exercises
+                                    .first
+                                    .id]
+                                : null;
+                        final weight =
+                            (dataState is DataReady)
+                                ? widget.workout.exercises.first.suggestedWeight
+                                : null;
+                        final showWeight = (weight != null && weight > 0);
+                        final name =
+                            (ex?.name ?? widget.workout.exercises.first.id)
+                                .replaceAll('_', ' ')
+                                .toUpperCase();
+                        return showWeight
+                            ? "$name: ${state is! UserSettingsLoaded ? "$weight kg" : getWeight(weight, state.weightUnit)}"
+                            : name;
+                      })()
+                      : 'Exercise',
+                  style: AppTextStyles.titleMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                );
+              },
             ),
 
             const SizedBox(height: 60),

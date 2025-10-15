@@ -6,8 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../blocs/data/data_bloc.dart';
+import '../../../../../blocs/user_settings/user_settings_bloc.dart';
 import '../../../../../constants/app_styles.dart';
 import '../../../../../models/custom_workout.dart';
+import '../../../../../utils/get_weight.dart';
 import '../../../../../widgets/exercise_chip.dart';
 
 class CWorkoutBreakView extends StatelessWidget {
@@ -174,7 +176,7 @@ class CWorkoutBreakView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
-                                  _nextExerciseTitle(),
+                                  _nextExerciseTitle(context),
                                   style: AppTextStyles.titleSmall.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -185,7 +187,6 @@ class CWorkoutBreakView extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 Text(
                                   () {
-                                    // If we're between exercises (nextExercise differs from currentExercise), always show upcoming exercise set 1.
                                     if (nextExercise != null &&
                                         nextExercise!.id !=
                                             currentExercise.id) {
@@ -323,7 +324,7 @@ class CWorkoutBreakView extends StatelessWidget {
     );
   }
 
-  String _nextExerciseTitle() {
+  String _nextExerciseTitle(BuildContext context) {
     if (nextExercise == null) return '---';
     final weight = nextExercise!.suggestedWeight;
     final dataState = dataBloc.state;
@@ -334,8 +335,13 @@ class CWorkoutBreakView extends StatelessWidget {
     } else {
       name = nextExercise!.id.toUpperCase();
     }
-    if (weight != null && weight > 0) {
+    final state = BlocProvider.of<UserSettingsBloc>(context).state;
+    if (state is! UserSettingsLoaded) {
       return '$name: ${weight}kg';
+    }
+    if (weight != null && weight > 0) {
+      final finalWeight = getWeight(weight, state.weightUnit);
+      return '$name: $finalWeight';
     }
     return name;
   }

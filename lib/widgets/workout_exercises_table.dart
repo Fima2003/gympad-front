@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../blocs/user_settings/user_settings_bloc.dart';
 import '../constants/app_styles.dart';
 import '../models/workout_exercise.dart';
+import '../utils/get_weight.dart';
 
 class WorkoutExercisesTable extends StatelessWidget {
   final List<WorkoutExercise> exercises;
@@ -128,9 +131,23 @@ class WorkoutExercisesTable extends StatelessWidget {
                           ),
                         ),
                         DataCell(
-                          Text(
-                            '${exercise.averageWeight.toStringAsFixed(1)} kg',
-                            style: AppTextStyles.bodyMedium,
+                          BlocBuilder<UserSettingsBloc, UserSettingsState>(
+                            builder: (context, state) {
+                              String text = '';
+                              if (state is! UserSettingsLoaded) {
+                                text =
+                                    '${exercise.averageWeight.toStringAsFixed(1)} kg';
+                              } else {
+                                text = getWeight(
+                                  exercise.averageWeight,
+                                  state.weightUnit,
+                                );
+                              }
+                              return Text(
+                                text,
+                                style: AppTextStyles.bodyMedium,
+                              );
+                            },
                           ),
                         ),
                       ],

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../blocs/data/data_bloc.dart';
+import '../../../blocs/user_settings/user_settings_bloc.dart';
 import '../../../constants/app_styles.dart';
 import '../../../models/personal_workout.dart';
+import '../../../utils/get_weight.dart';
 
 class PersonalWorkoutDetailScreen extends StatelessWidget {
   final PersonalWorkout workout;
@@ -186,7 +188,17 @@ class PersonalWorkoutDetailScreen extends StatelessWidget {
                           const SizedBox(width: 8),
                           _chip(Icons.numbers, '${ex.reps} reps'),
                           const SizedBox(width: 8),
-                          _chip(Icons.fitness_center, '${ex.weight}kg'),
+                          BlocBuilder<UserSettingsBloc, UserSettingsState>(
+                            builder: (context, state) {
+                              if (state is! UserSettingsLoaded) {
+                                return const SizedBox.shrink();
+                              }
+                              return _chip(
+                                Icons.fitness_center,
+                                getWeight(ex.weight, state.weightUnit),
+                              );
+                            },
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),

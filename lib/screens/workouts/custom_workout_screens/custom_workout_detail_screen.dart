@@ -1,9 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import '../../../blocs/user_settings/user_settings_bloc.dart';
 import '../../../constants/app_styles.dart';
 import '../../../models/custom_workout.dart';
 import '../../../blocs/data/data_bloc.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../utils/get_weight.dart';
 
 class PredefinedWorkoutDetailScreen extends StatelessWidget {
   final CustomWorkout workout;
@@ -246,9 +249,20 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                             ),
                           if (exercise.suggestedWeight != null) ...[
                             const SizedBox(width: 8),
-                            _buildInfoChip(
-                              Icons.fitness_center,
-                              '${exercise.suggestedWeight}kg',
+                            BlocBuilder<UserSettingsBloc, UserSettingsState>(
+                              builder: (context, state) {
+                                if (state is! UserSettingsLoaded ||
+                                    exercise.suggestedWeight == null) {
+                                  return const SizedBox.shrink();
+                                }
+                                return _buildInfoChip(
+                                  Icons.fitness_center,
+                                  getWeight(
+                                    exercise.suggestedWeight!,
+                                    state.weightUnit,
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ],

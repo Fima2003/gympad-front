@@ -11,12 +11,17 @@ class WeightSelectorVelocity extends StatefulWidget {
   final double minWeight;
   final double maxWeight;
 
+  /// Controls how the value is displayed to the user. Internal values and
+  /// onWeightChanged are always in kilograms. Accepts 'kg' or 'lbs'.
+  final String displayUnit;
+
   const WeightSelectorVelocity({
     super.key,
     required this.onWeightChanged,
     this.initialWeight = 15.0,
     this.minWeight = 0.5,
     this.maxWeight = 200.0,
+    this.displayUnit = 'kg',
   });
 
   @override
@@ -24,9 +29,8 @@ class WeightSelectorVelocity extends StatefulWidget {
 }
 
 class _WeightSelectorVelocityState extends State<WeightSelectorVelocity> {
-  // 0.5 kg per step
   static const double _stepKg = 0.5;
-  late int _currentIndex; // 1-based index where 1 == minWeight
+  late int _currentIndex;
 
   int get _minIndex => 1;
   int get _maxIndex =>
@@ -34,6 +38,10 @@ class _WeightSelectorVelocityState extends State<WeightSelectorVelocity> {
 
   double get _currentWeight =>
       widget.minWeight + ((_currentIndex - 1) * _stepKg);
+
+  bool get _useLbs => widget.displayUnit.toLowerCase() == 'lbs';
+  static double _kgToLbs(double kg) => kg * 2.20462262185;
+  static double _roundToHalf(double x) => (x * 2).round() / 2.0;
 
   @override
   void initState() {
@@ -59,7 +67,7 @@ class _WeightSelectorVelocityState extends State<WeightSelectorVelocity> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          'Weight',
+          'Weight (${_useLbs ? 'lbs' : 'kg'})',
           style: AppTextStyles.bodyLarge.copyWith(
             fontWeight: FontWeight.w600,
             color: AppColors.primary,
@@ -99,8 +107,11 @@ class _WeightSelectorVelocityState extends State<WeightSelectorVelocity> {
             ),
             textMapper: (numberText) {
               final int index = int.parse(numberText);
-              final double weight = widget.minWeight + ((index - 1) * _stepKg);
-              return weight.toStringAsFixed(1);
+              final double weightKg =
+                  widget.minWeight + ((index - 1) * _stepKg);
+              final double displayRaw = _useLbs ? _kgToLbs(weightKg) : weightKg;
+              final double display = _roundToHalf(displayRaw);
+              return display.toStringAsFixed(1);
             },
             textStyle: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
