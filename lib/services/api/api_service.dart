@@ -63,9 +63,9 @@ class ApiService implements IApiService {
 
   /// Build Firebase Function URL for the given function name
   String _buildFunctionUrl(String functionName) {
-    if (kDebugMode) {
-      return '$_localDomain$functionName/';
-    }
+    // if (kDebugMode) {
+    //   return '$_localDomain$functionName/';
+    // }
     return 'https://$functionName-$_baseDomain/';
   }
 

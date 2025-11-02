@@ -146,6 +146,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     try {
       final deviceId = await DeviceIdentityService().getOrCreate();
+      await _authService.createLocalUser();
       await _authService.markGuestSelected(deviceId);
       emit(AuthGuest(deviceId: deviceId));
     } catch (e, st) {

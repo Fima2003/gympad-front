@@ -56,12 +56,63 @@ class PredefinedWorkoutsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Custom Workouts',
-                  style: AppTextStyles.titleLarge.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      'Custom Workouts',
+                      style: AppTextStyles.titleLarge.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(
+                        Icons.info_outline,
+                        color: AppColors.primary,
+                        size: 24,
+                      ),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                title: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: AppColors.primary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Custom Workouts',
+                                      style: AppTextStyles.titleMedium,
+                                    ),
+                                  ],
+                                ),
+                                content: Text(
+                                  'Custom workouts are built by professional coaches. They are to help you better understand your level and if you like - you can copy them to your personal workouts. No smart progression is done here. But try it out!!!',
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed:
+                                        () => Navigator.of(context).pop(),
+                                    child: Text(
+                                      'Got it',
+                                      style: AppTextStyles.button.copyWith(
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                        );
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Text(

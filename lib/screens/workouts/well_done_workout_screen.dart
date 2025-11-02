@@ -191,7 +191,7 @@ class _WellDoneWorkoutScreenState extends State<WellDoneWorkoutScreen> {
             ),
             const SizedBox(height: 16),
             // Save Workout button (free workout only)
-            if (widget.workout.isFreeWorkout)
+            if (widget.workout.isFreeWorkout || widget.workout.isCustomWorkout)
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

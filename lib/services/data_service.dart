@@ -91,11 +91,11 @@ class DataService {
   }
 
   Future<void> _loadCustomWorkouts() async {
-    final level = _userAuthStorage.get().then((user) => user?.level);
+    final level = await _userAuthStorage.get().then((user) => user?.level);
     String userLevel = (await level)?.name ?? "Beginner";
     userLevel =
         userLevel[0].toUpperCase() + userLevel.substring(1).toLowerCase();
-    final response = await _customWorkoutApiService.getCustomWorkouts(
+    final response = await _customWorkoutApiService.getCustomWorkoutsByField(
       userLevel,
     );
     if (response.error != null) {

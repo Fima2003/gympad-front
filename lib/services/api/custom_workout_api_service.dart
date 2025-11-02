@@ -15,7 +15,7 @@ class CustomWorkoutApiService {
 
   IApiService _api = ApiService();
 
-  Future<ApiResponse<List<CustomWorkoutR>>> getCustomWorkouts([
+  Future<ApiResponse<List<CustomWorkoutR>>> getCustomWorkoutsByField([
     String? userLevel,
   ]) async {
     final queryParameters = {
@@ -24,7 +24,7 @@ class CustomWorkoutApiService {
       'limit': 10,
     };
     return await _api.get<void, List<CustomWorkoutR>>(
-      'getCustomWorkouts',
+      'getCustomWorkoutsByField',
       queryParameters: queryParameters,
       parser:
           (json) =>

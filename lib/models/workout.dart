@@ -13,10 +13,10 @@ class Workout {
   final bool createdWhileGuest; // Marker for workouts created without auth
 
   /// Returns true if this workout is a free workout (no predefined name/id pattern)
-  bool get isFreeWorkout {
-    // Heuristic: free workouts have id starting with 'free_' or no name
-    return id.startsWith('free_') || (name == null || name!.isEmpty);
-  }
+  bool get isFreeWorkout => workoutType == WorkoutType.free;
+
+  /// Returns true if this workout is a custom workout
+  bool get isCustomWorkout => workoutType == WorkoutType.custom;
 
   Workout({
     required this.id,

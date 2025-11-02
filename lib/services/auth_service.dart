@@ -77,6 +77,10 @@ class AuthService {
     };
   }
 
+  Future<void> createLocalUser() async {
+    await _userAuthStorage.save(User());
+  }
+
   /// Save user data locally
   Future<void> saveLocalUserData({
     String? userId,
