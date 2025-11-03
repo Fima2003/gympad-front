@@ -1176,9 +1176,10 @@ packages:
   v_scroller:
     dependency: "direct main"
     description:
-      path: "../../v_scroller"
-      relative: true
-    source: path
+      name: v_scroller
+      sha256: "252e6ff845d68ae81b86111fef7df7c45e277849498e397dc80306a4f00d00b6"
+      url: "https://pub.dev"
+    source: hosted
     version: "0.0.1"
   vector_math:
     dependency: transitive

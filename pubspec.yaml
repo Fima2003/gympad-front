@@ -35,8 +35,7 @@ dependencies:
   hive_test: ^1.0.1
   just_audio: ^0.10.4
   go_router: ^16.2.1
-  v_scroller: 
-    path: ../../v_scroller
+  v_scroller: ^0.0.1
 
 dev_dependencies:
   flutter_test:
