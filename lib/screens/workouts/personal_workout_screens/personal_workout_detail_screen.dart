@@ -195,7 +195,7 @@ class PersonalWorkoutDetailScreen extends StatelessWidget {
                               }
                               return _chip(
                                 Icons.fitness_center,
-                                getWeight(ex.weight, state.weightUnit),
+                                getWeightString(ex.weight, state.weightUnit),
                               );
                             },
                           ),

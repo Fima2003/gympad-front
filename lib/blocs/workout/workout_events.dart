@@ -100,9 +100,13 @@ class RunRestTick extends WorkoutEvent {
 
 /// User finishes the current interactive segment (set/exercise/workout). Bloc decides which.
 class RunFinishCurrent extends WorkoutEvent {
+  /// Weight lifted in the set in kg.
   final double weight;
+  /// Number of reps completed in the set.
   final int reps;
-  final Duration duration; // elapsed set duration
+  /// Duration of the set.
+  final Duration duration;
+  /// Creates a RunFinishCurrent event.
   const RunFinishCurrent({
     required this.weight,
     required this.reps,

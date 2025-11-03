@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:v_scroller/v_scroller.dart';
 
 import '../../../../../blocs/user_settings/user_settings_bloc.dart';
 import '../../../../../constants/app_styles.dart';
 import '../../../../../models/workout_set.dart';
 import '../../../../../utils/get_weight.dart';
 import '../../../../../widgets/reps_selector.dart';
-import '../../../../../widgets/velocity_weight_selector.dart';
 
 enum FinishType { set, exercise, workout }
 
@@ -14,6 +14,8 @@ class CWorkoutRunView extends StatefulWidget {
   final String workoutTitle;
   final String exerciseName;
   final int totalSets;
+
+  /// Initial weight to prefill the selector with in [kg].
   final double initialWeight;
   final int suggestedReps;
   final List<WorkoutSet> completedSets;
@@ -46,12 +48,17 @@ class CWorkoutRunView extends StatefulWidget {
 }
 
 class _CWorkoutRunViewState extends State<CWorkoutRunView> {
+  /// Currently selected weight in the units that user chose in settings.
   late double _selectedWeight;
 
   @override
   void initState() {
     super.initState();
-    _selectedWeight = widget.initialWeight;
+    final settings = context.read<UserSettingsBloc>().state;
+    _selectedWeight = getWeight(
+      widget.initialWeight,
+      settings is UserSettingsLoaded ? settings.weightUnit : 'kg',
+    );
   }
 
   @override
@@ -74,11 +81,18 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
         return RepsSelector(initialReps: widget.suggestedReps);
       },
     ).then((reps) {
-      if (reps == null) {
-        return;
+      if (reps == null) return; // User cancelled
+      if (!mounted) return;
+      final settings = BlocProvider.of<UserSettingsBloc>(context).state;
+      if (settings is! UserSettingsLoaded) {
+        widget.onFinish(toKg(_selectedWeight, 'kg'), reps, widget.elapsed);
+      } else {
+        widget.onFinish(
+          toKg(_selectedWeight, settings.weightUnit),
+          reps,
+          widget.elapsed,
+        );
       }
-      final duration = widget.elapsed;
-      widget.onFinish(_selectedWeight, reps, duration);
     });
   }
 
@@ -157,18 +171,32 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
               Center(
                 child: BlocBuilder<UserSettingsBloc, UserSettingsState>(
                   builder: (context, state) {
-                    if (state is! UserSettingsLoaded) {
-                      return WeightSelectorVelocity(
-                        initialWeight: _selectedWeight,
-                        onWeightChanged:
-                            (w) => setState(() => _selectedWeight = w),
-                      );
-                    }
-                    return WeightSelectorVelocity(
-                      initialWeight: _selectedWeight,
-                      displayUnit: state.weightUnit,
-                      onWeightChanged:
-                          (w) => setState(() => _selectedWeight = w),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Weight (${state is UserSettingsLoaded && state.weightUnit == "lbs" ? 'lbs' : 'kg'})',
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ValueSelectorVelocity(
+                          onValueChanged:
+                              (w) => setState(() => _selectedWeight = w),
+                          initialValue: _selectedWeight,
+                          style: VScrollerStyle(
+                            background: AppColors.background,
+                            primary: AppColors.primary,
+                            accent: AppColors.accent,
+                          ),
+                          selectedItemTextStyle: AppTextStyles.titleMedium,
+                          itemTextStyle: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -220,7 +248,7 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
                                     text = '${set.reps} reps × ${set.weight}kg';
                                   } else {
                                     text =
-                                        "${set.reps} reps x ${getWeight(set.weight, state.weightUnit)}";
+                                        "${set.reps} reps x ${getWeightString(set.weight, state.weightUnit)}";
                                   }
                                   return Text(
                                     text,

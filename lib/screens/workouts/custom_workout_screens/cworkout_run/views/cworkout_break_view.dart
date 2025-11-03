@@ -340,7 +340,7 @@ class CWorkoutBreakView extends StatelessWidget {
       return '$name: ${weight}kg';
     }
     if (weight != null && weight > 0) {
-      final finalWeight = getWeight(weight, state.weightUnit);
+      final finalWeight = getWeightString(weight, state.weightUnit);
       return '$name: $finalWeight';
     }
     return name;

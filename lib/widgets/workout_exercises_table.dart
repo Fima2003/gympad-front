@@ -138,7 +138,7 @@ class WorkoutExercisesTable extends StatelessWidget {
                                 text =
                                     '${exercise.averageWeight.toStringAsFixed(1)} kg';
                               } else {
-                                text = getWeight(
+                                text = getWeightString(
                                   exercise.averageWeight,
                                   state.weightUnit,
                                 );

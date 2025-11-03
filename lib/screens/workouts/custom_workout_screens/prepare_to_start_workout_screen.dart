@@ -156,7 +156,7 @@ class _PrepareToStartWorkoutScreenState
                                 .replaceAll('_', ' ')
                                 .toUpperCase();
                         return showWeight
-                            ? "$name: ${state is! UserSettingsLoaded ? "$weight kg" : getWeight(weight, state.weightUnit)}"
+                            ? "$name: ${state is! UserSettingsLoaded ? "$weight kg" : getWeightString(weight, state.weightUnit)}"
                             : name;
                       })()
                       : 'Exercise',

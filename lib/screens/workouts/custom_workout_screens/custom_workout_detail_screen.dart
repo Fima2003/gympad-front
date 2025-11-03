@@ -257,7 +257,7 @@ class PredefinedWorkoutDetailScreen extends StatelessWidget {
                                 }
                                 return _buildInfoChip(
                                   Icons.fitness_center,
-                                  getWeight(
+                                  getWeightString(
                                     exercise.suggestedWeight!,
                                     state.weightUnit,
                                   ),
