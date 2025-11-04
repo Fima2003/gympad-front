@@ -16,9 +16,7 @@ class UserSettingsAdapter extends TypeAdapter<UserSettings> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return UserSettings(
-      weightUnit: fields[0] as String,
-    );
+    return UserSettings(weightUnit: fields[0] as String);
   }
 
   @override

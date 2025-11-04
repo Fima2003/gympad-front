@@ -148,10 +148,7 @@ class AuthService {
       if (idToken == null) throw Exception('Could not verify token');
 
       // await saveLocalUserData(idToken: idToken);
-      await _userAuthStorage.save(User(
-        userId: user.uid,
-        authToken: idToken,
-      ));
+      await _userAuthStorage.save(User(userId: user.uid, authToken: idToken));
 
       // Register/login with backend
       await user.reload();
@@ -172,9 +169,7 @@ class AuthService {
               backendResponse.data?.completedQuestionnaire,
         };
       }
-      throw Exception(
-        'Sign up failed. ${backendResponse.error}. ${backendResponse.message}. ${backendResponse.status}',
-      );
+      throw Exception('Sign up failed. Try again later!');
     } on GoogleSignInException catch (e) {
       // User canceled or other sign-in error
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
