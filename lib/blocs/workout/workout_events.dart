@@ -102,10 +102,13 @@ class RunRestTick extends WorkoutEvent {
 class RunFinishCurrent extends WorkoutEvent {
   /// Weight lifted in the set in kg.
   final double weight;
+
   /// Number of reps completed in the set.
   final int reps;
+
   /// Duration of the set.
   final Duration duration;
+
   /// Creates a RunFinishCurrent event.
   const RunFinishCurrent({
     required this.weight,

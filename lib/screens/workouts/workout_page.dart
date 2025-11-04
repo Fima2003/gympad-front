@@ -10,7 +10,7 @@ class WorkoutPage extends StatelessWidget {
     return const TabBarView(
       children: [
         FreeWorkoutScreen(),
-        PredefinedWorkoutsScreen(),
+        CustomWorkoutsScreen(),
         PersonalWorkoutsScreen(),
       ],
     );

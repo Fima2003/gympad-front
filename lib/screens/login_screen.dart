@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../blocs/user_settings/user_settings_bloc.dart';
 import '../constants/app_styles.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
@@ -53,6 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
               context.pushReplacement('/questionnaire');
               return;
             }
+            context.read<UserSettingsBloc>().add(UserSettingsLoad());
             context.pushReplacement('/main');
           } else if (state is AuthError) {
             _showErrorDialog(state.message);

@@ -17,9 +17,10 @@ class UserPartialResponse {
   factory UserPartialResponse.fromJson(Map<String, dynamic> json) {
     return UserPartialResponse(
       name: json['name'] as String,
-      completedQuestionnaire: json['completedQuestionnaire'] as bool,
+      completedQuestionnaire:
+          (json['completedQuestionnaire'] as bool?) ?? false,
       level:
-          json['level'] != null
+          (json['level'] != null)
               ? UserLevel.values.firstWhere(
                 (e) =>
                     e.toString() ==

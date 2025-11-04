@@ -11,17 +11,12 @@ class User extends HiveObject {
   @HiveField(2)
   final String? authToken;
   @HiveField(3)
-  final bool isGuest;
+  final bool? isGuest;
   @HiveField(4)
   final UserLevel? level;
 
-  User({
-    this.userId,
-    this.gymId,
-    this.authToken,
-    this.level,
-    this.isGuest = false,
-  });
+  User({this.userId, this.gymId, this.authToken, this.level, bool? isGuest})
+    : isGuest = isGuest ?? false;
 
   User copyWith({
     String? userId,

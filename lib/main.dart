@@ -214,7 +214,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider<DataBloc>(
           create: (_) => DataBloc()..add(const DataLoadRequested()),
-          lazy: false,
+          lazy: true,
         ),
         BlocProvider<AuthBloc>(create: (context) => AuthBloc(), lazy: false),
         BlocProvider<WorkoutBloc>(
@@ -226,7 +226,7 @@ class _MyAppState extends State<MyApp> {
                 return Capabilities.authenticated;
               }
               if (authState is AuthGuest) return Capabilities.guest;
-              return Capabilities.guest; // default for unauth / loading
+              return Capabilities.guest;
             });
             bloc.add(WorkoutLoaded());
             return bloc;
@@ -234,7 +234,7 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider<UserSettingsBloc>(
           create: (context) => UserSettingsBloc()..add(UserSettingsLoad()),
-          lazy: false,
+          lazy: true,
         ),
         BlocProvider<AnalyticsBloc>(create: (context) => AnalyticsBloc()),
         BlocProvider<AudioBloc>(create: (context) => AudioBloc()),

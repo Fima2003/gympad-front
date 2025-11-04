@@ -8,7 +8,6 @@ import 'package:gympad/services/device_identity_service.dart';
 part 'auth_event.dart';
 part 'auth_state.dart';
 
-/// AuthBloc bridges UI and AuthService keeping UI logic lean & SRP.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthService _authService;
   final AppLogger _logger = AppLogger();
@@ -66,7 +65,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final result = await _authService.signInWithGoogle();
       if (result == null) {
-        // User cancelled
         emit(AuthUnauthenticated());
         return;
       }

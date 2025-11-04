@@ -380,8 +380,6 @@ class WorkoutService {
     }
   }
 
-  // Future<void> _updateExercisesOfPersonalWorkout(){}
-
   Future<void> _markWorkoutAsUploaded(String workoutId) async {
     await _historyStorage.markUploaded(workoutId);
   }

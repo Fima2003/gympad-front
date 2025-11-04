@@ -4,8 +4,8 @@ import '../../../constants/app_styles.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../blocs/data/data_bloc.dart';
 
-class PredefinedWorkoutsScreen extends StatelessWidget {
-  const PredefinedWorkoutsScreen({super.key});
+class CustomWorkoutsScreen extends StatelessWidget {
+  const CustomWorkoutsScreen({super.key});
 
   Color _getDifficultyColor(String difficulty) {
     switch (difficulty.toLowerCase()) {

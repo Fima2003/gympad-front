@@ -26,4 +26,9 @@ class UserSettingsError extends UserSettingsState {
 
   @override
   List<Object?> get props => [error];
+
+  @override
+  String toString() {
+    return error;
+  }
 }

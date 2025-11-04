@@ -21,7 +21,7 @@ class UserAdapter extends TypeAdapter<User> {
       gymId: fields[1] as String?,
       authToken: fields[2] as String?,
       level: fields[4] as UserLevel?,
-      isGuest: fields[3] as bool,
+      isGuest: fields[3] as bool?,
     );
   }
 

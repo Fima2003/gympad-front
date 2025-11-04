@@ -147,15 +147,19 @@ class AuthService {
       final idToken = await user.getIdToken();
       if (idToken == null) throw Exception('Could not verify token');
 
+      // await saveLocalUserData(idToken: idToken);
+      await _userAuthStorage.save(User(
+        userId: user.uid,
+        authToken: idToken,
+      ));
+
       // Register/login with backend
       await user.reload();
       final backendResponse = await _userApiService.userPartialRead();
       if (backendResponse.success) {
         _logger.info('User registered with backend: ${user.uid}');
         await saveLocalUserData(
-          userId: user.uid,
           gymId: backendResponse.data?.gymId,
-          idToken: idToken,
           level: backendResponse.data?.level,
           completedQuestionnaire: backendResponse.data?.completedQuestionnaire,
         );
@@ -168,15 +172,17 @@ class AuthService {
               backendResponse.data?.completedQuestionnaire,
         };
       }
-      throw Exception('Registration failed. Try again later.');
+      throw Exception(
+        'Sign up failed. ${backendResponse.error}. ${backendResponse.message}. ${backendResponse.status}',
+      );
     } on GoogleSignInException catch (e) {
       // User canceled or other sign-in error
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
       _logger.severe('GoogleSignIn error: ${e.code}', e);
       return {'success': false, 'error': e.description ?? e.code};
-    } catch (e) {
+    } catch (e, st) {
       _logger.severe('Sign in error', e);
-      return {'success': false, 'error': e.toString()};
+      return {'success': false, 'error': "${e.toString()}. Stacktrace: $st"};
     }
   }
 
