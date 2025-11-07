@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import '../models/custom_workout.dart';
 import '../models/withAdapters/exercise.dart';
@@ -44,18 +42,15 @@ class DataService {
 
   Future<void> loadData() async {
     if (_exercises == null) {
-      await _loadExercises();
+      await _loadExercises(await _userAuthStorage.get().then((user) => user?.goal) ?? "generalFitness");
     }
     if (_customWorkouts == null) {
       await _loadCustomWorkouts();
     }
-    if (_equipment == null) {
-      unawaited(_loadEquipment());
-    }
   }
 
-  Future<void> _loadExercises() async {
-    final response = await _exerciseApiService.getExercises();
+  Future<void> _loadExercises(String goal) async {
+    final response = await _exerciseApiService.getExercises(goal);
     if (response.error != null) {
       _logger.log(
         Level.WARNING,
@@ -92,7 +87,7 @@ class DataService {
 
   Future<void> _loadCustomWorkouts() async {
     final level = await _userAuthStorage.get().then((user) => user?.level);
-    String userLevel = (await level)?.name ?? "Beginner";
+    String userLevel = level?.name ?? "Beginner";
     userLevel =
         userLevel[0].toUpperCase() + userLevel.substring(1).toLowerCase();
     final response = await _customWorkoutApiService.getCustomWorkoutsByField(
@@ -126,17 +121,5 @@ class DataService {
       _customWorkouts![workout.id] = workout;
     }
     _logger.info("Received ${_customWorkouts?.length ?? 0} workouts from API");
-  }
-
-  Future<void> _loadEquipment() async {
-    final String jsonString = await rootBundle.loadString(
-      'assets/mock_data/equipment.json',
-    );
-    final Map<String, dynamic> jsonData = json.decode(jsonString);
-
-    _equipment = {};
-    jsonData['equipment'].forEach((key, value) {
-      _equipment![key] = Equipment.fromJson(key, value);
-    });
   }
 }

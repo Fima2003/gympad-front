@@ -63,9 +63,9 @@ class ApiService implements IApiService {
 
   /// Build Firebase Function URL for the given function name
   String _buildFunctionUrl(String functionName) {
-    // if (kDebugMode) {
-    //   return '$_localDomain$functionName/';
-    // }
+    if (kDebugMode) {
+      return '$_localDomain$functionName/';
+    }
     return 'https://$functionName-$_baseDomain/';
   }
 
@@ -336,7 +336,7 @@ class ApiService implements IApiService {
               : 'unknown';
     }
     _logger.info(
-      'Response from ${funcName} received with status: ${response.statusCode}',
+      'Response from $funcName received with status: ${response.statusCode}',
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
@@ -450,6 +450,6 @@ class ApiService implements IApiService {
   }
 
   void _logError(String message, dynamic error) {
-    _logger.error('$message');
+    _logger.error(message);
   }
 }

@@ -6,6 +6,7 @@ import '../../../../../blocs/user_settings/user_settings_bloc.dart';
 import '../../../../../constants/app_styles.dart';
 import '../../../../../models/workout_set.dart';
 import '../../../../../utils/get_weight.dart';
+import '../../../../../widgets/button.dart';
 import '../../../../../widgets/reps_selector.dart';
 
 enum FinishType { set, exercise, workout }
@@ -283,26 +284,39 @@ class _CWorkoutRunViewState extends State<CWorkoutRunView> {
               Center(
                 child: SizedBox(
                   width: buttonWidth,
-                  height: 56,
-                  child: ElevatedButton(
+                  child: GymPadButton(
+                    label:
+                        widget.finishType == FinishType.set
+                            ? 'Finish Set'
+                            : widget.finishType == FinishType.exercise
+                            ? 'Finish Exercise'
+                            : 'Finish Workout',
+                    variant: 'accent',
                     onPressed: () => _showRepsSelector(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                    customTextStyle: AppTextStyles.button.copyWith(
+                      color: AppColors.primary,
+                      fontSize: 18,
                     ),
-                    child: Text(
-                      widget.finishType == FinishType.set
-                          ? 'Finish Set'
-                          : widget.finishType == FinishType.exercise
-                          ? 'Finish Exercise'
-                          : 'Finish Workout',
-                      style: AppTextStyles.button.copyWith(
-                        color: AppColors.primary,
-                        fontSize: 18,
-                      ),
-                    ),
+                    // ),
+                    // ElevatedButton(
+                    //   onPressed: () => _showRepsSelector(context),
+                    //   style: ElevatedButton.styleFrom(
+                    //     backgroundColor: AppColors.accent,
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(12),
+                    //     ),
+                    //   ),
+                    //   child: Text(
+                    //     widget.finishType == FinishType.set
+                    //         ? 'Finish Set'
+                    //         : widget.finishType == FinishType.exercise
+                    //         ? 'Finish Exercise'
+                    //         : 'Finish Workout',
+                    //     style: AppTextStyles.button.copyWith(
+                    //       color: AppColors.primary,
+                    //       fontSize: 18,
+                    //     ),
+                    //   ),
                   ),
                 ),
               ),

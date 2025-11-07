@@ -22,13 +22,14 @@ class UserAdapter extends TypeAdapter<User> {
       authToken: fields[2] as String?,
       level: fields[4] as UserLevel?,
       isGuest: fields[3] as bool?,
+      goal: fields[5] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, User obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.userId)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class UserAdapter extends TypeAdapter<User> {
       ..writeByte(3)
       ..write(obj.isGuest)
       ..writeByte(4)
-      ..write(obj.level);
+      ..write(obj.level)
+      ..writeByte(5)
+      ..write(obj.goal);
   }
 
   @override

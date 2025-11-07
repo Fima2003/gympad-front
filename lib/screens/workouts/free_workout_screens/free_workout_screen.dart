@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../blocs/workout/workout_bloc.dart';
 import '../../../constants/app_styles.dart';
+import '../../../widgets/button.dart';
 
 class FreeWorkoutScreen extends StatelessWidget {
   const FreeWorkoutScreen({super.key});
@@ -79,63 +80,26 @@ class FreeWorkoutScreen extends StatelessWidget {
 
                 // Start Workout Button
                 if (!inRunPhase)
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        context.push('/workout/free/run');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 4,
-                      ),
-                      child: Text(
-                        'START A WORKOUT',
-                        style: AppTextStyles.button.copyWith(
-                          color: AppColors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  GymPadButton(
+                    label: 'START A WORKOUT',
+                    onPressed: () {
+                      context.push('/workout/free/run');
+                    },
+                    fullWidth: true,
                   )
                 else
                   // Continue Workout Button (route differs if following a custom workout)
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (hasPlan) {
-                          context.push('/workout/custom/run');
-                        } else {
-                          context.push('/workout/free/run');
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accent,
-                        foregroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 4,
-                      ),
-                      child: Text(
-                        hasPlan ? 'RESUME WORKOUT' : 'CONTINUE WORKOUT',
-                        style: AppTextStyles.button.copyWith(
-                          color: AppColors.primary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  GymPadButton(
+                    label: hasPlan ? 'RESUME WORKOUT' : 'CONTINUE WORKOUT',
+                    onPressed: () {
+                      if (hasPlan) {
+                        context.push('/workout/custom/run');
+                      } else {
+                        context.push('/workout/free/run');
+                      }
+                    },
+                    variant: 'accent',
+                    fullWidth: true,
                   ),
               ],
             ),

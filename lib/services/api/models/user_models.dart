@@ -6,12 +6,14 @@ class UserPartialResponse {
   final String? gymId;
   final UserLevel level;
   final bool completedQuestionnaire;
+  final String goal;
 
   UserPartialResponse({
     required this.name,
     required this.completedQuestionnaire,
     required this.level,
     this.gymId,
+    required this.goal
   });
 
   factory UserPartialResponse.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class UserPartialResponse {
               )
               : UserLevel.beginner,
       gymId: json['gymId'] as String?,
+      goal: json['goal'] as String
     );
   }
 

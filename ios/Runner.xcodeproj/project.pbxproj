@@ -166,7 +166,6 @@
 				CC399DE17259EBEF7580129D /* Pods-RunnerTests.release.xcconfig */,
 				2EB3021040DDB9D48441D0C2 /* Pods-RunnerTests.profile.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -505,6 +504,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.gympad.gympad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -713,6 +713,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.gympad.gympad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

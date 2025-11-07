@@ -4,6 +4,7 @@ import '../blocs/user_settings/user_settings_bloc.dart';
 import '../constants/app_styles.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
+import '../widgets/button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -123,31 +124,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Container(
                       width: double.infinity,
-                      height: 56,
+                      // height: 56,
                       margin: const EdgeInsets.symmetric(horizontal: 20),
-                      child: ElevatedButton.icon(
+                      child: 
+                      GymPadButton(
+                        label: 'Sign In with Google',
+                        icon: Icons.login,
                         onPressed: _signInWithGoogle,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.accent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 2,
-                        ),
-                        icon: Icon(
-                          Icons.login,
-                          size: 24,
-                          color: AppColors.accent,
-                        ),
-                        label: Text(
-                          'Sign In with Google',
-                          style: AppTextStyles.button.copyWith(
+                        customTextStyle: AppTextStyles.button.copyWith(
                             color: AppColors.accent,
                             fontSize: 18,
                           ),
-                        ),
-                      ),
+                      )
                     ),
                     const SizedBox(height: 16),
                     Text(

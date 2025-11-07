@@ -484,14 +484,13 @@ class _RingPainter extends CustomPainter {
   final double progress; // 0..1
   final Color backgroundColor;
   final Color foregroundColor;
-  final double strokeWidth;
+  final double strokeWidth = 6;
 
   _RingPainter({
     required this.progress,
     required this.backgroundColor,
     required this.foregroundColor,
-    double strokeWidth = 6,
-  }) : strokeWidth = strokeWidth;
+  });
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -13,9 +13,10 @@ class ExerciseApiService {
   ExerciseApiService._internal();
   IApiService _api = ApiService();
 
-  Future<ApiResponse<List<ExerciseR>>> getExercises() async {
+  Future<ApiResponse<List<ExerciseR>>> getExercises(String goal) async {
     return await _api.get<void, List<ExerciseR>>(
-      'getAllExercises',
+      'getExercisesForGoal',
+      queryParameters: {'goal': goal},
       parser:
           (data) => (data as List).map((e) => ExerciseR.fromJson(e)).toList(),
       auth: false,

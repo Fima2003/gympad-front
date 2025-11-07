@@ -43,7 +43,7 @@ extension DataSelectors on DataState {
   List<Exercise> exercisesForMuscleGroup(String mg) {
     if (this is! DataReady) return const [];
     return (this as DataReady).exercises.values
-        .where((e) => e.muscleGroup == mg)
+        .where((e) => e.muscleGroup.contains(mg))
         .toList();
   }
 }

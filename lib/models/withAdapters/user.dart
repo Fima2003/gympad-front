@@ -14,8 +14,10 @@ class User extends HiveObject {
   final bool? isGuest;
   @HiveField(4)
   final UserLevel? level;
+  @HiveField(5)
+  final String? goal;
 
-  User({this.userId, this.gymId, this.authToken, this.level, bool? isGuest})
+  User({this.userId, this.gymId, this.authToken, this.level, bool? isGuest, this.goal})
     : isGuest = isGuest ?? false;
 
   User copyWith({
@@ -24,17 +26,19 @@ class User extends HiveObject {
     String? authToken,
     UserLevel? level,
     bool? isGuest,
+    String? goal,
   }) => User(
     userId: userId ?? this.userId,
     gymId: gymId ?? this.gymId,
     authToken: authToken ?? this.authToken,
     level: level ?? this.level,
     isGuest: isGuest ?? this.isGuest,
+    goal: goal ?? this.goal,
   );
 
   @override
   String toString() =>
-      'User(userId: $userId, gymId: $gymId, level: $level, isGuest: $isGuest)';
+      'User(userId: $userId, gymId: $gymId, level: $level, isGuest: $isGuest, goal: $goal)';
 }
 
 @HiveType(typeId: 11)

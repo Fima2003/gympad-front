@@ -87,6 +87,7 @@ class AuthService {
     String? gymId,
     String? idToken,
     bool? isGuest,
+    String? goal,
     bool? completedQuestionnaire,
     UserLevel? level,
   }) async {
@@ -96,6 +97,7 @@ class AuthService {
             userId: userId,
             gymId: gymId,
             authToken: idToken,
+            goal: goal,
             level: level,
             isGuest: isGuest,
           ),
@@ -158,6 +160,7 @@ class AuthService {
         await saveLocalUserData(
           gymId: backendResponse.data?.gymId,
           level: backendResponse.data?.level,
+          goal: backendResponse.data?.goal,
           completedQuestionnaire: backendResponse.data?.completedQuestionnaire,
         );
         return {
@@ -171,6 +174,7 @@ class AuthService {
       }
       throw Exception('Sign up failed. Try again later!');
     } on GoogleSignInException catch (e) {
+      await signOut();
       // User canceled or other sign-in error
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
       _logger.severe('GoogleSignIn error: ${e.code}', e);
@@ -211,6 +215,7 @@ class AuthService {
             gymId: res.data?.gymId,
             idToken: token,
             level: res.data?.level,
+            goal: res.data?.goal,
             completedQuestionnaire: res.data?.completedQuestionnaire,
           );
         }

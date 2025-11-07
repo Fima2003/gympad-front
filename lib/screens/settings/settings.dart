@@ -105,7 +105,7 @@ class _SettingsState extends State<Settings> {
                                       ),
                                     );
                                   },
-                                  activeColor: AppColors.accent,
+                                  activeThumbColor: AppColors.accent,
                                   activeTrackColor: AppColors.primary
                                       .withValues(alpha: 0.5),
                                 ),
