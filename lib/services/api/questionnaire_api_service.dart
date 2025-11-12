@@ -1,5 +1,6 @@
 import 'i_api_service.dart';
 import 'api_service.dart';
+import 'models/api_result.dart';
 import 'models/questionnaire_models.dart';
 
 class QuestionnaireApiService {
@@ -15,7 +16,7 @@ class QuestionnaireApiService {
 
   IApiService _api = ApiService();
 
-  Future<ApiResponse<void>> submit(QuestionnaireSubmitRequest request) async {
+  Future<ApiResult<void>> submit(QuestionnaireSubmitRequest request) async {
     return await _api.post<QuestionnaireSubmitRequest, void>(
       'questionnaireSubmit',
       body: request,

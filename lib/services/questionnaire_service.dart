@@ -46,7 +46,6 @@ class QuestionnaireService {
       completedAt: stored.completedAt,
       answers: stored.answers,
     );
-    final resp = await _api.submit(req);
     final cur = await _lss.get();
     UserLevel userLevel;
     String goal;
@@ -91,8 +90,16 @@ class QuestionnaireService {
         return u.copyWith(level: userLevel, goal: goal);
       },
     );
+    final resp = await _api.submit(req);
     if (cur != null) {
-      await _lss.save(cur.copyWith(uploaded: resp.success));
+      resp.fold(
+        onError: (err) async {
+          await _lss.save(cur.copyWith(uploaded: false));
+        },
+        onSuccess: (_) async {
+          await _lss.save(cur.copyWith(uploaded: true));
+        },
+      );
     }
   }
 
@@ -106,9 +113,12 @@ class QuestionnaireService {
         answers: stored.answers,
       );
       final resp = await _api.submit(req);
-      if (resp.success) {
-        await _lss.save(stored.copyWith(uploaded: true));
-      }
+      resp.fold(
+        onError: (err) {},
+        onSuccess: (_) async {
+          await _lss.save(stored.copyWith(uploaded: true));
+        },
+      );
     }
   }
 

@@ -18,15 +18,18 @@ class UserSettingsAdapter extends TypeAdapter<UserSettings> {
     };
     return UserSettings(
       weightUnit: fields[0] as String,
+      etag: fields[1] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserSettings obj) {
     writer
-      ..writeByte(1)
+      ..writeByte(2)
       ..writeByte(0)
-      ..write(obj.weightUnit);
+      ..write(obj.weightUnit)
+      ..writeByte(1)
+      ..write(obj.etag);
   }
 
   @override

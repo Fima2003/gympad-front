@@ -1,5 +1,6 @@
 import 'api_service.dart';
 import 'i_api_service.dart';
+import 'models/api_result.dart';
 import 'models/custom_workout.model.dart';
 
 class CustomWorkoutApiService {
@@ -15,7 +16,7 @@ class CustomWorkoutApiService {
 
   IApiService _api = ApiService();
 
-  Future<ApiResponse<List<CustomWorkoutR>>> getCustomWorkoutsByField([
+  Future<ApiResult<List<CustomWorkoutR>>> getCustomWorkoutsByField([
     String? userLevel,
   ]) async {
     final queryParameters = {

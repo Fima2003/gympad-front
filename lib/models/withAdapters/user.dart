@@ -16,9 +16,18 @@ class User extends HiveObject {
   final UserLevel? level;
   @HiveField(5)
   final String? goal;
+  @HiveField(6)
+  final String? etag;
 
-  User({this.userId, this.gymId, this.authToken, this.level, bool? isGuest, this.goal})
-    : isGuest = isGuest ?? false;
+  User({
+    this.userId,
+    this.gymId,
+    this.authToken,
+    this.level,
+    bool? isGuest,
+    this.goal,
+    this.etag,
+  }) : isGuest = isGuest ?? false;
 
   User copyWith({
     String? userId,
@@ -27,6 +36,7 @@ class User extends HiveObject {
     UserLevel? level,
     bool? isGuest,
     String? goal,
+    String? etag,
   }) => User(
     userId: userId ?? this.userId,
     gymId: gymId ?? this.gymId,
@@ -34,6 +44,7 @@ class User extends HiveObject {
     level: level ?? this.level,
     isGuest: isGuest ?? this.isGuest,
     goal: goal ?? this.goal,
+    etag: etag ?? this.etag,
   );
 
   @override

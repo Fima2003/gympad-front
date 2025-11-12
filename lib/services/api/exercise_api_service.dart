@@ -1,6 +1,7 @@
+import '../../models/withAdapters/exercise.dart';
 import 'api_service.dart';
 import 'i_api_service.dart';
-import 'models/exercise.model.dart';
+import 'models/api_result.dart';
 
 class ExerciseApiService {
   static final ExerciseApiService _instance = ExerciseApiService._internal();
@@ -13,12 +14,13 @@ class ExerciseApiService {
   ExerciseApiService._internal();
   IApiService _api = ApiService();
 
-  Future<ApiResponse<List<ExerciseR>>> getExercises(String goal) async {
-    return await _api.get<void, List<ExerciseR>>(
+  Future<ApiResult<List<Exercise>>> getExercises(String goal) async {
+    return await _api.get<void, List<Exercise>>(
       'getExercisesForGoal',
       queryParameters: {'goal': goal},
-      parser:
-          (data) => (data as List).map((e) => ExerciseR.fromJson(e)).toList(),
+      parser: (data) {
+        return (data as List).map((e) => Exercise.fromJson(e)).toList();
+      },
       auth: false,
     );
   }

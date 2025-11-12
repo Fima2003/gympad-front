@@ -1,6 +1,6 @@
 import '../../models/personal_workout.dart';
-import 'i_api_service.dart';
 import 'api_service.dart';
+import 'models/api_result.dart';
 import 'models/personal_workout.model.dart';
 import 'models/workout_models.dart';
 
@@ -14,7 +14,7 @@ class WorkoutApiService {
 
   /// GET getAllMyWorkouts
   /// Returns: List of { id, name?, muscleGroups[] }
-  Future<ApiResponse<List<WorkoutListItem>>> getAllMyWorkouts() async {
+  Future<ApiResult<List<WorkoutListItem>>> getAllMyWorkouts() async {
     return _api.get<void, List<WorkoutListItem>>(
       'getAllMyWorkouts',
       auth: true,
@@ -29,7 +29,7 @@ class WorkoutApiService {
 
   /// GET getPersonalWorkouts
   /// Returns: List of { name ,description?,exercises:[{ exerciseId, name,sets,weight,reps,restTime }] }
-  Future<ApiResponse<List<PersonalWorkout>>> getPersonalWorkouts() async {
+  Future<ApiResult<List<PersonalWorkout>>> getPersonalWorkouts() async {
     return _api.get<void, List<PersonalWorkout>>(
       'getPersonalWorkouts',
       auth: true,
@@ -48,7 +48,7 @@ class WorkoutApiService {
   }
 
   /// GET getMyWorkout with query param workoutId
-  Future<ApiResponse<WorkoutDetailResponse>> getMyWorkout({
+  Future<ApiResult<WorkoutDetailResponse>> getMyWorkout({
     required String workoutId,
   }) async {
     return _api.get<void, WorkoutDetailResponse>(
@@ -63,7 +63,7 @@ class WorkoutApiService {
 
   /// POST createWorkout
   /// Input is full workout payload, returns success only
-  Future<ApiResponse<WorkoutCreateResponse>> logNewWorkout(
+  Future<ApiResult<WorkoutCreateResponse>> logNewWorkout(
     WorkoutCreateRequest request,
   ) async {
     return _api.post<WorkoutCreateRequest, WorkoutCreateResponse>(
@@ -78,7 +78,7 @@ class WorkoutApiService {
 
   /// POST createCustomWorkout
   /// Input is custom workout payload, returns Personal Workout id
-  Future<ApiResponse<String>> createPersonalWorkout(
+  Future<ApiResult<String>> createPersonalWorkout(
     CreatePersonalWorkoutRequest request,
   ) async {
     return _api.post<CreatePersonalWorkoutRequest, String>(
@@ -90,7 +90,7 @@ class WorkoutApiService {
   }
 
   /// DELETE deleteWorkout
-  Future<ApiResponse<void>> deleteWorkout(WorkoutDeleteRequest request) async {
+  Future<ApiResult<void>> deleteWorkout(WorkoutDeleteRequest request) async {
     return _api.delete<WorkoutDeleteRequest, void>(
       'deleteWorkout',
       body: request,

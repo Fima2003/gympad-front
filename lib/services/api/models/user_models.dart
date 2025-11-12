@@ -7,13 +7,15 @@ class UserPartialResponse {
   final UserLevel level;
   final bool completedQuestionnaire;
   final String goal;
+  final String? etag;
 
   UserPartialResponse({
     required this.name,
     required this.completedQuestionnaire,
     required this.level,
     this.gymId,
-    required this.goal
+    required this.goal,
+    this.etag,
   });
 
   factory UserPartialResponse.fromJson(Map<String, dynamic> json) {
@@ -31,7 +33,27 @@ class UserPartialResponse {
               )
               : UserLevel.beginner,
       gymId: json['gymId'] as String?,
-      goal: json['goal'] as String
+      goal: json['goal'] as String,
+      etag: json['etag'] as String?,
+    );
+  }
+
+  UserPartialResponse copyWith({
+    String? name,
+    String? gymId,
+    UserLevel? level,
+    bool? completedQuestionnaire,
+    String? goal,
+    String? etag,
+  }) {
+    return UserPartialResponse(
+      name: name ?? this.name,
+      gymId: gymId ?? this.gymId,
+      level: level ?? this.level,
+      completedQuestionnaire:
+          completedQuestionnaire ?? this.completedQuestionnaire,
+      goal: goal ?? this.goal,
+      etag: etag ?? this.etag,
     );
   }
 

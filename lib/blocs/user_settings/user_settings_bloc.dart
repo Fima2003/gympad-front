@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
 
+import '../../models/withAdapters/user_settings.dart';
 import '../../services/api/models/user_settings.dto.dart';
 import '../../services/user_settings_service.dart';
 
@@ -9,25 +10,43 @@ part 'user_settings_state.dart';
 
 class UserSettingsBloc extends Bloc<UserSettingsEvent, UserSettingsState> {
   final UserSettingsService _userSettingsService = UserSettingsService();
+
   UserSettingsBloc() : super(UserSettingsInitial()) {
     on<UserSettingsLoad>(_userSettingsLoad);
     on<UserSettingsUpdate>(_userSettingsUpdate);
     on<UserSettingsSubmit>(_userSettingsSubmit);
   }
 
-  _userSettingsLoad(
+  /// Load user settings and subscribe to updates.
+  /// This initializes the service and starts listening to the stream.
+  Future<void> _userSettingsLoad(
     UserSettingsLoad event,
     Emitter<UserSettingsState> emit,
   ) async {
     try {
-      final settings = await _userSettingsService.getUserSettings();
-      emit(UserSettingsLoaded(weightUnit: settings.weightUnit));
+      // Initialize settings (loads cache + starts API sync)
+      await _userSettingsService.initializeUserSettings();
+
+      // Use emit.forEach to properly handle stream emissions
+      await emit.forEach<UserSettings>(
+        _userSettingsService.userSettingsStream,
+        onData: (settings) {
+          print(settings);
+          return UserSettingsLoaded(weightUnit: settings.weightUnit);
+        },
+        onError: (error, stackTrace) {
+          print(error);
+          return UserSettingsError(error: error.toString());
+        },
+      );
     } catch (e) {
-      emit(UserSettingsError(error: e as String));
+      emit(UserSettingsError(error: e.toString()));
     }
   }
 
-  _userSettingsUpdate(
+  /// Update settings locally (updates state, but doesn't save yet).
+  /// The UI will see the change immediately.
+  void _userSettingsUpdate(
     UserSettingsUpdate event,
     Emitter<UserSettingsState> emit,
   ) {
@@ -38,7 +57,9 @@ class UserSettingsBloc extends Bloc<UserSettingsEvent, UserSettingsState> {
     }
   }
 
-  _userSettingsSubmit(
+  /// Submit settings to the API and local storage.
+  /// The stream will emit the updated value.
+  Future<void> _userSettingsSubmit(
     UserSettingsSubmit event,
     Emitter<UserSettingsState> emit,
   ) async {
@@ -47,5 +68,12 @@ class UserSettingsBloc extends Bloc<UserSettingsEvent, UserSettingsState> {
       weightUnit: stateToSubmit.weightUnit,
     );
     await _userSettingsService.updateUserSettings(updateSettings);
+    // No need to emit here - the stream will emit the updated value
+  }
+
+  @override
+  Future<void> close() {
+    _userSettingsService.dispose();
+    return super.close();
   }
 }

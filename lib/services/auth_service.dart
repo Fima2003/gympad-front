@@ -90,6 +90,7 @@ class AuthService {
     String? goal,
     bool? completedQuestionnaire,
     UserLevel? level,
+    String? etag,
   }) async {
     await _userAuthStorage.update(
       copyWithFn:
@@ -100,6 +101,7 @@ class AuthService {
             goal: goal,
             level: level,
             isGuest: isGuest,
+            etag: etag,
           ),
     );
     if (completedQuestionnaire != null) {
@@ -155,24 +157,33 @@ class AuthService {
       // Register/login with backend
       await user.reload();
       final backendResponse = await _userApiService.userPartialRead();
-      if (backendResponse.success) {
-        _logger.info('User registered with backend: ${user.uid}');
-        await saveLocalUserData(
-          gymId: backendResponse.data?.gymId,
-          level: backendResponse.data?.level,
-          goal: backendResponse.data?.goal,
-          completedQuestionnaire: backendResponse.data?.completedQuestionnaire,
-        );
-        return {
-          'success': true,
-          'userId': user.uid,
-          'gymId': backendResponse.data?.gymId,
-          'user': user,
-          'completedQuestionnaire':
-              backendResponse.data?.completedQuestionnaire,
-        };
-      }
-      throw Exception('Sign up failed. Try again later!');
+
+      // Handle ApiResult<UserPartialResponse>
+      return backendResponse.fold(
+        onError: (error) {
+          _logger.warning(
+            'User registration with backend failed: status=${error.status}, error=${error.error}, message=${error.message}',
+          );
+          throw Exception('Sign up failed. Try again later!');
+        },
+        onSuccess: (data) async {
+          _logger.info('User signed in with backend: ${user.uid}');
+          await saveLocalUserData(
+            gymId: data.gymId,
+            level: data.level,
+            goal: data.goal,
+            completedQuestionnaire: data.completedQuestionnaire,
+            etag: data.etag,
+          );
+          return {
+            'success': true,
+            'userId': user.uid,
+            'gymId': data.gymId,
+            'user': user,
+            'completedQuestionnaire': data.completedQuestionnaire,
+          };
+        },
+      );
     } on GoogleSignInException catch (e) {
       await signOut();
       // User canceled or other sign-in error
@@ -205,53 +216,83 @@ class AuthService {
   Future<bool> fetchUserOnAppStartWithRetry() async {
     try {
       if (!isSignedIn) return false;
-      final res = await _userApiService.userPartialRead();
-      if (res.success) {
-        final user = _auth.currentUser;
-        if (user != null) {
-          final token = await user.getIdToken();
-          await saveLocalUserData(
-            userId: user.uid,
-            gymId: res.data?.gymId,
-            idToken: token,
-            level: res.data?.level,
-            goal: res.data?.goal,
-            completedQuestionnaire: res.data?.completedQuestionnaire,
-          );
-        }
-        return true;
-      }
 
-      // If unauthorized/forbidden, refresh and retry once
-      if (res.status == 401 || res.status == 403) {
-        _logger.info(
-          'Token likely expired. Refreshing and retrying userPartialRead.',
-        );
-        final user = _auth.currentUser;
-        if (user == null) return false;
-        final fresh = await user.getIdToken(true);
-        if (fresh == null) return false;
-        await _userAuthStorage.update(
-          copyWithFn: (u) => u.copyWith(authToken: fresh),
-        );
+      final cachedUser = await _userAuthStorage.get();
+      final cachedEtag = cachedUser?.etag;
 
-        final retry = await _userApiService.userPartialRead();
-        if (retry.success) {
-          await saveLocalUserData(
-            userId: user.uid,
-            gymId: retry.data?.gymId,
-            idToken: fresh,
-            level: retry.data?.level,
-            completedQuestionnaire: retry.data?.completedQuestionnaire,
+      final res = await _userApiService.userPartialRead(etag: cachedEtag);
+
+      // Pattern match using fold to handle ApiResult
+      return res.fold(
+        onError: (appError) async {
+          // If 304 NOT MODIFIED, use cached data and update etag
+          if (appError.status == 304) {
+            _logger.info(
+              'fetchUserOnAppStartWithRetry: Using cached data (304 Not Modified)',
+            );
+            return true;
+          }
+
+          // If unauthorized/forbidden, refresh and retry once
+          if (appError.status == 401 || appError.status == 403) {
+            _logger.info(
+              'Token likely expired. Refreshing and retrying userPartialRead.',
+            );
+            final user = _auth.currentUser;
+            if (user == null) return false;
+            final fresh = await user.getIdToken(true);
+            if (fresh == null) return false;
+            await _userAuthStorage.update(
+              copyWithFn: (u) => u.copyWith(authToken: fresh),
+            );
+
+            final retry = await _userApiService.userPartialRead(
+              etag: cachedEtag,
+            );
+            return retry.fold(
+              onError: (retryError) async {
+                _logger.warning(
+                  'fetchUserOnAppStartWithRetry retry failed: status=${retryError.status}, error=${retryError.error}, message=${retryError.message}',
+                );
+                return false;
+              },
+              onSuccess: (userData) async {
+                // Successfully got data after token refresh
+                await saveLocalUserData(
+                  userId: user.uid,
+                  gymId: userData.gymId,
+                  idToken: fresh,
+                  level: userData.level,
+                  completedQuestionnaire: userData.completedQuestionnaire,
+                );
+                return true;
+              },
+            );
+          }
+
+          _logger.warning(
+            'fetchUserOnAppStartWithRetry failed: status=${appError.status}, error=${appError.error}, message=${appError.message}',
           );
+          return false;
+        },
+        onSuccess: (userData) async {
+          // Successfully got user data
+          final user = _auth.currentUser;
+          if (user != null) {
+            final token = await user.getIdToken();
+            await saveLocalUserData(
+              userId: user.uid,
+              gymId: userData.gymId,
+              idToken: token,
+              level: userData.level,
+              goal: userData.goal,
+              completedQuestionnaire: userData.completedQuestionnaire,
+              etag: userData.etag,
+            );
+          }
           return true;
-        }
-      }
-
-      _logger.warning(
-        'fetchUserOnAppStartWithRetry failed: status=${res.status}, error=${res.error}, message=${res.message}',
+        },
       );
-      return false;
     } catch (e, st) {
       _logger.severe('fetchUserOnAppStartWithRetry error', e, st);
       return false;

@@ -23,13 +23,14 @@ class UserAdapter extends TypeAdapter<User> {
       level: fields[4] as UserLevel?,
       isGuest: fields[3] as bool?,
       goal: fields[5] as String?,
+      etag: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, User obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.userId)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class UserAdapter extends TypeAdapter<User> {
       ..writeByte(4)
       ..write(obj.level)
       ..writeByte(5)
-      ..write(obj.goal);
+      ..write(obj.goal)
+      ..writeByte(6)
+      ..write(obj.etag);
   }
 
   @override

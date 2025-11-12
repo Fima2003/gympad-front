@@ -47,4 +47,31 @@ class Exercise extends HiveObject {
       maxReps: 0,
     );
   }
+
+  factory Exercise.fromJson(Map<String, dynamic> json) {
+    return Exercise(
+      exerciseId: json['exerciseId'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String?,
+      type: json['type'] as String,
+      equipmentId: json['equipmentId'] as String?,
+      muscleGroup:
+          (json['muscleGroup'] as List<dynamic>)
+              .map((e) => e as String)
+              .toList(),
+      minReps: _parseInt(json['minReps']),
+      restTime: _parseInt(json['restTime']),
+      maxReps: _parseInt(json['maxReps']),
+    );
+  }
+
+  static int _parseInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+    if (value is String) {
+      return int.tryParse(value) ?? 0;
+    }
+    return 0;
+  }
 }

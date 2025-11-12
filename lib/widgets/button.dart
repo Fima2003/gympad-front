@@ -72,7 +72,13 @@ class GymPadButton extends StatelessWidget {
               ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, color: customTextStyle != null ? customTextStyle!.color : foregroundColor),
+                  Icon(
+                    icon,
+                    color:
+                        customTextStyle != null
+                            ? customTextStyle!.color
+                            : foregroundColor,
+                  ),
                   const SizedBox(width: 8),
                   Text(label, style: textStyle),
                 ],

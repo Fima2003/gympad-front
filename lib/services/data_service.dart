@@ -3,8 +3,7 @@ import 'package:logging/logging.dart';
 import '../models/custom_workout.dart';
 import '../models/withAdapters/exercise.dart';
 import '../models/equipment.dart';
-import 'api/custom_workout_api_service.dart';
-import 'api/exercise_api_service.dart';
+import 'api/api.dart';
 import 'hive/custom_workout_lss.dart';
 import 'hive/exercise_lss.dart';
 import 'hive/user_auth_lss.dart';
@@ -42,7 +41,10 @@ class DataService {
 
   Future<void> loadData() async {
     if (_exercises == null) {
-      await _loadExercises(await _userAuthStorage.get().then((user) => user?.goal) ?? "generalFitness");
+      await _loadExercises(
+        await _userAuthStorage.get().then((user) => user?.goal) ??
+            "generalFitness",
+      );
     }
     if (_customWorkouts == null) {
       await _loadCustomWorkouts();
@@ -51,37 +53,38 @@ class DataService {
 
   Future<void> _loadExercises(String goal) async {
     final response = await _exerciseApiService.getExercises(goal);
-    if (response.error != null) {
-      _logger.log(
-        Level.WARNING,
-        "Failed to fetch exercises: ${response.error}",
-      );
-      final localExercises = await _exerciseLssService.getAll();
-      if (localExercises.isNotEmpty) {
-        _exercises = {
-          for (var exercise in localExercises) exercise.exerciseId: exercise,
-        };
+
+    return response.fold(
+      onError: (error) {
+        _logger.log(Level.WARNING, "Failed to fetch exercises: $error");
+        return _exerciseLssService.getAll().then((localExercises) {
+          if (localExercises.isNotEmpty) {
+            _exercises = {
+              for (var exercise in localExercises)
+                exercise.exerciseId: exercise,
+            };
+            _logger.log(
+              Level.INFO,
+              "Loaded ${_exercises?.length ?? 0} exercises from local storage",
+            );
+          } else {
+            _exercises = {};
+            _logger.log(Level.WARNING, "No local exercises available");
+          }
+        });
+      },
+      onSuccess: (data) {
+        _exerciseLssService.saveMany(data);
+
+        _exercises = {};
+        for (final exercise in data) {
+          _exercises![exercise.exerciseId] = exercise;
+        }
         _logger.log(
           Level.INFO,
-          "Loaded ${_exercises?.length ?? 0} exercises from local storage",
+          "Received ${_exercises?.length ?? 0} exercise from API",
         );
-      } else {
-        _exercises = {};
-        _logger.log(Level.WARNING, "No local exercises available");
-      }
-      return;
-    }
-
-    final exercises = response.data!.map((e) => e.toDomain()).toList();
-    _exerciseLssService.saveMany(exercises);
-
-    _exercises = {};
-    for (final exercise in exercises) {
-      _exercises![exercise.exerciseId] = exercise;
-    }
-    _logger.log(
-      Level.INFO,
-      "Received ${_exercises?.length ?? 0} exercise from API",
+      },
     );
   }
 
@@ -93,33 +96,37 @@ class DataService {
     final response = await _customWorkoutApiService.getCustomWorkoutsByField(
       userLevel,
     );
-    if (response.error != null) {
-      _logger.log(
-        Level.WARNING,
-        "Failed to fetch custom workouts: ${response.error}",
-      );
-      final localCustomWorkouts = await _customWorkoutLssService.getAll();
-      if (localCustomWorkouts.isNotEmpty) {
-        _customWorkouts = {
-          for (var workout in localCustomWorkouts) workout.id: workout,
-        };
-        _logger.log(
-          Level.INFO,
-          "Loaded ${_customWorkouts?.length ?? 0} workouts from local storage",
-        );
-      } else {
+    response.fold(
+      onError: (error) async {
+        _logger.log(Level.WARNING, "Failed to fetch custom workouts: $error");
+        final localCustomWorkouts = await _customWorkoutLssService.getAll();
+        if (localCustomWorkouts.isNotEmpty) {
+          _customWorkouts = {
+            for (var workout in localCustomWorkouts) workout.id: workout,
+          };
+          _logger.log(
+            Level.INFO,
+            "Loaded ${_customWorkouts?.length ?? 0} workouts from local storage",
+          );
+        } else {
+          _customWorkouts = {};
+          _logger.log(Level.WARNING, "No local custom workouts available");
+        }
+        return;
+      },
+      onSuccess: (data) {
+        final customWorkouts = data.map((e) => e.toDomain()).toList();
+
         _customWorkouts = {};
-        _logger.log(Level.WARNING, "No local custom workouts available");
-      }
-      return;
-    }
+        for (final workout in customWorkouts) {
+          _customWorkouts![workout.id] = workout;
+        }
+        _logger.info(
+          "Received ${_customWorkouts?.length ?? 0} workouts from API",
+        );
 
-    final customWorkouts = response.data!.map((e) => e.toDomain()).toList();
-
-    _customWorkouts = {};
-    for (final workout in customWorkouts) {
-      _customWorkouts![workout.id] = workout;
-    }
-    _logger.info("Received ${_customWorkouts?.length ?? 0} workouts from API");
+        _customWorkoutLssService.saveMany(customWorkouts);
+      },
+    );
   }
 }

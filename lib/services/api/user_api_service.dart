@@ -1,6 +1,8 @@
 import 'i_api_service.dart';
 import 'api_service.dart';
 import 'models/user_models.dart';
+import 'models/app_error.dart';
+import 'models/api_result.dart';
 
 /// User API service class
 class UserApiService {
@@ -20,27 +22,24 @@ class UserApiService {
 
   /// Get partial user information (name and gymId)
   ///
-  /// Returns user's name and optional gym ID
-  /// Requires authentication
-  Future<ApiResponse<UserPartialResponse>> userPartialRead() async {
+  /// Returns user's name and optional gym ID.
+  /// Requires authentication.
+  ///
+  /// Accepts optional [etag] parameter for If-None-Match header to support
+  /// HTTP caching. If the remote data hasn't changed (304 NOT MODIFIED),
+  /// the returned ApiResult will contain an error with status 304.
+  ///
+  /// Returns ApiResult<UserPartialResponse> where:
+  /// - isError with status 304 indicates cached data should be used
+  /// - isError indicates an error occurred
+  /// - isSuccess contains the user data
+  Future<ApiResult<UserPartialResponse>> userPartialRead({String? etag}) async {
     return await _api.get<void, UserPartialResponse>(
       'userPartialRead',
       auth: true,
+      etag: etag,
       parser:
           (data) => UserPartialResponse.fromJson(data as Map<String, dynamic>),
-    );
-  }
-
-  /// Get full user information
-  ///
-  /// Returns complete user profile including email, name, gymId, workouts,
-  /// and timestamp information
-  /// Requires authentication
-  Future<ApiResponse<UserFullResponse>> userFullRead() async {
-    return await _api.get<void, UserFullResponse>(
-      'userFullRead',
-      auth: true,
-      parser: (data) => UserFullResponse.fromJson(data as Map<String, dynamic>),
     );
   }
 
@@ -50,24 +49,23 @@ class UserApiService {
   /// At least one parameter must be provided
   /// Returns success message on completion
   /// Requires authentication
-  Future<ApiResponse<void>> userUpdate({String? name, String? gymId}) async {
+  Future<ApiResult<void>> userUpdate({String? name, String? gymId}) async {
     final request = UserUpdateRequest(name: name, gymId: gymId);
 
     // Validate that at least one parameter is provided
     final validity = request.isValid();
     if (validity != "Success") {
-      return ApiResponse.failure(
-        status: 400,
-        error: 'Validation error',
-        message: validity,
+      return ApiResult.error(
+        AppError(status: 400, error: 'Validation error', message: validity),
       );
     }
 
-    return await _api.put<UserUpdateRequest, void>(
+    final response = await _api.put<UserUpdateRequest, void>(
       'userUpdate',
       body: request,
       auth: true,
     );
+    return response;
   }
 
   /// Delete user account
@@ -75,29 +73,29 @@ class UserApiService {
   /// Permanently deletes the user account
   /// Returns success message on completion
   /// Requires authentication
-  Future<ApiResponse<void>> userDelete() async {
+  Future<ApiResult<void>> userDelete() async {
     return await _api.delete<void, void>('userDelete', auth: true);
   }
 
   // Convenience methods for easier usage
 
   /// Update only the user's name
-  Future<ApiResponse<void>> updateName(String name) async {
+  Future<ApiResult<void>> updateName(String name) async {
     return await userUpdate(name: name);
   }
 
   /// Update only the user's gym ID
-  Future<ApiResponse<void>> updateGymId(String gymId) async {
+  Future<ApiResult<void>> updateGymId(String gymId) async {
     return await userUpdate(gymId: gymId);
   }
 
   /// Update both name and gym ID
-  Future<ApiResponse<void>> updateNameAndGym(String name, String gymId) async {
+  Future<ApiResult<void>> updateNameAndGym(String name, String gymId) async {
     return await userUpdate(name: name, gymId: gymId);
   }
 
   /// Clear the user's gym association
-  Future<ApiResponse<void>> clearGym() async {
+  Future<ApiResult<void>> clearGym() async {
     return await userUpdate(gymId: '');
   }
 }

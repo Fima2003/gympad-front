@@ -345,36 +345,39 @@ class WorkoutService {
       );
 
       final response = await _workoutApiService.logNewWorkout(request);
-      if (updateExercises &&
-          workout.workoutType == WorkoutType.personal &&
-          response.success &&
-          response.data != null &&
-          response.data!.nextWorkoutExercises != null &&
-          workoutToFollowId != null) {
-        final exercises = response.data!.nextWorkoutExercises!;
-        await _personalLocal.update(
-          key: workoutToFollowId,
-          copyWithFn: (c) {
-            final newExercises = exercises.map((e) => e.toDomain()).toList();
-            return c.copyWith(exercises: newExercises);
-          },
-        );
-        // await _personalLocal.updateExercises(
-        //   workoutToFollowId,
-        //   exercises.map((e) => e.toDomain()).toList(),
-        // );
-      }
-      _logger.info(response.success.toString());
+      await response.fold(
+        onError: (error) async {
+          if (error.status == 409) {
+            // Mark as uploaded in history (conflict means it was already saved)
+            await _markWorkoutAsUploaded(workout.id);
+            _logger.info('Successfully uploaded workout ${workout.id}');
+          } else {
+            _logger.warning(
+              'Workout upload failed ${workout.id}: status=${error.status}, error=${error.error}, message=${error.message}',
+            );
+          }
+        },
+        onSuccess: (data) async {
+          // Mark as uploaded in history
+          await _markWorkoutAsUploaded(workout.id);
+          _logger.info('Successfully uploaded workout ${workout.id}');
 
-      if (response.success || response.status == 409) {
-        // Mark as uploaded in history
-        await _markWorkoutAsUploaded(workout.id);
-        _logger.info('Successfully uploaded workout ${workout.id}');
-      } else {
-        _logger.warning(
-          'Workout upload failed ${workout.id}: status=${response.status}, error=${response.error}, message=${response.message}',
-        );
-      }
+          if (updateExercises &&
+              workout.workoutType == WorkoutType.personal &&
+              data.nextWorkoutExercises != null &&
+              workoutToFollowId != null) {
+            final exercises = data.nextWorkoutExercises!;
+            await _personalLocal.update(
+              key: workoutToFollowId,
+              copyWithFn: (c) {
+                final newExercises =
+                    exercises.map((e) => e.toDomain()).toList();
+                return c.copyWith(exercises: newExercises);
+              },
+            );
+          }
+        },
+      );
     } catch (e, st) {
       _logger.warning('Failed to upload workout ${workout.id}', e, st);
     }
@@ -468,19 +471,24 @@ class WorkoutService {
       return cached;
     }
     final resp = await _workoutApiService.getPersonalWorkouts();
-    if (resp.success && resp.data != null) {
-      final list = resp.data!;
-      await _personalLocal.saveMany(list);
-      return list;
-    } else {
-      final cached = await _personalLocal.getAll();
-      return cached;
-    }
+    return resp.fold(
+      onError: (_) async {
+        _logger.warning(
+          'Failed to fetch personal workouts from API, using cache',
+        );
+        final cached = await _personalLocal.getAll();
+        return cached;
+      },
+      onSuccess: (list) async {
+        await _personalLocal.saveMany(list);
+        return list;
+      },
+    );
   }
 
   Future<bool> savePersonalWorkout(CreatePersonalWorkoutRequest req) async {
     final resp = await WorkoutApiService().createPersonalWorkout(req);
-    return resp.success;
+    return resp.fold(onError: (_) => false, onSuccess: (_) => true);
   }
 
   Future<void> clearAll() async {

@@ -126,16 +126,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       // height: 56,
                       margin: const EdgeInsets.symmetric(horizontal: 20),
-                      child: 
-                      GymPadButton(
+                      child: GymPadButton(
                         label: 'Sign In with Google',
                         icon: Icons.login,
                         onPressed: _signInWithGoogle,
                         customTextStyle: AppTextStyles.button.copyWith(
-                            color: AppColors.accent,
-                            fontSize: 18,
-                          ),
-                      )
+                          color: AppColors.accent,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(
