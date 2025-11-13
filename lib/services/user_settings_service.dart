@@ -10,7 +10,7 @@ import 'hive/user_settings_lss.dart';
 import 'logger_service.dart';
 
 class UserSettingsService {
-  // add capabilities
+  //todo add capabilities
   final UserSettingsApiService _userSettingsApiService =
       UserSettingsApiService();
   final UserSettingsLss _userSettingsLss = UserSettingsLss();
@@ -28,42 +28,52 @@ class UserSettingsService {
   Stream<UserSettings> get userSettingsStream => _userSettingsController.stream;
 
   /// Initialize settings by loading from cache and syncing with API.
-  /// Emits settings to the stream as they become available.
+  ///
+  /// Flow:
+  /// 1. Immediately emit cached settings from local storage
+  /// 2. Fetch fresh settings from API in the background (non-blocking)
+  /// 3. If API returns new data (not error, not 304), update local storage and emit
+  /// 4. Otherwise, keep using local cache silently
   Future<void> initializeUserSettings() async {
     try {
-      // Load cached settings immediately and emit to stream
+      // Step 1: Load and emit cached settings immediately
       final cachedSettings = await _userSettingsLss.get();
       if (cachedSettings != null) {
         _userSettingsController.add(cachedSettings);
         _logger.info('Emitted cached user settings to stream');
       }
 
-      // Fetch fresh settings from API in the background
+      // Step 2: Sync fresh settings from API in the background (non-blocking)
       unawaited(_syncSettingsFromApi(cachedSettings?.etag));
     } catch (e) {
       _logger.severe('Error in initializeUserSettings: $e');
     }
   }
 
-  /// Sync settings from API and emit updates to stream.
+  /// Sync settings from API in the background.
+  ///
+  /// Only updates local storage and emits if API returns fresh data.
+  /// Silently keeps local cache if API returns 304 or errors.
   Future<void> _syncSettingsFromApi(String? etag) async {
     try {
-      print(etag);
       final result = await _userSettingsApiService.getSettings(etag: etag);
       await result.fold(
         onError: (error) async {
           if (error.status == 304) {
+            // Not modified - keep using cached data
             _logger.info(
               'User settings not modified (304), keeping local cache',
             );
           } else {
+            // API error - keep using cached data, just log the issue
             _logger.warning('Failed to sync user settings from API: $error');
           }
         },
         onSuccess: (data) async {
-          _logger.info('Received new user settings from API, updating stream');
-          await _userSettingsLss.save(data);
-          _userSettingsController.add(data);
+          // Fresh data from API - update local storage and emit
+          _logger.info('Received new user settings from API, updating cache');
+          await _userSettingsLss.save(data.copyWith(etag: result.etag));
+          _userSettingsController.add(data.copyWith(etag: result.etag));
         },
       );
     } catch (e) {
@@ -105,9 +115,11 @@ class UserSettingsService {
       },
       onSuccess: (data) async {
         _logger.info('User settings successfully updated on API');
-        await _userSettingsLss.update(
-          copyWithFn: (current) => current.copyWith(etag: data.etag),
-        );
+        if (result.etag != null) {
+          await _userSettingsLss.update(
+            copyWithFn: (current) => current.copyWith(etag: result.etag),
+          );
+        }
       },
     );
   }

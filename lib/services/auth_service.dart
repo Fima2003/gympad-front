@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../models/withAdapters/user.dart';
 import 'logger_service.dart';
@@ -25,12 +26,19 @@ class AuthService {
 
   final _userAuthStorage = UserAuthLocalStorageService();
 
+  // BehaviorSubject to emit user data updates to listeners (e.g., AuthBloc)
+  late final BehaviorSubject<User?> _userController;
+
   // --- Initialization control ---
   bool _initialized = false;
   Completer<void>? _initCompleter;
 
   /// Indicates whether [initialize] has completed successfully at least once.
   bool get isInitialized => _initialized;
+
+  /// Stream of user data updates.
+  /// Emits cached user immediately to new subscribers, then any future updates.
+  Stream<User?> get userStream => _userController.stream;
 
   /// One-time async initializer for the singleton.
   ///
@@ -54,6 +62,9 @@ class AuthService {
 
     _logger.config('initialize() start');
     try {
+      // Initialize user stream controller
+      _userController = BehaviorSubject<User?>();
+
       _initialized = true;
       _logger.info('initialize() complete');
     } catch (e, st) {
@@ -81,7 +92,7 @@ class AuthService {
     await _userAuthStorage.save(User());
   }
 
-  /// Save user data locally
+  /// Save user data locally and emit to stream
   Future<void> saveLocalUserData({
     String? userId,
     String? gymId,
@@ -107,6 +118,12 @@ class AuthService {
     if (completedQuestionnaire != null) {
       await _questionnaireService.markCompleted(completedQuestionnaire);
     }
+
+    // Emit updated user to stream
+    final updatedUser = await _userAuthStorage.get();
+    if (updatedUser != null && _userController.isClosed == false) {
+      _userController.add(updatedUser);
+    }
   }
 
   Future<void> markGuestSelected(String deviceId) async {
@@ -117,10 +134,16 @@ class AuthService {
   }
 
   /// Clear local user data
+  /// Clear local user data and emit null to stream
   Future<void> clearLocalUserData() async {
     await _userAuthStorage.clear();
     await _questionnaireService.clear();
     await _workoutService.clearAll();
+
+    // Emit null to stream to signal logout
+    if (!_userController.isClosed) {
+      _userController.add(null);
+    }
   }
 
   /// Sign in with Google and register/login with backend
@@ -212,71 +235,115 @@ class AuthService {
   /// Check if user is signed in
   bool get isSignedIn => _auth.currentUser != null;
 
-  /// Fetch current user info from backend; if token expired, refresh and retry once
+  /// Fetch current user info from backend.
+  ///
+  /// Flow:
+  /// 1. Immediately load and use cached user data from local storage
+  /// 2. Attempt to fetch fresh data from API in the background (non-blocking)
+  /// 3. If API returns new data (not error, not 304), update local storage
+  /// 4. Otherwise, keep using local cache silently
+  ///
+  /// Handles token refresh on 401/403 (once).
   Future<bool> fetchUserOnAppStartWithRetry() async {
     try {
       if (!isSignedIn) return false;
 
+      // Step 1: Load cached user from storage and emit to stream
       final cachedUser = await _userAuthStorage.get();
-      final cachedEtag = cachedUser?.etag;
+      _logger.info('Loaded cached user data from storage');
+      if (cachedUser != null && _userController.isClosed == false) {
+        _userController.add(cachedUser);
+      }
 
-      final res = await _userApiService.userPartialRead(etag: cachedEtag);
+      // Step 2: Attempt to sync fresh data from API in the background
+      unawaited(_syncUserFromApi(cachedUser?.etag));
 
-      // Pattern match using fold to handle ApiResult
-      return res.fold(
+      return true;
+    } catch (e, st) {
+      _logger.severe('fetchUserOnAppStartWithRetry error', e, st);
+      return false;
+    }
+  }
+
+  /// Sync user data from API in the background.
+  ///
+  /// Only updates local storage if API returns fresh data (not 304, not error).
+  /// Handles 401/403 with single token refresh retry.
+  /// Silently keeps local cache for all other scenarios.
+  Future<void> _syncUserFromApi(String? etag) async {
+    try {
+      final res = await _userApiService.userPartialRead(etag: etag);
+
+      await res.fold(
         onError: (appError) async {
-          // If 304 NOT MODIFIED, use cached data and update etag
+          // If 304 NOT MODIFIED, use cached data and keep going
           if (appError.status == 304) {
-            _logger.info(
-              'fetchUserOnAppStartWithRetry: Using cached data (304 Not Modified)',
-            );
-            return true;
+            _logger.info('User data not modified (304), keeping local cache');
+            return;
           }
 
-          // If unauthorized/forbidden, refresh and retry once
+          // If unauthorized/forbidden, refresh token once and retry
           if (appError.status == 401 || appError.status == 403) {
             _logger.info(
-              'Token likely expired. Refreshing and retrying userPartialRead.',
+              'Token likely expired. Refreshing and retrying user fetch.',
             );
             final user = _auth.currentUser;
-            if (user == null) return false;
-            final fresh = await user.getIdToken(true);
-            if (fresh == null) return false;
-            await _userAuthStorage.update(
-              copyWithFn: (u) => u.copyWith(authToken: fresh),
-            );
+            if (user == null) {
+              _logger.warning('Cannot refresh: no authenticated user');
+              return;
+            }
 
-            final retry = await _userApiService.userPartialRead(
-              etag: cachedEtag,
+            final freshToken = await user.getIdToken(true);
+            if (freshToken == null) {
+              _logger.warning('Failed to refresh token');
+              return;
+            }
+
+            // Update stored token
+            await _userAuthStorage.update(
+              copyWithFn: (u) => u.copyWith(authToken: freshToken),
             );
-            return retry.fold(
+            _logger.info('Token refreshed, retrying user fetch');
+
+            // Retry once with new token
+            final retry = await _userApiService.userPartialRead(etag: etag);
+            await retry.fold(
               onError: (retryError) async {
                 _logger.warning(
-                  'fetchUserOnAppStartWithRetry retry failed: status=${retryError.status}, error=${retryError.error}, message=${retryError.message}',
+                  'User sync retry failed after token refresh: '
+                  'status=${retryError.status}, error=${retryError.error}, '
+                  'message=${retryError.message}',
                 );
-                return false;
               },
               onSuccess: (userData) async {
-                // Successfully got data after token refresh
+                // Successfully got data after token refresh - update local storage
+                _logger.info(
+                  'User data fetched after token refresh, updating cache',
+                );
                 await saveLocalUserData(
                   userId: user.uid,
                   gymId: userData.gymId,
-                  idToken: fresh,
+                  idToken: freshToken,
                   level: userData.level,
+                  goal: userData.goal,
                   completedQuestionnaire: userData.completedQuestionnaire,
+                  etag: retry.etag,
                 );
-                return true;
               },
             );
+            return;
           }
 
+          // All other errors - keep cached data silently
           _logger.warning(
-            'fetchUserOnAppStartWithRetry failed: status=${appError.status}, error=${appError.error}, message=${appError.message}',
+            'User sync failed: status=${appError.status}, '
+            'error=${appError.error}, message=${appError.message}. '
+            'Keeping local cache.',
           );
-          return false;
         },
         onSuccess: (userData) async {
-          // Successfully got user data
+          // Fresh data from API - update local storage
+          _logger.info('Fresh user data fetched from API, updating cache');
           final user = _auth.currentUser;
           if (user != null) {
             final token = await user.getIdToken();
@@ -287,15 +354,20 @@ class AuthService {
               level: userData.level,
               goal: userData.goal,
               completedQuestionnaire: userData.completedQuestionnaire,
-              etag: userData.etag,
+              etag: res.etag,
             );
           }
-          return true;
         },
       );
     } catch (e, st) {
-      _logger.severe('fetchUserOnAppStartWithRetry error', e, st);
-      return false;
+      _logger.severe('Error syncing user from API: $e', e, st);
+    }
+  }
+
+  /// Cleanup resources when service is no longer needed.
+  void dispose() {
+    if (!_userController.isClosed) {
+      _userController.close();
     }
   }
 }

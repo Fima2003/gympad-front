@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/custom_workout.dart';
-import '../../models/equipment.dart';
 import '../../models/withAdapters/exercise.dart';
 import '../../services/data_service.dart';
 import '../../services/logger_service.dart';
@@ -31,7 +30,6 @@ class DataBloc extends Bloc<DataEvent, DataState> {
       emit(
         DataReady(
           exercises: _dataService.exercisesMap,
-          equipment: _dataService.equipmentMap,
           customWorkouts: _dataService.customWorkoutsMap,
         ),
       );
@@ -51,7 +49,6 @@ class DataBloc extends Bloc<DataEvent, DataState> {
       emit(
         DataReady(
           exercises: _dataService.exercisesMap,
-          equipment: _dataService.equipmentMap,
           customWorkouts: _dataService.customWorkoutsMap,
         ),
       );

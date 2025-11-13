@@ -4,13 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/workout_exercise.dart';
 import '../../models/workout_set.dart';
 import '../../services/api/models/personal_workout.model.dart';
-import '../../services/workout_service.dart';
+import '../../services/personal_workout_service.dart';
 
 part 'save_workout_events.dart';
 part 'save_workout_state.dart';
 
 class SaveWorkoutBloc extends Bloc<SaveWorkoutEvent, SaveWorkoutState> {
-  final WorkoutService _workoutService = WorkoutService();
+  final PersonalWorkoutService _personalWorkoutService =
+      PersonalWorkoutService();
   String name = '';
   String description = '';
   List<WorkoutExercise> exercises = [];
@@ -214,7 +215,7 @@ class SaveWorkoutBloc extends Bloc<SaveWorkoutEvent, SaveWorkoutState> {
       description: description,
       exercises: exercisesDto,
     );
-    final resp = await _workoutService.savePersonalWorkout(req);
+    final resp = await _personalWorkoutService.savePersonalWorkout(req);
     emit(SaveWorkoutSuccess(resp));
   }
 

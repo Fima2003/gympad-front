@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:gympad/models/personal_workout.dart';
 import 'package:gympad/services/hive/personal_workout_lss.dart';
 
 import '../models/custom_workout.dart';
@@ -10,7 +9,6 @@ import '../models/workout_set.dart';
 import '../services/api/api.dart';
 import '../services/logger_service.dart';
 import '../models/capabilities.dart';
-import 'api/models/personal_workout.model.dart';
 import 'hive/current_workout_lss.dart';
 import 'hive/workout_history_lss.dart';
 import 'hive/workout_to_follow_lss.dart';
@@ -333,16 +331,12 @@ class WorkoutService {
       final startTimeUtc = workout.startTime.toUtc();
       final endTimeUtc = (workout.endTime ?? DateTime.now()).toUtc();
 
-      _logger.info("StartTime:");
-      _logger.info(startTimeUtc.toString());
-      _logger.info("EndTime:");
-      _logger.info(endTimeUtc.toString());
-
       // Build DTO request from domain model
       final request = WorkoutCreateRequest.fromWorkoutAndWorkoutToFollowId(
         workout.copyWith(startTime: startTimeUtc, endTime: endTimeUtc),
         workoutToFollowId,
       );
+      print("Request to Log New Workout: $request");
 
       final response = await _workoutApiService.logNewWorkout(request);
       await response.fold(
@@ -461,34 +455,6 @@ class WorkoutService {
       exercises: [...before, ...reordered],
     );
     unawaited(_saveWorkoutToFollow());
-  }
-
-  Future<List<PersonalWorkout>> getPersonalWorkouts() async {
-    final caps = _capabilitiesProvider();
-    if (!caps.canSync) {
-      _logger.info('Skipping fetching personal workouts (guest mode)');
-      final cached = await _personalLocal.getAll();
-      return cached;
-    }
-    final resp = await _workoutApiService.getPersonalWorkouts();
-    return resp.fold(
-      onError: (_) async {
-        _logger.warning(
-          'Failed to fetch personal workouts from API, using cache',
-        );
-        final cached = await _personalLocal.getAll();
-        return cached;
-      },
-      onSuccess: (list) async {
-        await _personalLocal.saveMany(list);
-        return list;
-      },
-    );
-  }
-
-  Future<bool> savePersonalWorkout(CreatePersonalWorkoutRequest req) async {
-    final resp = await WorkoutApiService().createPersonalWorkout(req);
-    return resp.fold(onError: (_) => false, onSuccess: (_) => true);
   }
 
   Future<void> clearAll() async {

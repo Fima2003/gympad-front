@@ -31,11 +31,9 @@ class UserSettingsBloc extends Bloc<UserSettingsEvent, UserSettingsState> {
       await emit.forEach<UserSettings>(
         _userSettingsService.userSettingsStream,
         onData: (settings) {
-          print(settings);
           return UserSettingsLoaded(weightUnit: settings.weightUnit);
         },
         onError: (error, stackTrace) {
-          print(error);
           return UserSettingsError(error: error.toString());
         },
       );
@@ -68,7 +66,6 @@ class UserSettingsBloc extends Bloc<UserSettingsEvent, UserSettingsState> {
       weightUnit: stateToSubmit.weightUnit,
     );
     await _userSettingsService.updateUserSettings(updateSettings);
-    // No need to emit here - the stream will emit the updated value
   }
 
   @override

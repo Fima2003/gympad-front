@@ -3,7 +3,7 @@ import 'lss.dart';
 
 /// Local storage service for Exercise domain models.
 class ExerciseLss extends LSS<Exercise, Exercise> {
-  ExerciseLss() : super('exercises');
+  ExerciseLss() : super('exercises', withEtag: true);
 
   @override
   Exercise fromDomain(Exercise domain) => domain;

@@ -25,7 +25,7 @@ class UserSettingsApiService {
         etag: etag,
       );
 
-  Future<ApiResult<UpdateUserSettingsResponse>> updateUserSettings(
+  Future<ApiResult<void>> updateUserSettings(
     UpdateUserSettingsRequest body, {
     String? etag,
   }) async => await _api.put(
@@ -33,8 +33,5 @@ class UserSettingsApiService {
     auth: true,
     body: body.toJson(),
     etag: etag,
-    parser:
-        (data) =>
-            UpdateUserSettingsResponse.fromJson(data),
   );
 }

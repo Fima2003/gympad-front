@@ -16,16 +16,11 @@ class DataLoading extends DataState {
 
 class DataReady extends DataState {
   final Map<String, Exercise> exercises;
-  final Map<String, Equipment> equipment;
   final Map<String, CustomWorkout> customWorkouts;
-  const DataReady({
-    required this.exercises,
-    required this.equipment,
-    required this.customWorkouts,
-  });
+  const DataReady({required this.exercises, required this.customWorkouts});
 
   @override
-  List<Object?> get props => [exercises, equipment, customWorkouts];
+  List<Object?> get props => [exercises, customWorkouts];
 }
 
 class DataError extends DataState {

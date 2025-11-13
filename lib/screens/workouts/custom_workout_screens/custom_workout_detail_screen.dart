@@ -8,10 +8,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../utils/get_weight.dart';
 
-class PredefinedWorkoutDetailScreen extends StatelessWidget {
+class CustomWorkoutDetailScreen extends StatelessWidget {
   final CustomWorkout workout;
 
-  const PredefinedWorkoutDetailScreen({super.key, required this.workout});
+  const CustomWorkoutDetailScreen({super.key, required this.workout});
 
   Color _getDifficultyColor(String difficulty) {
     switch (difficulty.toLowerCase()) {

@@ -11,12 +11,3 @@ class UpdateUserSettingsRequest {
     return body;
   }
 }
-
-class UpdateUserSettingsResponse {
-  final String etag;
-
-  UpdateUserSettingsResponse({required this.etag});
-
-  factory UpdateUserSettingsResponse.fromJson(Map<String, dynamic> json) =>
-      UpdateUserSettingsResponse(etag: json['etag'] as String);
-}

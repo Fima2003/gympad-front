@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../blocs/auth/auth_bloc.dart';
-import '../blocs/personal_workouts/personal_workout_bloc.dart';
 import '../constants/app_styles.dart';
 import 'me/me.dart';
 import 'workouts/workout_page.dart';
@@ -22,9 +21,6 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PersonalWorkoutBloc>().add(RequestSync());
-    });
   }
 
   BottomNavigationBar _buildBottomNav() => BottomNavigationBar(

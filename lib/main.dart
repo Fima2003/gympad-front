@@ -9,36 +9,31 @@ import 'package:go_router/go_router.dart';
 import 'blocs/analytics/analytics_bloc.dart';
 import 'blocs/personal_workouts/personal_workout_bloc.dart';
 import 'blocs/user_settings/user_settings_bloc.dart';
+import 'blocs/auth/auth_bloc.dart';
+import 'blocs/audio/audio_bloc.dart';
+import 'blocs/data/data_bloc.dart';
+import 'blocs/workout/workout_bloc.dart';
+import 'constants/app_styles.dart';
 import 'firebase_options.dart';
+import 'models/workout.dart';
 import 'models/custom_workout.dart';
 import 'models/personal_workout.dart';
 import 'models/workout_exercise.dart';
+import 'models/capabilities.dart';
 import 'screens/intro/intro_screen.dart';
 import 'screens/settings/settings.dart';
 import 'screens/splash.dart';
-import 'screens/workouts/free_workout_screens/save_workout/save_workout_screen.dart';
-import 'screens/workouts/well_done_workout_screen.dart';
-import 'screens/workouts/custom_workout_screens/custom_workout_detail_screen.dart';
-import 'screens/workouts/custom_workout_screens/cworkout_run/cworkout_run_screen.dart';
-import 'screens/workouts/custom_workout_screens/prepare_to_start_workout_screen.dart';
-import 'screens/workouts/free_workout_screens/free_workout_run/free_workout_run_screen.dart';
-import 'screens/workouts/personal_workout_screens/personal_workout_detail_screen.dart';
+import 'screens/workouts/workouts.dart';
+import 'screens/login_screen.dart';
+import 'screens/main_screen.dart';
+import 'screens/questionnaire/questionnaire_screen.dart';
 import 'services/api/api_service.dart';
 import 'services/auth_service.dart';
 import 'services/hive/hive_initializer.dart';
 import 'services/logger_service.dart';
-import 'constants/app_styles.dart';
-import 'blocs/data/data_bloc.dart';
-import 'blocs/workout/workout_bloc.dart';
-import 'models/capabilities.dart';
+import 'services/personal_workout_service.dart';
 import 'services/workout_service.dart';
 import 'services/migration/migrate_guest_workouts_usecase.dart';
-import 'blocs/auth/auth_bloc.dart';
-import 'blocs/audio/audio_bloc.dart';
-import 'screens/login_screen.dart';
-import 'screens/main_screen.dart';
-import 'models/workout.dart';
-import 'screens/questionnaire/questionnaire_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -136,7 +131,7 @@ class _MyAppState extends State<MyApp> {
                         ),
                       );
                     }
-                    return PredefinedWorkoutDetailScreen(workout: workout);
+                    return CustomWorkoutDetailScreen(workout: workout);
                   },
                 ),
               ],
@@ -239,7 +234,19 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<AnalyticsBloc>(create: (context) => AnalyticsBloc()),
         BlocProvider<AudioBloc>(create: (context) => AudioBloc()),
         BlocProvider<PersonalWorkoutBloc>(
-          create: (context) => PersonalWorkoutBloc(),
+          create: (context) {
+            final bloc = PersonalWorkoutBloc();
+            PersonalWorkoutService().configureCapabilitiesProvider(() {
+              final authState = context.read<AuthBloc>().state;
+              if (authState is AuthAuthenticated) {
+                return Capabilities.authenticated;
+              }
+              if (authState is AuthGuest) return Capabilities.guest;
+              return Capabilities.guest;
+            });
+            bloc.add(RequestSync());
+            return bloc;
+          },
         ),
       ],
       child: BlocListener<AuthBloc, AuthState>(

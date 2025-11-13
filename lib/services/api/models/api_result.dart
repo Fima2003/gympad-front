@@ -9,9 +9,10 @@ import 'app_error.dart';
 /// - Convenience methods (fold, map, getOrElse, etc.)
 /// - Clear isSuccess/isError predicates
 /// - Easy error inspection (status, message)
+/// - Optional ETag field for caching support (separate from data)
 abstract class ApiResult<T> {
   /// Create a successful result with data
-  factory ApiResult.success(T data) = _Success<T>;
+  factory ApiResult.success(T data, {String? etag}) = _Success<T>;
 
   /// Create an error result
   factory ApiResult.error(AppError error) = _Error<T>;
@@ -23,6 +24,9 @@ abstract class ApiResult<T> {
       ifRight: (data) => _Success<T>(data),
     );
   }
+
+  /// Get the ETag value if present
+  String? get etag;
 
   /// Pattern match: apply different functions based on success or error
   /// Returns the result of whichever function is called
@@ -80,11 +84,13 @@ abstract class ApiResult<T> {
   bool get is304NotModified;
 }
 
-/// Success case: contains the data
+/// Success case: contains the data and optional ETag
 class _Success<T> implements ApiResult<T> {
   final T data;
+  @override
+  final String? etag;
 
-  _Success(this.data);
+  _Success(this.data, {this.etag});
 
   @override
   R fold<R>({
@@ -105,7 +111,7 @@ class _Success<T> implements ApiResult<T> {
   @override
   ApiResult<R> map<R>(R Function(T data) transform) {
     try {
-      return ApiResult.success(transform(data));
+      return ApiResult.success(transform(data), etag: etag);
     } catch (e) {
       return ApiResult.error(
         AppError(status: 500, error: 'Transform error', message: e.toString()),
@@ -117,7 +123,7 @@ class _Success<T> implements ApiResult<T> {
   Future<ApiResult<R>> mapAsync<R>(Future<R> Function(T data) transform) async {
     try {
       final result = await transform(data);
-      return ApiResult.success(result);
+      return ApiResult.success(result, etag: etag);
     } catch (e) {
       return ApiResult.error(
         AppError(
@@ -177,7 +183,7 @@ class _Success<T> implements ApiResult<T> {
   bool get is304NotModified => false;
 
   @override
-  String toString() => 'ApiResult.success($data)';
+  String toString() => 'ApiResult.success($data, etag: $etag)';
 }
 
 /// Error case: contains the AppError
@@ -185,6 +191,9 @@ class _Error<T> implements ApiResult<T> {
   final AppError error;
 
   _Error(this.error);
+
+  @override
+  String? get etag => null; // Errors don't have ETags
 
   @override
   R fold<R>({

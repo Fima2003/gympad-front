@@ -208,6 +208,11 @@ class WorkoutCreateRequest {
       endTime: workout.endTime ?? DateTime.now(),
     );
   }
+
+  @override
+  String toString() {
+    return 'WorkoutCreateRequest{id: $id, name: $name, workoutToFollowId: $workoutToFollowId, workoutType: $workoutType, exercises: $exercises, startTime: $startTime, endTime: $endTime}';
+  }
 }
 
 class WorkoutCreateResponse {

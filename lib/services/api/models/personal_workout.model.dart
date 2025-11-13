@@ -35,7 +35,8 @@ class PersonalWorkoutResponse extends CreatePersonalWorkoutRequest {
     ).toJson();
   }
 
-  PersonalWorkout toDomain() => PersonalWorkout(
+  @override
+  PersonalWorkout toDomain(String _) => PersonalWorkout(
     workoutId: workoutId,
     name: name,
     description: description,
@@ -74,6 +75,13 @@ class CreatePersonalWorkoutRequest {
               .toList(),
     );
   }
+
+  PersonalWorkout toDomain(String workoutId) => PersonalWorkout(
+    workoutId: workoutId,
+    name: name,
+    exercises: exercises.map((e) => e.toDomain()).toList(),
+    description: description,
+  );
 }
 
 class PersonalWorkoutExerciseDto {

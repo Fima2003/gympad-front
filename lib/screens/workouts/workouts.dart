@@ -1,3 +1,10 @@
 export './personal_workout_screens/personal_workouts_screen.dart';
+export './personal_workout_screens/personal_workout_detail_screen.dart';
 export './custom_workout_screens/custom_workouts_screen.dart';
+export './custom_workout_screens/custom_workout_detail_screen.dart';
+export './custom_workout_screens/cworkout_run/cworkout_run_screen.dart';
 export './free_workout_screens/free_workout_screen.dart';
+export './free_workout_screens/free_workout_run/free_workout_run_screen.dart';
+export './free_workout_screens/save_workout/save_workout_screen.dart';
+export './well_done_workout_screen.dart';
+export './custom_workout_screens/prepare_to_start_workout_screen.dart';

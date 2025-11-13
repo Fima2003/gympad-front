@@ -409,15 +409,12 @@ class ApiService implements IApiService {
       if (responseData is Map<String, dynamic>) {
         final success = responseData['success'] as bool? ?? false;
         if (success) {
-          final data = responseData['data'] ?? <String, dynamic>{};
-          if (etag != null) {
-            data['etag'] = etag;
-          }
+          final data = responseData['data'];
 
           if (data != null && parser != null) {
             try {
               final parsedData = parser(data);
-              return ApiResult.success(parsedData);
+              return ApiResult.success(parsedData, etag: etag);
             } catch (e, st) {
               _logError('Failed to parse response data: $st', e);
               return ApiResult.error(
@@ -430,7 +427,7 @@ class ApiService implements IApiService {
               );
             }
           } else {
-            return ApiResult.success(data as K);
+            return ApiResult.success(data as K, etag: etag);
           }
         } else {
           // Server returned success: false

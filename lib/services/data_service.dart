@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 import '../models/custom_workout.dart';
 import '../models/withAdapters/exercise.dart';
-import '../models/equipment.dart';
 import 'api/api.dart';
 import 'hive/custom_workout_lss.dart';
 import 'hive/exercise_lss.dart';
@@ -16,7 +15,6 @@ class DataService {
   final _logger = AppLogger().createLogger('DataService');
 
   Map<String, Exercise>? _exercises;
-  Map<String, Equipment>? _equipment;
   Map<String, CustomWorkout>? _customWorkouts;
   final CustomWorkoutApiService _customWorkoutApiService =
       CustomWorkoutApiService();
@@ -28,22 +26,22 @@ class DataService {
 
   // Read-only access for BLoC
   Map<String, Exercise> get exercisesMap => _exercises ?? const {};
-  Map<String, Equipment> get equipmentMap => _equipment ?? const {};
   Map<String, CustomWorkout> get customWorkoutsMap =>
       _customWorkouts ?? const {};
 
   Future<void> forceReload() async {
     _exercises = null;
-    _equipment = null;
     _customWorkouts = null;
     await loadData();
   }
 
   Future<void> loadData() async {
+    String etag = await _exerciseLssService.getEtag() ?? '';
     if (_exercises == null) {
       await _loadExercises(
         await _userAuthStorage.get().then((user) => user?.goal) ??
             "generalFitness",
+        etag,
       );
     }
     if (_customWorkouts == null) {
@@ -51,8 +49,8 @@ class DataService {
     }
   }
 
-  Future<void> _loadExercises(String goal) async {
-    final response = await _exerciseApiService.getExercises(goal);
+  Future<void> _loadExercises(String goal, String etag) async {
+    final response = await _exerciseApiService.getExercisesFor(goal, etag);
 
     return response.fold(
       onError: (error) {
@@ -75,6 +73,7 @@ class DataService {
       },
       onSuccess: (data) {
         _exerciseLssService.saveMany(data);
+        _exerciseLssService.setEtag(response.etag);
 
         _exercises = {};
         for (final exercise in data) {

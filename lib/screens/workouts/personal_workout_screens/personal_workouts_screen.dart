@@ -18,7 +18,6 @@ class _PersonalWorkoutsScreenState extends State<PersonalWorkoutsScreen> {
   void initState() {
     super.initState();
     // Request workouts via BLoC on screen initialization
-    context.read<PersonalWorkoutBloc>().add(RequestSync());
   }
 
   // TODO: weird inference of muscle group here; either move to model but also it returns just one mg???

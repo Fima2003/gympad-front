@@ -9,6 +9,11 @@ import 'hive_initializer.dart';
 /// - [T]: The domain model type (e.g., Exercise, CustomWorkout)
 /// - [H]: The Hive adapter type (e.g., HiveExercise, HiveCustomWorkout)
 ///
+/// Supports optional ETag tracking:
+/// - If [withEtag] is true, stores a collection-level ETag at key `_etag`
+/// - Useful for collections where you track the whole group version, not individual items
+/// - Example: Exercises collection has one ETag for the entire list, not per-exercise
+///
 /// Subclasses must:
 /// 1. Provide [boxName] via constructor
 /// 2. Implement [fromDomain] to convert domain model to Hive model
@@ -29,13 +34,29 @@ import 'hive_initializer.dart';
 ///   @override
 ///   String getKey(Exercise domain) => domain.id;
 /// }
+///
+/// class ExerciseLss extends LSS<Exercise, HiveExercise> {
+///   ExerciseLss() : super('exercises', withEtag: true);
+///
+///   @override
+///   HiveExercise fromDomain(Exercise domain) => HiveExercise.fromDomain(domain);
+///
+///   @override
+///   Exercise toDomain(HiveExercise hive) => hive.toDomain();
+///
+///   @override
+///   String getKey(Exercise domain) => domain.id;
+/// }
 /// ```
 abstract class LSS<T, H> {
   final String boxName;
   final String? defaultKey;
   late final Logger _logger;
+  final bool withEtag;
 
-  LSS(this.boxName, {this.defaultKey}) {
+  static const String _etagKey = '_etag';
+
+  LSS(this.boxName, {this.defaultKey, this.withEtag = false}) {
     _logger = AppLogger().createLogger('LSS<$boxName>');
   }
 
@@ -45,6 +66,16 @@ abstract class LSS<T, H> {
     return Hive.isBoxOpen(boxName)
         ? Hive.box<H>(boxName)
         : await Hive.openBox<H>(boxName);
+  }
+
+  /// Opens the metadata box for storing collection-level info (ETag, etc).
+  /// This is separate from the data box to avoid type conflicts.
+  Future<Box<dynamic>> _metadataBox() async {
+    await HiveInitializer.init();
+    final metadataBoxName = '${boxName}_metadata';
+    return Hive.isBoxOpen(metadataBoxName)
+        ? Hive.box<dynamic>(metadataBoxName)
+        : await Hive.openBox<dynamic>(metadataBoxName);
   }
 
   /// Convert domain model to Hive model. Must be implemented by subclass.
@@ -158,6 +189,13 @@ abstract class LSS<T, H> {
     try {
       final box = await _box();
       await box.clear();
+
+      // Also clear metadata if ETag tracking is enabled
+      if (withEtag) {
+        final metadataBox = await _metadataBox();
+        await metadataBox.clear();
+      }
+
       _logger.fine('Cleared all items from box');
     } catch (e, st) {
       _logger.severe('clear failed', e, st);
@@ -216,6 +254,39 @@ abstract class LSS<T, H> {
     } catch (e, st) {
       _logger.severe('count failed', e, st);
       return 0;
+    }
+  }
+
+  /// Get the collection-level ETag (only if [withEtag] is true).
+  /// Returns null if ETag is not tracked or has not been set.
+  Future<String?> getEtag() async {
+    if (!withEtag) return null;
+    try {
+      final metadataBox = await _metadataBox();
+      final etag = metadataBox.get(_etagKey) as String?;
+      _logger.fine('Retrieved ETag: $etag');
+      return etag;
+    } catch (e, st) {
+      _logger.severe('getEtag failed', e, st);
+      return null;
+    }
+  }
+
+  /// Set the collection-level ETag (only if [withEtag] is true).
+  Future<void> setEtag(String? etag) async {
+    if (!withEtag) return;
+    try {
+      final metadataBox = await _metadataBox();
+      if (etag != null) {
+        await metadataBox.put(_etagKey, etag);
+        _logger.fine('Stored ETag: $etag');
+      } else {
+        await metadataBox.delete(_etagKey);
+        _logger.fine('Cleared ETag');
+      }
+    } catch (e, st) {
+      _logger.severe('setEtag failed', e, st);
+      rethrow;
     }
   }
 }

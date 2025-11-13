@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gympad/services/auth_service.dart';
 import 'package:gympad/services/logger_service.dart';
 import 'package:gympad/services/device_identity_service.dart';
+import 'package:gympad/models/withAdapters/user.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -34,17 +35,36 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final local = await _authService.getLocalUserData();
       final userId = local['userId'];
       final isGuest = local['isGuest'] == 'true';
+
       if (userId != null) {
-        emit(
-          AuthAuthenticated(
-            userId: userId,
-            gymId: local['gymId'],
-            authToken: local['authToken'],
-            completedQuestionnaire: local['completedQuestionnaire'] == 'true',
-          ),
+        // Subscribe to user stream for real-time updates (only for authenticated users)
+        // Use emit.forEach to properly handle stream emissions
+        await emit.forEach<User?>(
+          _authService.userStream,
+          onData: (user) {
+            if (user == null) {
+              // User signed out - emit unauthenticated
+              return AuthUnauthenticated();
+            }
+            if (user.userId != null) {
+              // Authenticated user update
+              return AuthAuthenticated(
+                userId: user.userId!,
+                gymId: user.gymId,
+                authToken: user.authToken,
+                completedQuestionnaire: false,
+              );
+            }
+            // Keep current state if user data is incomplete
+            return state;
+          },
+          onError: (error, stackTrace) {
+            _logger.error('User stream error', error, stackTrace);
+            return state;
+          },
         );
       } else if (isGuest) {
-        // Re-enter guest mode immediately.
+        // Re-enter guest mode
         final deviceId = await DeviceIdentityService().getOrCreate();
         emit(AuthGuest(deviceId: deviceId));
       } else {
@@ -169,5 +189,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         ),
       );
     }
+  }
+
+  @override
+  Future<void> close() {
+    _authService.dispose();
+    return super.close();
   }
 }
