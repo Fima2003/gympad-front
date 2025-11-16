@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/workout/workout_bloc.dart';
 import '../blocs/data/data_bloc.dart';
 import '../blocs/user_settings/user_settings_bloc.dart';
 import '../services/notification_service.dart';
 import '../services/logger_service.dart';
 import '../utils/get_weight.dart';
-import '../models/custom_workout.dart';
 
 /// Handles integration between app lifecycle, workout state, and notifications
 class NotificationsHandler with WidgetsBindingObserver {
@@ -20,7 +18,6 @@ class NotificationsHandler with WidgetsBindingObserver {
   StreamSubscription<WorkoutState>? _workoutSubscription;
   Timer? _notificationUpdateTimer;
   
-  AppLifecycleState? _lastLifecycleState;
   WorkoutState? _lastWorkoutState;
   bool _isInBackground = false;
 
@@ -61,7 +58,6 @@ class NotificationsHandler with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _logger.info('App lifecycle changed: $state');
-    _lastLifecycleState = state;
 
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       // App went to background

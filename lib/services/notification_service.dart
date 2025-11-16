@@ -15,7 +15,6 @@ class NotificationService {
   final AppLogger _logger = AppLogger();
 
   bool _isInitialized = false;
-  String? _selectedPayload;
 
   // Notification IDs
   static const int _breakNotificationId = 100;
