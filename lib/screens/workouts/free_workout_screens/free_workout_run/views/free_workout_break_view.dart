@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../../../../../constants/app_styles.dart';
@@ -12,22 +13,14 @@ import '../../../../../widgets/exercise_chip.dart';
 ///  - Provide timing (remaining & total seconds)
 ///  - Provide current exercise display name and previous exercises list
 ///  - Manage finishing / skipping / extending logic via callbacks that dispatch bloc events
-///
-/// Differences vs custom workout break view:
-///  - No upcoming reorder list (free mode open-ended)
-///  - No nextExercise weight suggestion line (can be injected later if needed)
 class FreeWorkoutBreakView extends StatelessWidget {
   final int remainingSeconds;
   final int totalSeconds;
-  final String
-  exerciseName; // exercise just completed OR currently ongoing between sets
-  final int
-  completedSetsForExercise; // number of sets already done for this exercise
-  final List<WorkoutExercise>
-  previousExercises; // earlier exercises this session
+  final String exerciseName; // exercise just completed OR currently ongoing between sets
+  final int completedSetsForExercise; // number of sets already done for this exercise
+  final List<WorkoutExercise> previousExercises; // earlier exercises this session
   final bool isFinishing;
-  final double?
-  progress; // 0..1 optional overall progress (can be null in free mode)
+  final double? progress; // 0..1 optional overall progress (can be null in free mode)
 
   final VoidCallback onNewSet; // start next set of same exercise immediately
   final VoidCallback onNewExercise; // open selection view
@@ -154,7 +147,7 @@ class FreeWorkoutBreakView extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'SETS: $completedSetsForExercise',
+                      'SETS COMPLETED: $completedSetsForExercise',
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: Colors.white.withValues(alpha: 0.7),
                       ),
