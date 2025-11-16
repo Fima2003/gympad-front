@@ -82,6 +82,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late final GoRouter _router;
   final NotificationsHandler _notificationsHandler = NotificationsHandler();
+  bool _notificationsInitialized = false;
 
   @override
   void initState() {
@@ -271,12 +272,15 @@ class _MyAppState extends State<MyApp> {
                 previous is AuthGuest && current is AuthAuthenticated,
         child: Builder(
           builder: (context) {
-            // Initialize notifications handler with blocs
-            _notificationsHandler.initialize(
-              workoutBloc: context.read<WorkoutBloc>(),
-              dataBloc: context.read<DataBloc>(),
-              userSettingsBloc: context.read<UserSettingsBloc>(),
-            );
+            // Initialize notifications handler with blocs (only once)
+            if (!_notificationsInitialized) {
+              _notificationsInitialized = true;
+              _notificationsHandler.initialize(
+                workoutBloc: context.read<WorkoutBloc>(),
+                dataBloc: context.read<DataBloc>(),
+                userSettingsBloc: context.read<UserSettingsBloc>(),
+              );
+            }
             
             return MaterialApp.router(
               title: 'GymPad',
