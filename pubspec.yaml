@@ -38,6 +38,8 @@ dependencies:
   v_scroller: ^0.0.1
   dart_either: ^2.0.0
   rxdart: ^0.28.0
+  lottie: ^3.3.2
+  flutter_local_notifications: ^19.5.0
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +58,7 @@ flutter:
     - assets/mock_data/
     - assets/audio/
     - assets/intro_images/
+    - assets/lottie/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

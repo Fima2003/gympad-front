@@ -20,6 +20,6 @@ custom workouts still show up as beginner                       | Medium     | D
 | Bug  | Free exercises don't always start                      | High       | Done        | -------- |
 | Feat | Copy the custom workout to personal workouts.          | Medium     | Done        | -------- |
 | Feat | Every exercise should have a visual.                   | High       | Not Started | -------- |
-| Feat | Add an e-tag to the requests                           | Medium     | Not Started | -------- |
+| Feat | Add an e-tag to the requests                           | Medium     | Done | -------- |
 | Bug  | Free exercises start with weird selected weight        | Medium     | Not Started | -------- |
 | Bug  | Questionnaire appears even though I have filled it out | High       | Not Started | -------- |

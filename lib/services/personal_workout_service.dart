@@ -91,7 +91,9 @@ class PersonalWorkoutService {
       }
       print(await _personalLocal.getEtag());
 
-      final result = await _personalWorkoutApiService.getPersonalWorkouts(await _personalLocal.getEtag());
+      final result = await _personalWorkoutApiService.getPersonalWorkouts(
+        await _personalLocal.getEtag(),
+      );
       await result.foldAsync(
         onError: (error) async {
           if (error.status == 304) {

@@ -29,7 +29,9 @@ class WorkoutApiService {
 
   /// GET getPersonalWorkouts
   /// Returns: List of { name ,description?,exercises:[{ exerciseId, name,sets,weight,reps,restTime }] }
-  Future<ApiResult<List<PersonalWorkout>>> getPersonalWorkouts(String? etag) async {
+  Future<ApiResult<List<PersonalWorkout>>> getPersonalWorkouts(
+    String? etag,
+  ) async {
     return _api.get<void, List<PersonalWorkout>>(
       'getPersonalWorkouts',
       auth: true,
@@ -38,10 +40,9 @@ class WorkoutApiService {
         final list = (data as List<dynamic>);
         return list
             .map(
-              (e) =>
-                  PersonalWorkoutResponse.fromJson(
-                    e as Map<String, dynamic>,
-                  ).toDomain(''),
+              (e) => PersonalWorkoutResponse.fromJson(
+                e as Map<String, dynamic>,
+              ).toDomain(''),
             )
             .toList();
       },

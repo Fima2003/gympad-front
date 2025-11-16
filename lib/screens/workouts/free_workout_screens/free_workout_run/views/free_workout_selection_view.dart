@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../../../../constants/app_styles.dart';
 import '../../../../../blocs/data/data_bloc.dart';
@@ -8,7 +9,7 @@ import '../../../../../models/withAdapters/exercise.dart';
 class FreeWorkoutSelectionView extends StatefulWidget {
   final String? initialMuscleGroup;
   final void Function(Exercise exercise) onExerciseChosen;
-  final VoidCallback? onExit; // optional (e.g., to pop selection mode)
+  final VoidCallback? onExit;
 
   const FreeWorkoutSelectionView({
     super.key,
@@ -152,6 +153,9 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
   }
 
   Widget _buildContent(Set<String> muscleGroups, DataState dataState) {
+    if (dataState is! DataReady) {
+      return _buildLoadingState();
+    }
     if (_searchQuery.isNotEmpty) {
       return _buildExerciseGrid(_filtered);
     } else if (_selectedGroup != null) {
@@ -330,6 +334,20 @@ class _FreeWorkoutSelectionViewState extends State<FreeWorkoutSelectionView> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: SizedBox(
+        width: 150,
+        height: 150,
+        child: Lottie.asset(
+          'assets/lottie/Gym_blue.json',
+          repeat: true,
+          fit: BoxFit.contain,
         ),
       ),
     );

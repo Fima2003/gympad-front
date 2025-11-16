@@ -4,7 +4,8 @@ import 'lss.dart';
 
 class PersonalWorkoutLocalService
     extends LSS<PersonalWorkout, HivePersonalWorkout> {
-  PersonalWorkoutLocalService() : super("personal_workouts_box", withEtag: true);
+  PersonalWorkoutLocalService()
+    : super("personal_workouts_box", withEtag: true);
 
   @override
   getKey(PersonalWorkout domain) => domain.workoutId;

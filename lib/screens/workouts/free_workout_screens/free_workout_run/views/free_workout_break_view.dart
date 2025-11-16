@@ -16,11 +16,15 @@ import '../../../../../widgets/exercise_chip.dart';
 class FreeWorkoutBreakView extends StatelessWidget {
   final int remainingSeconds;
   final int totalSeconds;
-  final String exerciseName; // exercise just completed OR currently ongoing between sets
-  final int completedSetsForExercise; // number of sets already done for this exercise
-  final List<WorkoutExercise> previousExercises; // earlier exercises this session
+  final String
+  exerciseName; // exercise just completed OR currently ongoing between sets
+  final int
+  completedSetsForExercise; // number of sets already done for this exercise
+  final List<WorkoutExercise>
+  previousExercises; // earlier exercises this session
   final bool isFinishing;
-  final double? progress; // 0..1 optional overall progress (can be null in free mode)
+  final double?
+  progress; // 0..1 optional overall progress (can be null in free mode)
 
   final VoidCallback onNewSet; // start next set of same exercise immediately
   final VoidCallback onNewExercise; // open selection view
