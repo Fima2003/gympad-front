@@ -34,6 +34,7 @@ import 'services/logger_service.dart';
 import 'services/personal_workout_service.dart';
 import 'services/workout_service.dart';
 import 'services/migration/migrate_guest_workouts_usecase.dart';
+import 'notifications/notifications_handler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,6 +81,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final GoRouter _router;
+  final NotificationsHandler _notificationsHandler = NotificationsHandler();
 
   @override
   void initState() {
@@ -267,17 +269,34 @@ class _MyAppState extends State<MyApp> {
         listenWhen:
             (previous, current) =>
                 previous is AuthGuest && current is AuthAuthenticated,
-        child: MaterialApp.router(
-          title: 'GymPad',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-            useMaterial3: true,
-            scaffoldBackgroundColor: AppColors.background,
-          ),
-          routerConfig: _router,
+        child: Builder(
+          builder: (context) {
+            // Initialize notifications handler with blocs
+            _notificationsHandler.initialize(
+              workoutBloc: context.read<WorkoutBloc>(),
+              dataBloc: context.read<DataBloc>(),
+              userSettingsBloc: context.read<UserSettingsBloc>(),
+            );
+            
+            return MaterialApp.router(
+              title: 'GymPad',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+                useMaterial3: true,
+                scaffoldBackgroundColor: AppColors.background,
+              ),
+              routerConfig: _router,
+            );
+          },
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _notificationsHandler.dispose();
+    super.dispose();
   }
 }
