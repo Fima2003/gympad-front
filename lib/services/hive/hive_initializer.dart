@@ -6,6 +6,7 @@ import '../../models/withAdapters/user_settings.dart';
 import 'adapters/hive_personal_workout.dart';
 import 'adapters/hive_workout.dart';
 import 'adapters/hive_custom_workout.dart';
+import 'adapters/hive_notification_settings.dart';
 
 /// Central place to initialize Hive & register all adapters exactly once.
 class HiveInitializer {
@@ -58,6 +59,11 @@ class HiveInitializer {
     // The one below is 11 (started from 0)
     if (!Hive.isAdapterRegistered(UserLevelAdapter().typeId)) {
       Hive.registerAdapter<UserLevel>(UserLevelAdapter());
+    }
+    if (!Hive.isAdapterRegistered(HiveNotificationSettingsAdapter().typeId)) {
+      Hive.registerAdapter<HiveNotificationSettings>(
+        HiveNotificationSettingsAdapter(),
+      );
     }
 
     _initialized = true;

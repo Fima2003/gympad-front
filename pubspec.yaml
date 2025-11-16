@@ -38,6 +38,8 @@ dependencies:
   v_scroller: ^0.0.1
   dart_either: ^2.0.0
   rxdart: ^0.28.0
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
 
 dev_dependencies:
   flutter_test:

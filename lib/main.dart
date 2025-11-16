@@ -31,6 +31,7 @@ import 'services/api/api_service.dart';
 import 'services/auth_service.dart';
 import 'services/hive/hive_initializer.dart';
 import 'services/logger_service.dart';
+import 'services/notification_service.dart';
 import 'services/personal_workout_service.dart';
 import 'services/workout_service.dart';
 import 'services/migration/migrate_guest_workouts_usecase.dart';
@@ -67,6 +68,14 @@ Future<void> main() async {
   await HiveInitializer.init();
 
   await AuthService().initialize();
+
+  // Initialize notification service (no-op on web)
+  try {
+    await NotificationService().initialize();
+  } catch (e, st) {
+    logger.warning('Failed to initialize NotificationService', e, st);
+    // Continue app initialization even if notifications fail
+  }
 
   runApp(const MyApp());
 }
