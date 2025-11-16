@@ -150,13 +150,18 @@ class _PrepareToStartWorkoutScreenState
                             (dataState is DataReady)
                                 ? widget.workout.exercises.first.suggestedWeight
                                 : null;
+                        final reps =
+                            (dataState is DataReady)
+                                ? widget.workout.exercises.first.suggestedReps
+                                : null;
                         final showWeight = (weight != null && weight > 0);
+                        final showReps = (reps != null && reps > 0);
                         final name =
                             (ex?.name ?? widget.workout.exercises.first.id)
                                 .replaceAll('_', ' ')
                                 .toUpperCase();
                         return showWeight
-                            ? "$name: ${state is! UserSettingsLoaded ? "$weight kg" : getWeightString(weight, state.weightUnit)}"
+                            ? "$name: ${showReps ? "$reps x " : ''}${state is! UserSettingsLoaded ? "$weight kg" : getWeightString(weight, state.weightUnit)}"
                             : name;
                       })()
                       : 'Exercise',

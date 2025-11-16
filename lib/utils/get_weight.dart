@@ -1,3 +1,5 @@
+/// Converts and formats weight based on the specified unit.
+/// example: "70.0 kg" or "154.3 lbs"
 String getWeightString(double wInKg, String unit) {
   String actualWeight;
   switch (unit) {

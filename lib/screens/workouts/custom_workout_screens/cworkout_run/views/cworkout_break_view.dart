@@ -327,6 +327,7 @@ class CWorkoutBreakView extends StatelessWidget {
   String _nextExerciseTitle(BuildContext context) {
     if (nextExercise == null) return '---';
     final weight = nextExercise!.suggestedWeight;
+    final reps = nextExercise!.suggestedReps;
     final dataState = dataBloc.state;
     String name;
     if (dataState is DataReady) {
@@ -337,11 +338,11 @@ class CWorkoutBreakView extends StatelessWidget {
     }
     final state = BlocProvider.of<UserSettingsBloc>(context).state;
     if (state is! UserSettingsLoaded) {
-      return '$name: ${weight}kg';
+      return '$name\n$reps x ${weight}kg';
     }
     if (weight != null && weight > 0) {
       final finalWeight = getWeightString(weight, state.weightUnit);
-      return '$name: $finalWeight';
+      return '$name\n$reps x $finalWeight';
     }
     return name;
   }
